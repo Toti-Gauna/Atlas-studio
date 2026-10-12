@@ -1,0 +1,93 @@
+/* Settings — workspace, members, providers, model registry, routing, audit. Colors via tokens only. */
+.body {
+  margin-top: var(--s-5);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.subtle {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 0;
+}
+.strong {
+  font-weight: 600;
+  color: var(--text);
+}
+.person {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  font-weight: 600;
+}
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--s-4);
+}
+.providerCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.providerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.cardTitle {
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+.yesNo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.yesNo[data-on="true"] {
+  color: var(--ok);
+}
+.yesNo[data-on="false"] {
+  color: var(--text-2);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.cellStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 140px;
+}
+.extLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-13);
+  color: var(--teal-ink);
+}
+.wideTable td,
+.wideTable th {
+  vertical-align: top;
+}
+.actions {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}

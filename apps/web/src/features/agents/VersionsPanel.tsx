@@ -9,6 +9,7 @@ import { Badge, Callout, Card, Table } from "@/components/ui";
 import { agentsCopy as c } from "@/copy/agents";
 import { flattenConfig } from "./draft";
 import s from "./agents.module.css";
+import ps from "./panels.module.css";
 
 export function VersionsPanel({ agent }: { agent: AgentDetail }) {
   const versions = useMemo(() => [...agent.versions].sort((a, b) => b.version - a.version), [agent.versions]);
@@ -30,12 +31,12 @@ export function VersionsPanel({ agent }: { agent: AgentDetail }) {
   };
 
   return (
-    <div className={s.versions}>
+    <div className={ps.versions}>
       <Card className={s.section} aria-labelledby="ver-list-h">
         <h2 id="ver-list-h" className={s.sectionTitle}>
           {c.versions.caption}
         </h2>
-        <div role="radiogroup" aria-labelledby="ver-list-h" className={s.versionList}>
+        <div role="radiogroup" aria-labelledby="ver-list-h" className={ps.versionList}>
           {versions.map((v) => (
             <button
               key={v.id}
@@ -46,7 +47,7 @@ export function VersionsPanel({ agent }: { agent: AgentDetail }) {
               role="radio"
               aria-checked={v.version === selected}
               tabIndex={v.version === selected ? 0 : -1}
-              className={s.versionItem}
+              className={ps.versionItem}
               onClick={() => pick(v.version)}
               onKeyDown={(e) => {
                 const i = versions.findIndex((x) => x.version === selected);
@@ -58,12 +59,12 @@ export function VersionsPanel({ agent }: { agent: AgentDetail }) {
                 refs.current[next.version]?.focus();
               }}
             >
-              <span className={s.versionTop}>
+              <span className={ps.versionTop}>
                 <Badge mono>v{v.version}</Badge>
                 {v.version === agent.currentVersion ? <Badge tone="teal">{c.versions.current}</Badge> : null}
                 <span className={s.checkMeta}>{formatDateTime(v.createdAt)}</span>
               </span>
-              <span className={s.versionNote}>{v.changeNote || c.versions.noNote}</span>
+              <span className={ps.versionNote}>{v.changeNote || c.versions.noNote}</span>
             </button>
           ))}
         </div>
@@ -89,8 +90,8 @@ export function VersionsPanel({ agent }: { agent: AgentDetail }) {
                 {changed.map((k) => (
                   <tr key={k}>
                     <th scope="row">{c.diffLabels[k] ?? k}</th>
-                    <td className={s.diffOld}>{a[k]}</td>
-                    <td className={s.diffNew}>{b[k]}</td>
+                    <td className={ps.diffOld}>{a[k]}</td>
+                    <td className={ps.diffNew}>{b[k]}</td>
                   </tr>
                 ))}
               </tbody>

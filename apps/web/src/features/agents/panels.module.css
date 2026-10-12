@@ -1,0 +1,111 @@
+/* Agent Studio — version history/diff and plan preview panels. Colors via tokens only. */
+
+/* Versions */
+.versions {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+.versionList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.versionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  color: var(--text);
+}
+.versionItem[aria-checked="true"] {
+  border-color: var(--violet);
+  box-shadow: inset 0 0 0 1px var(--violet);
+  background: var(--violet-soft);
+}
+.versionItem:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.versionTop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.versionNote {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.diffOld,
+.diffNew {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-width: 180px;
+  vertical-align: top;
+}
+.diffOld {
+  color: var(--text-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+.diffNew {
+  background: var(--teal-soft);
+}
+
+/* Plan preview */
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.planResult {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  border-top: 1px solid var(--line);
+  padding-top: var(--s-4);
+  margin-top: var(--s-2);
+}
+.planResult section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.planHead {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+.planSteps {
+  margin: 0;
+  padding-left: 1.3em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.planSteps li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bullets {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: var(--fs-14);
+  display: grid;
+  gap: 4px;
+}
+
+@media (max-width: 1024px) {
+  .versions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

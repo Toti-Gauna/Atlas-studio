@@ -1,0 +1,335 @@
+/* Agent Studio — gallery, editor, versions and plan preview. Colors via tokens only. */
+
+/* Gallery */
+.explain {
+  margin-bottom: var(--s-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.explainTitle {
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+.explainList {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text-2);
+  font-size: var(--fs-14);
+  display: grid;
+  gap: 4px;
+}
+.gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s-4);
+}
+.gallery > li {
+  display: flex;
+  min-width: 0;
+}
+.galleryCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--text);
+  min-width: 0;
+  transition: border-color var(--d-fast), box-shadow var(--d-fast);
+}
+.galleryCard:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-1);
+}
+.galleryCard:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.cardTop {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+}
+.cardName {
+  display: block;
+  font-weight: 700;
+  font-size: var(--fs-16);
+}
+.cardMeta {
+  display: block;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.cardDesc {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-14);
+  line-height: var(--lh-snug);
+  flex: 1;
+}
+.cardFoot {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Editor layout */
+.titleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.tabBody {
+  margin-top: var(--s-5);
+}
+.editorGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: var(--s-6);
+  align-items: start;
+}
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.sideCol {
+  position: sticky;
+  top: var(--s-4);
+  min-width: 0;
+}
+.formFieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.sectionTitle {
+  font-size: var(--fs-16);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.row2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+.groupField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.groupField > [role="radiogroup"] {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.groupLabel {
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+  padding: 0;
+}
+.hint {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin: 0;
+}
+.error {
+  font-size: var(--fs-12);
+  color: var(--danger);
+  font-weight: 600;
+  margin: 0;
+}
+.subFieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.questions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.questionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-2);
+  align-items: center;
+}
+.checkList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.checkRow {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  cursor: pointer;
+}
+.checkRow:has(input:checked) {
+  border-color: var(--teal-line);
+  background: var(--teal-soft);
+}
+.checkRow:has(input:disabled) {
+  cursor: default;
+}
+.checkRow input {
+  margin-top: 3px;
+  accent-color: var(--teal);
+  flex: none;
+}
+.checkMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.checkTitle {
+  font-weight: 600;
+  font-size: var(--fs-14);
+}
+.checkMeta {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.confirmNote {
+  color: var(--warn);
+  font-weight: 600;
+}
+.tempRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 84px;
+  gap: var(--s-3);
+  align-items: center;
+}
+.tempRow input[type="range"] {
+  accent-color: var(--teal);
+  width: 100%;
+}
+.tempRow .hint {
+  grid-column: 1 / -1;
+}
+.numInput {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+.numInput:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: var(--focus-ring);
+}
+.limitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--s-4);
+}
+.guardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  font-size: var(--fs-14);
+}
+.guardList li {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+}
+.guardList svg {
+  color: var(--teal-ink);
+  flex: none;
+  margin-top: 3px;
+}
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+.saveRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-3);
+  align-items: end;
+}
+
+@media (max-width: 1024px) {
+  .editorGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sideCol {
+    position: static;
+  }
+}
+@media (max-width: 640px) {
+  .row2,
+  .saveRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tempRow {
+    grid-template-columns: minmax(0, 1fr) 84px;
+  }
+  .tempRow label {
+    grid-column: 1 / -1;
+  }
+}
