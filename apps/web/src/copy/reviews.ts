@@ -47,6 +47,7 @@ export const reviewsCopy = {
     reload: "Reload artifact",
     alreadyOpen: (v: number, name: string) => `v${v} already has an open review assigned to ${name}.`,
     noteRequired: "Add a note explaining what needs to change.",
+    noReviewers: "No other member with the reviewer or admin role. Ask an admin to add one.",
     cannotRequest: "Only owners and editors can request a review.",
   },
 } as const;

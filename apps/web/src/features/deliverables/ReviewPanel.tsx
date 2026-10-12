@@ -119,6 +119,7 @@ export function ReviewPanel({ detail }: { detail: ArtifactDetail }) {
                   options={[{ value: "", label: members.isPending ? "Loading members…" : c.panel.pickReviewer }, ...reviewerOptions.map((m) => ({ value: m.user.id, label: `${m.user.displayName} (${m.role})` }))]}
                 />
               )}
+              {members.isSuccess && reviewerOptions.length === 0 ? <p className={s.muted}>{c.panel.noReviewers}</p> : null}
               <Button type="submit" variant="primary" icon={<Send size={14} aria-hidden />} disabled={!reviewerId} loading={request.isPending}>
                 {c.panel.send}
               </Button>
