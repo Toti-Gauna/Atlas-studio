@@ -1,6 +1,6 @@
 # Estado — Atlas Studio Premium V3
 
-**Estado global:** Construcción · P02 (frontend) en cierre · **requiere revisión de Ignacio**. Nada está aprobado.
+**Estado global:** Construcción · P02 (frontend) publicado como preview · P03 en espera · **requiere revisión de Ignacio**. Nada está aprobado.
 Última actualización: 2026-10-12.
 
 ## Fases
