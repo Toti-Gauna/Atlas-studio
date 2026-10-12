@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Comparison, ComparisonRun, ToolProposal } from "@atlas/contracts";
 import { api } from "@/lib/api";
@@ -36,9 +36,11 @@ export function CompareDialog({ open, onClose, conversationId, prompt, agentId }
   const [b, setB] = useState("anthropic:claude-sonnet-5-5");
   const [result, setResult] = useState<Comparison | null>(null);
   const run = useMutation({ mutationFn: () => api.comparisons.create({ conversationId, prompt, modelKeys: [a, b], agentId }), onSuccess: setResult });
-  useEffect(() => {
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
     if (open) setResult(null);
-  }, [open]);
+  }
   const opts = (models.data ?? []).map((m) => ({ value: m.key, label: `${m.displayName}${m.availability.mode === "pending" ? " (pending)" : ""}` }));
   return (
     <Modal open={open} onClose={onClose} wide title="Compare two models" description="Runs two independent executions of the same prompt; each reserves its own budget before calling.">
@@ -73,7 +75,11 @@ export function CompareDialog({ open, onClose, conversationId, prompt, agentId }
 
 export function BranchDialog({ open, onClose, initial, onSubmit, pending }: { open: boolean; onClose: () => void; initial: string; onSubmit: (text: string) => void; pending: boolean }) {
   const [text, setText] = useState(initial);
-  useEffect(() => setText(initial), [initial, open]);
+  const [seed, setSeed] = useState({ initial, open });
+  if (seed.initial !== initial || seed.open !== open) {
+    setSeed({ initial, open });
+    setText(initial);
+  }
   return (
     <Modal
       open={open}
@@ -102,13 +108,15 @@ export function ServiceRequestDialog({ open, onClose, conversationId }: { open: 
   const [details, setDetails] = useState("");
   const [category, setCategory] = useState<ToolProposal["payload"]["category"]>("shipping");
   const [proposal, setProposal] = useState<ToolProposal | null>(null);
-  useEffect(() => {
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
     if (open) {
       setProposal(null);
       setTitle("");
       setDetails("");
     }
-  }, [open]);
+  }
   const propose = useMutation({ mutationFn: () => api.conversations.proposeTool(conversationId, { title, details, category }), onSuccess: setProposal });
   const confirm = useMutation({
     mutationFn: () => api.toolProposals.confirm(proposal!.id),

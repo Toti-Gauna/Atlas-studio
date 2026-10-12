@@ -1,0 +1,217 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: center;
+  margin-bottom: var(--s-3);
+}
+.toolLabel {
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.toolLabel:not(:first-child) {
+  margin-left: var(--s-3);
+}
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--s-3);
+  align-items: end;
+  margin-bottom: var(--s-5);
+}
+.clear {
+  justify-self: start;
+  margin-bottom: 4px;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  transition: opacity var(--d-fast) var(--ease-out);
+}
+.section {
+  margin-top: var(--s-7);
+}
+.muted {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s-3);
+}
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.cardTitle {
+  font-size: var(--fs-16);
+  font-weight: 650;
+  margin: 0 0 var(--s-3);
+}
+.cardHead .cardTitle {
+  margin: 0;
+}
+.tokenGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-4);
+  margin: 0;
+}
+.tokenGrid dt {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  font-weight: 600;
+}
+.tokenGrid dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-22);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chart */
+.chartWrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.chart {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--r-1);
+}
+.chart:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+.axisText {
+  fill: var(--text-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.valueText {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.bar {
+  fill: var(--teal);
+}
+.barActive {
+  fill: var(--teal-ink);
+}
+.unknownMark {
+  fill: var(--warn);
+}
+.tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--r-2);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+.tooltip strong {
+  color: var(--text);
+  font-size: var(--fs-14);
+  font-variant-numeric: tabular-nums;
+}
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* Ledger */
+.breakdownCell {
+  background: var(--surface-2);
+  padding: var(--s-3) var(--s-4) var(--s-4) 56px !important;
+}
+.subTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+.subTable th {
+  text-align: left;
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.subTable td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Budgets */
+.budgets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--s-3);
+}
+.budget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.budgetTitle {
+  font-size: var(--fs-16);
+  font-weight: 650;
+  margin: 2px 0 0;
+}
+.budgetMeta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-2);
+  margin: 0;
+  font-size: var(--fs-13);
+}
+.budgetMeta dt {
+  color: var(--text-3);
+}
+.budgetMeta dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}

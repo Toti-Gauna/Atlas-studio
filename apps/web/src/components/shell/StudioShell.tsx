@@ -132,7 +132,6 @@ function ShellInner({ children }: { children: ReactNode }) {
   const [palette, setPalette] = useState(false);
   const [preview, setPreview] = useState(false);
   const pathname = usePathname();
-  const { close } = usePanel();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -145,12 +144,12 @@ function ShellInner({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Panels belong to a page; navigating away closes them.
-  useEffect(() => {
-    close();
+  // The mobile navigation sheet closes on route change (panels are keyed to the path in PanelProvider).
+  const [navPath, setNavPath] = useState(pathname);
+  if (navPath !== pathname) {
+    setNavPath(pathname);
     setMobileNav(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }
 
   const rail = belowDesktop || collapsed;
   return (

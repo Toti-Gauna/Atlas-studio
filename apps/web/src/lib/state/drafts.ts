@@ -10,11 +10,15 @@ const key = (scope: string) => `atlas.draft.${scope}`;
 export function useDraft(scope: string): [string, (v: string) => void, () => void] {
   const [value, setValue] = useState("");
   useEffect(() => {
+    // Sync from sessionStorage after hydration (external store; static export prerenders without it).
+    let stored = "";
     try {
-      setValue(sessionStorage.getItem(key(scope)) ?? "");
+      stored = sessionStorage.getItem(key(scope)) ?? "";
     } catch {
-      setValue("");
+      stored = "";
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setValue(stored);
   }, [scope]);
   const update = useCallback(
     (v: string) => {

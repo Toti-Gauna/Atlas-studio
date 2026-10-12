@@ -108,18 +108,13 @@ export function ChatView() {
   const projectId = conv.data?.projectId ?? newProject ?? projects.data?.[0]?.id ?? null;
   const project = projects.data?.find((p) => p.id === projectId);
 
-  useEffect(() => {
-    if (!state.agentId) {
-      const fallback = conv.data?.agentId ?? project?.defaultAgentId ?? agents.data?.[0]?.id ?? null;
-      if (fallback) setState((st) => ({ ...st, agentId: fallback }));
-    }
-  }, [conv.data?.agentId, project?.defaultAgentId, agents.data, state.agentId]);
-  useEffect(() => setBranchId(null), [convId]);
-  useEffect(() => {
-    const prefill = params.get("prefill");
-    if (prefill) setDraft(prefill);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // The agent shown in the composer falls back to the conversation/project default until the user picks one.
+  const agentId = state.agentId ?? conv.data?.agentId ?? project?.defaultAgentId ?? agents.data?.[0]?.id ?? null;
+  const [branchFor, setBranchFor] = useState(convId);
+  if (branchFor !== convId) {
+    setBranchFor(convId);
+    setBranchId(null);
+  }
 
   const send = useMutation({
     mutationFn: async (approvalKey?: string) => {
@@ -129,7 +124,7 @@ export function ChatView() {
       let activeBranch = conv.data?.activeBranchId;
       if (!id || isNew) {
         if (!createdRef.current) {
-          const created = await api.conversations.create({ projectId: projectId!, agentId: state.agentId! });
+          const created = await api.conversations.create({ projectId: projectId!, agentId: agentId! });
           createdRef.current = { id: created.id, branchId: created.activeBranchId };
         }
         id = createdRef.current.id;
@@ -140,7 +135,7 @@ export function ChatView() {
         {
           content: draft.trim(),
           branchId: branchId ?? activeBranch!,
-          agentId: state.agentId!,
+          agentId: agentId!,
           pinnedModelKey: state.pinnedModelKey,
           workMode: state.workMode,
           attachmentDocumentIds: state.attachments,
@@ -187,7 +182,7 @@ export function ChatView() {
   });
 
   const branch = useMutation({
-    mutationFn: (v: { from: Message; reason: "edit" | "regenerate"; text?: string }) => api.branches.create({ fromMessageId: v.from.id, reason: v.reason, editedContent: v.text, agentId: state.agentId ?? undefined, pinnedModelKey: state.pinnedModelKey }),
+    mutationFn: (v: { from: Message; reason: "edit" | "regenerate"; text?: string }) => api.branches.create({ fromMessageId: v.from.id, reason: v.reason, editedContent: v.text, agentId: agentId ?? undefined, pinnedModelKey: state.pinnedModelKey }),
     onSuccess: (d) => {
       setBranchFrom(null);
       setBranchId(d.activeBranchId);
@@ -250,7 +245,7 @@ export function ChatView() {
           ) : isNew || !conv.data?.messages.length ? (
             <div className={s.empty}>
               <EmptyState title="Start with a question or a deliverable" body="Answers quote authorized project sources with page and version. Without evidence, Atlas abstains and offers a person." />
-              {projectId ? <Recommendations projectId={projectId} agentId={state.agentId ?? undefined} onUse={usePrepared} limit={3} /> : null}
+              {projectId ? <Recommendations projectId={projectId} agentId={agentId ?? undefined} onUse={usePrepared} limit={3} /> : null}
             </div>
           ) : (
             <Thread
@@ -294,7 +289,7 @@ export function ChatView() {
               setDraft(v);
               if (blocked) setBlocked(null);
             }}
-            state={state}
+            state={{ ...state, agentId }}
             onState={(p) => {
               setState((st) => ({ ...st, ...p }));
               setBlocked(null);
@@ -302,7 +297,7 @@ export function ChatView() {
             agents={agentList}
             projectId={projectId}
             pending={send.isPending}
-            disabled={!projectId || !state.agentId}
+            disabled={!projectId || !agentId}
             onSend={() => send.mutate(undefined)}
             onStop={() => abortRef.current?.abort()}
           />
@@ -311,7 +306,7 @@ export function ChatView() {
       <Sheet open={historyOpen} onClose={() => setHistoryOpen(false)} side="left" label="Conversation history">
         <HistoryList activeId={convId} onPick={() => setHistoryOpen(false)} />
       </Sheet>
-      {convId && state.agentId ? <CompareDialog open={compare !== null} onClose={() => setCompare(null)} conversationId={convId} prompt={compare ?? ""} agentId={state.agentId} /> : null}
+      {convId && agentId ? <CompareDialog open={compare !== null} onClose={() => setCompare(null)} conversationId={convId} prompt={compare ?? ""} agentId={agentId} /> : null}
       <BranchDialog open={branchFrom !== null} onClose={() => setBranchFrom(null)} initial={branchFrom?.content ?? ""} pending={branch.isPending} onSubmit={(text) => branch.mutate({ from: branchFrom!, reason: "edit", text })} />
       {convId ? <ServiceRequestDialog open={service} onClose={() => setService(false)} conversationId={convId} /> : null}
     </div>

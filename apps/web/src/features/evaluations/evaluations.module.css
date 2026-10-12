@@ -1,0 +1,45 @@
+.suites {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-7);
+}
+.suite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  min-width: 0;
+}
+.suiteHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+.suiteTitle {
+  font-size: var(--fs-22);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.runAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.muted {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.question {
+  min-width: 240px;
+  max-width: 480px;
+}
+.selectedRow td {
+  background: var(--teal-soft);
+}

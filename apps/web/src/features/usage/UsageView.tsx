@@ -55,7 +55,9 @@ export function UsageView() {
       />
 
       <div className={s.toolbar} role="group" aria-label={c.filters.title}>
+        <span className={s.toolLabel} aria-hidden>{c.range.label}</span>
         <Segmented<Range> label={c.range.label} value={range} onChange={setRange} options={[{ value: "7d", label: c.range.d7 }, { value: "30d", label: c.range.d30 }]} />
+        <span className={s.toolLabel} aria-hidden>{c.groupBy.label}</span>
         <Segmented<UsageGroupBy>
           label={c.groupBy.label}
           value={groupBy}

@@ -78,6 +78,9 @@ export function renderJson(content: ArtifactContent, sources: SourceRef[], meta:
   return JSON.stringify({ meta, content, sources }, null, 2);
 }
 
+const EXTRA_WIN_ANSI = new Set([0x2013, 0x2014, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2026, 0x20ac]);
+const WIN_ANSI_OK = (c: number) => c === 9 || c === 10 || c === 13 || (c >= 0x20 && c <= 0x7e) || (c >= 0xa0 && c <= 0xff) || EXTRA_WIN_ANSI.has(c);
+
 /** pdf-lib standard fonts use WinAnsi; map common Unicode to safe equivalents. */
 export function winAnsiSafe(s: string): string {
   return s
@@ -87,7 +90,9 @@ export function winAnsiSafe(s: string): string {
     .replace(/[×]/g, "x")
     .replace(/[·]/g, "-")
     .replace(/[−]/g, "-")
-    .replace(/[^\x09\x0A\x0D\x20-\x7E -ÿ–—‘’“”•…€]/g, "?");
+    .split("")
+    .map((ch) => (WIN_ANSI_OK(ch.charCodeAt(0)) ? ch : "?"))
+    .join("");
 }
 
 export { footer as exportFooter };

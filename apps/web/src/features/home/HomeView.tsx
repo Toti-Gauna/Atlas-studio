@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -35,13 +35,11 @@ export function HomeView() {
   const budgets = useQuery({ queryKey: ["budgets"], queryFn: api.budgets.list, enabled: canProjects });
   const conversations = useQuery({ queryKey: ["conversations", null], queryFn: () => api.conversations.list() });
   const [projectId, setProjectId] = useState<string | null>(null);
-  const [agentId, setAgentId] = useState<string | null>(null);
+  const [pickedAgent, setAgentId] = useState<string | null>(null);
   const [text, setText] = useState("");
 
   const project = projects.data?.find((p) => p.id === projectId) ?? projects.data?.[0];
-  useEffect(() => {
-    if (project && !agentId) setAgentId(project.defaultAgentId);
-  }, [project, agentId]);
+  const agentId = pickedAgent ?? project?.defaultAgentId ?? null;
 
   const go = (prompt: string, mode = "answer", agent = agentId) => {
     if (!project) return;

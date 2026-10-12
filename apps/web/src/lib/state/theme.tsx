@@ -9,8 +9,10 @@ const KEY = "atlas.theme";
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("system");
   useEffect(() => {
+    // Read the saved preference after hydration (external store).
     try {
       const saved = localStorage.getItem(KEY) as Theme | null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setThemeState(saved);
     } catch {
       /* storage unavailable */

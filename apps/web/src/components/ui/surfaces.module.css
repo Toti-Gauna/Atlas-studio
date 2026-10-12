@@ -85,6 +85,7 @@
 }
 
 .tableWrap {
+  position: relative; /* contains the absolutely positioned sr-only caption */
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--line);

@@ -7,7 +7,7 @@
 | Fase | Estado | Notas |
 |---|---|---|
 | P01 Producto, arte, arquitectura | Hecho (salvo vertical slice con DB) | Contratos, dominio, registry verificado, corpus, docs. El slice login → project → run → artefacto persistente en PostgreSQL se hace en P03 por decisión del usuario (avisar antes de BE/DB para preparar Render + Neon). |
-| P02 Frontend Studio | En curso | Todas las pantallas sobre transporte FIXTURE (DEMO, en navegador). Publicación en GitHub Pages. |
+| P02 Frontend Studio | Hecho (preview) | 22 rutas sobre transporte FIXTURE (DEMO, en navegador), verificadas en Chromium a 360/768/1440 sin errores de consola ni scroll horizontal. Publicado en GitHub Pages. |
 | P03 Backend, DB, agentes | Pendiente — **esperando preparación de Render + Neon con el usuario** | Express 5, PostgreSQL + migraciones, sesiones, worker, ledger/reservas atómicas. |
 | P04 Integración y proveedores | Pendiente | Retirar FIXTURE, HTTP transport, adaptadores Anthropic/Gemini, export servidor. |
 | P05 QA | Pendiente | 10 escenarios núcleo + 14 V3, DB/Playwright, permisos, concurrencia financiera. |
@@ -31,7 +31,15 @@
 - `pnpm --filter @atlas/demo-seed test` → 16/16 ✓
 - `pnpm --filter @atlas/renderers test` → 6/6 ✓
 - `pnpm --filter @atlas/web test` → 8/8 ✓ (transporte FIXTURE)
-- `next build` (static export) ✓ · smoke en Chromium sin errores de consola
+- `pnpm -r lint` ✓ · `pnpm -r typecheck` ✓
+- `pnpm build:pages` (static export, 25 páginas) ✓
+- `node e2e/routes.mjs` → 22 rutas × 3 anchos (66 vistas): 0 errores de consola, 0 overflow horizontal
+- `node e2e/smoke.mjs` → demo + envío de mensaje + evidencia ✓
+
+## Limitaciones conocidas del preview
+- Datos en memoria del navegador: se reinician al recargar o al abrir una URL directa (hay que volver a "Start demo workspace").
+- Retrieval local léxico: preguntas con sinónimos que no aparecen en el corpus pueden abstenerse (comportamiento honesto, no un error).
+- Subida de PDF no extrae texto en el preview (lo hará el worker en P03); imágenes: visión pendiente de proveedor.
 
 ## Checkpoint para retomar
-Rama `main`. Próximo paso exacto: integrar pantallas de los agentes A–E, `pnpm build:pages`, smoke en Chromium (360/768/1440), push a `main` y a `gh-pages`, informar URL, y **avisar antes de empezar P03** (Render + Neon + deploy Hostinger).
+Rama `main`. P02 publicado. **Próximo paso: P03 — esperando al usuario para preparar Render (API/worker) y Neon (PostgreSQL aislado), y definir el deploy del frontend en Hostinger.**

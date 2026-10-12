@@ -76,6 +76,7 @@ on("DELETE", "/artifact-shares/:id", (ctx) => {
   for (const a of ctx.db.artifacts) {
     const i = a.shares.findIndex((s) => s.id === ctx.params.id);
     if (i >= 0) {
+      if (!canOnArtifact(roleOn(ctx, a), "share")) throw new FixtureError("FORBIDDEN", "Only the owner can revoke access.");
       a.shares.splice(i, 1);
       return undefined;
     }

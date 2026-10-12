@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Eye, Maximize2, PenLine, Save } from "lucide-react";
@@ -29,10 +29,13 @@ export function ArtifactWorkspace({ detail, compact }: { detail: ArtifactDetail;
   const exp = useExportArtifact();
   const canEdit = canOnArtifact(detail.myRole, "edit");
 
-  useEffect(() => {
+  // Reset view and draft when a new version is saved (render-time sync, no effect).
+  const [syncedVersion, setSyncedVersion] = useState(detail.currentVersion);
+  if (syncedVersion !== detail.currentVersion) {
+    setSyncedVersion(detail.currentVersion);
     setViewVersion(detail.currentVersion);
     setDraft(detail.current.content);
-  }, [detail.currentVersion, detail.current.content]);
+  }
 
   const versionQ = useQuery({
     queryKey: ["artifact", detail.id, "v", viewVersion],

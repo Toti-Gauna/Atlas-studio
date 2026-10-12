@@ -61,7 +61,11 @@ function CitedPage({ citation }: { citation: Citation }) {
 
 export function EvidencePanel({ state }: { state: { citations: Citation[]; activeIndex: number } }) {
   const [active, setActive] = useState(state.activeIndex);
-  useEffect(() => setActive(state.activeIndex), [state.activeIndex, state.citations]);
+  const [from, setFrom] = useState(state);
+  if (from !== state) {
+    setFrom(state);
+    setActive(state.activeIndex);
+  }
   const cit = state.citations[active];
   return (
     <div className={s.wrap}>

@@ -62,7 +62,10 @@ on("POST", "/workflows/:id/runs", (ctx) => {
   if (!w.versions.some((v) => v.version === b.version)) notFound("Workflow version");
   return startWorkflow(ctx.db, w.summary.id, b.version, b.projectId, b.inputs, b.idempotencyKey);
 });
-on("GET", "/workflows/:id/runs", (ctx) => ctx.db.workflowRuns.filter((r) => r.workflowId === ctx.params.id));
+on("GET", "/workflows/:id/runs", (ctx) => {
+  requireAction(ctx, "workflow.read");
+  return ctx.db.workflowRuns.filter((r) => r.workflowId === ctx.params.id);
+});
 /** Each poll lets the preview worker process one step; the UI renders exactly this state. */
 on("GET", "/workflow-runs/:id", (ctx) => tick(ctx.db, getWfRun(ctx, ctx.params.id!), ctx.userId));
 on("POST", "/workflow-runs/:id/pause", (ctx) => {
