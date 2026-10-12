@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Id, IsoDateTime, NanoUsd } from "./common";
+import { DataLabel, Id, IsoDateTime, NanoUsd } from "./common";
 import { AgentConfig, ToolId } from "./agents";
 import { RoutingDecision } from "./models";
 
@@ -91,6 +91,8 @@ export const RunSummary = z.object({
   latencyMs: z.number().int().nonnegative().nullable(),
   costStatus: z.enum(["no_provider_charge", "calculated", "estimated", "unknown", "reconciled"]),
   costNanoUsd: NanoUsd.nullable(),
+  /** DEMO = seeded/fixture record; LIVE = real execution telemetry. */
+  label: DataLabel,
 });
 export type RunSummary = z.infer<typeof RunSummary>;
 

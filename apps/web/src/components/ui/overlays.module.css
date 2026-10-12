@@ -1,0 +1,129 @@
+.dialog {
+  border: 1px solid var(--line);
+  border-radius: var(--r-4);
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-3);
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(86vh, 860px);
+  overflow: hidden;
+}
+.dialogWide {
+  width: min(880px, calc(100vw - 32px));
+}
+.dialog::backdrop {
+  background: rgba(11, 18, 32, 0.48);
+}
+.dialogInner {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+.dialogHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-5) var(--s-5) var(--s-3);
+}
+.dialogTitle {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.dialogDesc {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: var(--fs-14);
+}
+.dialogBody {
+  padding: var(--s-2) var(--s-5) var(--s-5);
+  overflow-y: auto;
+}
+.dialogFoot {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-5);
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.sheet {
+  margin: 0 0 0 auto;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: min(440px, 100vw);
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-3);
+}
+.sheetLeft {
+  margin: 0 auto 0 0;
+  border-left: 0;
+  border-right: 1px solid var(--line);
+  width: min(300px, 88vw);
+}
+.sheet::backdrop {
+  background: rgba(11, 18, 32, 0.42);
+}
+.sheetInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.toasts {
+  position: fixed;
+  z-index: var(--z-toast);
+  right: var(--s-4);
+  bottom: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-3);
+  background: var(--ink);
+  color: var(--pearl);
+  box-shadow: var(--shadow-3);
+  font-size: var(--fs-14);
+}
+:global([data-theme="dark"]) .toast {
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+}
+.toastTitle {
+  font-weight: 700;
+}
+.toastBody {
+  opacity: 0.86;
+  margin-top: 2px;
+}
+.toastClose {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  padding: 2px;
+}
+.toastSuccess svg:first-child {
+  color: var(--teal);
+}
+.toastError svg:first-child {
+  color: #ff8a80;
+}

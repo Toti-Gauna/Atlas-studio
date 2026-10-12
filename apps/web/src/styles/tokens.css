@@ -1,0 +1,182 @@
+/*
+ * Atlas design tokens — "editorial calm, technological precision".
+ * Brand palette: Ink #0B1220 · Pearl #F5F7FA · Teal #19B6A4 · Violet #8278D8 (roles/artifacts only).
+ * Contrast notes: teal is used as a fill with ink text (≈7.4:1) or as text on ink;
+ * on light surfaces text uses --teal-ink (#0B6F65, ≈5.6:1 on white).
+ */
+:root {
+  /* Brand */
+  --ink: #0b1220;
+  --pearl: #f5f7fa;
+  --teal: #19b6a4;
+  --violet: #8278d8;
+
+  /* Neutrals (light) */
+  --bg: #f5f7fa;
+  --bg-sunken: #edf0f4;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --surface-3: #eef1f5;
+  --line: #dde3ea;
+  --line-strong: #c3ccd7;
+  --text: #0b1220;
+  --text-2: #3a4558;
+  --text-3: #5b6779;
+  --text-inverse: #f5f7fa;
+
+  /* Accents (light) */
+  --teal-ink: #0b6f65;
+  --teal-soft: #e3f6f3;
+  --teal-line: #9fded5;
+  --violet-ink: #5248ad;
+  --violet-soft: #efedfb;
+  --violet-line: #c9c4f0;
+
+  /* Status (light) */
+  --ok: #0b6f65;
+  --ok-soft: #e3f6f3;
+  --warn: #8a5a00;
+  --warn-soft: #fdf3dc;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+  --info: #2c4a73;
+  --info-soft: #e8eef7;
+
+  /* Focus */
+  --focus: #0b6f65;
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus);
+
+  /* Typography */
+  --font-display: "Manrope Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Source Sans 3 Variable", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-15: 0.9375rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-22: 1.375rem;
+  --fs-28: 1.75rem;
+  --fs-36: 2.25rem;
+  --fs-48: 3rem;
+  --fs-64: 4rem;
+  --lh-tight: 1.15;
+  --lh-snug: 1.3;
+  --lh-body: 1.55;
+
+  /* Spacing (4/8/12/16/24/32/48) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Radius */
+  --r-1: 6px;
+  --r-2: 10px;
+  --r-3: 14px;
+  --r-4: 20px;
+  --r-pill: 999px;
+
+  /* Elevation — hairline-first, shadows only for floating layers */
+  --shadow-1: 0 1px 0 rgba(11, 18, 32, 0.04), 0 1px 2px rgba(11, 18, 32, 0.06);
+  --shadow-2: 0 4px 16px rgba(11, 18, 32, 0.08), 0 1px 3px rgba(11, 18, 32, 0.06);
+  --shadow-3: 0 18px 48px rgba(11, 18, 32, 0.16), 0 2px 8px rgba(11, 18, 32, 0.08);
+
+  /* Layout */
+  --sidebar-w: 260px;
+  --sidebar-rail-w: 64px;
+  --panel-w: 380px;
+  --canvas-w: min(560px, 46vw);
+  --topbar-h: 56px;
+  --content-max: 1120px;
+
+  /* Motion (durations mirror src/lib/motion.ts) */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --d-fast: 160ms;
+  --d-agent: 200ms;
+  --d-drawer: 240ms;
+  --d-reco: 280ms;
+
+  --z-sidebar: 30;
+  --z-panel: 40;
+  --z-overlay: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1220;
+    --bg-sunken: #080d18;
+    --surface: #101a2b;
+    --surface-2: #132036;
+    --surface-3: #192842;
+    --line: #22314b;
+    --line-strong: #31425f;
+    --text: #edf1f6;
+    --text-2: #b9c3d1;
+    --text-3: #8d9aae;
+    --text-inverse: #0b1220;
+    --teal-ink: #3fd0bd;
+    --teal-soft: #0f2f33;
+    --teal-line: #1e5c58;
+    --violet-ink: #aaa3ee;
+    --violet-soft: #1f1d3c;
+    --violet-line: #3f3a75;
+    --ok: #3fd0bd;
+    --ok-soft: #0f2f33;
+    --warn: #f2c063;
+    --warn-soft: #33270d;
+    --danger: #ff8a80;
+    --danger-soft: #3a1714;
+    --info: #9cb9e6;
+    --info-soft: #172743;
+    --focus: #3fd0bd;
+    --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.3);
+    --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.35);
+    --shadow-3: 0 20px 56px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b1220;
+  --bg-sunken: #080d18;
+  --surface: #101a2b;
+  --surface-2: #132036;
+  --surface-3: #192842;
+  --line: #22314b;
+  --line-strong: #31425f;
+  --text: #edf1f6;
+  --text-2: #b9c3d1;
+  --text-3: #8d9aae;
+  --text-inverse: #0b1220;
+  --teal-ink: #3fd0bd;
+  --teal-soft: #0f2f33;
+  --teal-line: #1e5c58;
+  --violet-ink: #aaa3ee;
+  --violet-soft: #1f1d3c;
+  --violet-line: #3f3a75;
+  --ok: #3fd0bd;
+  --ok-soft: #0f2f33;
+  --warn: #f2c063;
+  --warn-soft: #33270d;
+  --danger: #ff8a80;
+  --danger-soft: #3a1714;
+  --info: #9cb9e6;
+  --info-soft: #172743;
+  --focus: #3fd0bd;
+  --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 20px 56px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}

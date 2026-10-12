@@ -1,0 +1,68 @@
+.skel {
+  border-radius: var(--r-1);
+  background: var(--surface-3);
+}
+.skelStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.loadingRow {
+  opacity: 0.85;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--s-2);
+  padding: var(--s-7) var(--s-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-3);
+  background: var(--surface-2);
+}
+.compact {
+  padding: var(--s-5) var(--s-4);
+}
+.icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  margin-bottom: var(--s-1);
+}
+.danger .icon {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: transparent;
+}
+.warn .icon {
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-color: transparent;
+}
+.title {
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+.body {
+  color: var(--text-2);
+  font-size: var(--fs-14);
+  max-width: 52ch;
+}
+.action {
+  margin-top: var(--s-2);
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}

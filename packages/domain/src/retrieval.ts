@@ -26,7 +26,7 @@ export interface ChunkInput {
 }
 
 export const STOPWORDS = new Set(
-  "a an and are as at be by can do does did for from has have how i if in is it its of on or our should that the their this to was we what when where which who why will with you your about after before into than then there these those under within without per may must not no any all many much long often until get need tell me please us they them".split(
+  "a an and are as at be by can do does did for from has have how i if in is it its of on or our should that the their this to was we what when where which who why will with you your about after before into than then there these those under within without per may must not no any all many much long often until get need tell me please us they them take takes taken".split(
     " ",
   ),
 );
@@ -41,14 +41,32 @@ export function tokenize(text: string): string[] {
     .map(stem);
 }
 
-/** Tiny suffix stripper: enough for "refunds"/"refund", "shipping"/"ship". */
-function stem(t: string): string {
-  if (t.length > 5 && t.endsWith("ing")) return t.slice(0, -3);
-  if (t.length > 4 && t.endsWith("ies")) return `${t.slice(0, -3)}y`;
-  if (t.length > 4 && t.endsWith("es") && !t.endsWith("ses")) return t.slice(0, -2);
-  if (t.length > 3 && t.endsWith("s") && !t.endsWith("ss")) return t.slice(0, -1);
-  if (t.length > 4 && t.endsWith("ed")) return t.slice(0, -2);
-  return t;
+/**
+ * Light, deterministic stemmer (Porter-inspired subset). It only needs to be
+ * consistent between queries and documents: "cancelled", "cancelling" and
+ * "cancellations" → "cancel"; "late"/"later" → "lat"; "approve"/"approved" → "approv".
+ */
+export function stem(t: string): string {
+  let s = t;
+  const tryStrip = (suffix: string, minLen: number): boolean => {
+    if (s.length > minLen && s.endsWith(suffix)) {
+      s = s.slice(0, -suffix.length);
+      return true;
+    }
+    return false;
+  };
+  if (tryStrip("ations", 7) || tryStrip("ation", 6) || tryStrip("ions", 6) || tryStrip("ion", 6) || tryStrip("ings", 6) || tryStrip("ing", 5)) {
+    // stripped a derivational/progressive suffix
+  } else if (s.length > 4 && s.endsWith("ies")) {
+    s = `${s.slice(0, -3)}y`;
+  } else if (tryStrip("ed", 4) || tryStrip("ers", 5) || tryStrip("er", 4)) {
+    // stripped past tense / agentive
+  } else if (s.length > 3 && s.endsWith("s") && !s.endsWith("ss") && !s.endsWith("us")) {
+    s = s.slice(0, -1);
+  }
+  if (s.length > 3 && /([bdfglmnprt])\1$/.test(s)) s = s.slice(0, -1);
+  if (s.length >= 4 && s.endsWith("e")) s = s.slice(0, -1);
+  return s;
 }
 
 /** Splits page text into paragraph-sized chunks (≈ maxChars), keeping offsets. */
