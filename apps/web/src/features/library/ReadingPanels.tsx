@@ -41,9 +41,11 @@ export function ImagePanel({ doc }: { doc: DocumentDetail }) {
   const [broken, setBroken] = useState(false);
   return (
     <section className={s.stack} aria-label={doc.title}>
-      <Callout tone="warn" icon={<Eye size={16} aria-hidden />}>
-        {L.image.vision}
-      </Callout>
+      {doc.visionStatus !== "available" ? (
+        <Callout tone="warn" icon={<Eye size={16} aria-hidden />}>
+          {L.image.vision}
+        </Callout>
+      ) : null}
       {src && !broken ? (
         // eslint-disable-next-line @next/next/no-img-element -- static export serves the demo asset as-is
         <img src={src} alt={L.image.alt(doc.title)} className={s.image} onError={() => setBroken(true)} />
