@@ -1,0 +1,80 @@
+.wrap {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.chain {
+  list-style: none;
+  margin: 0;
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-13);
+}
+.chain li {
+  display: flex;
+  flex-direction: column;
+}
+.arrow {
+  color: var(--teal-ink);
+  padding-left: 2px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chipActive > * {
+  background: var(--teal-soft) !important;
+  border-color: var(--teal-line) !important;
+}
+.docHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  align-items: flex-start;
+  margin-bottom: var(--s-2);
+}
+.docTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.docMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.openLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--teal-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.pageText {
+  margin-top: var(--s-3);
+  padding: var(--s-4);
+  background: var(--pearl);
+  color: var(--ink);
+  border-radius: var(--r-2);
+  border: 1px solid var(--line);
+  font-size: var(--fs-14);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.mark {
+  background: rgba(25, 182, 164, 0.18);
+  color: var(--ink);
+  border-bottom: 2px solid var(--teal);
+  padding: 1px 0;
+  border-radius: 2px;
+}

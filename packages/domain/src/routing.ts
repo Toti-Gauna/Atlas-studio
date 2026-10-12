@@ -83,7 +83,7 @@ export const DEFAULT_ROUTING_POLICY: RoutingPolicy = {
   updatedAt: "2026-10-12T15:30:00.000Z",
   rules: [
     { id: "r_chat", task: "chat_answer", preferredModelKey: "anthropic:claude-sonnet-5-5", requiredCapabilities: ["text"], fallbackModelKey: "local:atlas-extractive-v1", maxEstimatedCostNanoUsd: "200000000" },
-    { id: "r_compliance", task: "compliance_review", preferredModelKey: "anthropic:claude-opus-5-5", requiredCapabilities: ["text", "tools"], fallbackModelKey: "local:atlas-extractive-v1", maxEstimatedCostNanoUsd: "500000000" },
+    { id: "r_compliance", task: "compliance_review", preferredModelKey: "anthropic:claude-opus-5-5", requiredCapabilities: ["text"], fallbackModelKey: "local:atlas-extractive-v1", maxEstimatedCostNanoUsd: "500000000" },
     { id: "r_data", task: "data_analysis", preferredModelKey: "local:atlas-extractive-v1", requiredCapabilities: ["deterministic_tools"], fallbackModelKey: null, maxEstimatedCostNanoUsd: null },
     { id: "r_deck", task: "presentation", preferredModelKey: "anthropic:claude-sonnet-5-5", requiredCapabilities: ["text"], fallbackModelKey: "local:atlas-extractive-v1", maxEstimatedCostNanoUsd: "300000000" },
     { id: "r_reco", task: "recommendation", preferredModelKey: "local:atlas-extractive-v1", requiredCapabilities: ["templates"], fallbackModelKey: null, maxEstimatedCostNanoUsd: null },

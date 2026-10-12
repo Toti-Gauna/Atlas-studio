@@ -109,7 +109,7 @@ export const api = {
 
   documents: {
     list: (projectId?: string) => t().request<DocumentSummary[]>("GET", "/documents", { query: { projectId } }),
-    get: (id: string) => t().request<DocumentDetail>("GET", `/documents/${id}`),
+    get: (id: string, versionId?: string) => t().request<DocumentDetail>("GET", `/documents/${id}`, { query: { versionId } }),
     upload: (body: UploadRequest) => t().request<DocumentSummary>("POST", "/documents", { body }),
     reindex: (id: string) => t().request<DocumentSummary>("POST", `/documents/${id}/reindex`),
     remove: (id: string) => t().request<void>("DELETE", `/documents/${id}`),

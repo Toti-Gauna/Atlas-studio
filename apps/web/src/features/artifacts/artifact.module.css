@@ -1,0 +1,260 @@
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.doc {
+  background: var(--pearl);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  padding: clamp(16px, 3vw, 40px);
+  font-size: var(--fs-15);
+  line-height: 1.65;
+}
+.h1,
+.h2,
+.h3 {
+  color: var(--ink);
+  margin: 0.4em 0 0.5em;
+}
+.h1 {
+  font-size: var(--fs-22);
+}
+.h2 {
+  font-size: var(--fs-18);
+}
+.h3 {
+  font-size: var(--fs-16);
+}
+.p {
+  margin: 0 0 0.9em;
+}
+.ref {
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  color: #0b6f65;
+  margin-left: 2px;
+}
+.ul {
+  margin: 0 0 1em;
+  padding-left: 1.3em;
+}
+.callout {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 0 0 1em;
+  background: #e8eef7;
+  color: #2c4a73;
+  font-size: var(--fs-14);
+}
+.callout_gap {
+  background: #fbe9e7;
+  color: #b3261e;
+}
+.callout_warning {
+  background: #fdf3dc;
+  color: #8a5a00;
+}
+.figure {
+  margin: 0 0 1.2em;
+}
+.caption {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.tableScroll {
+  overflow-x: auto;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #fff;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+.table th,
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e6eaf0;
+  text-align: left;
+  vertical-align: top;
+}
+.table th {
+  background: #f1f4f8;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.note {
+  margin-top: 10px;
+  font-size: var(--fs-13);
+  color: #5b6779;
+}
+.code {
+  background: #0b1220;
+  color: #e6edf5;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: var(--fs-13);
+}
+
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.slideFigure {
+  margin: 0;
+}
+.slide {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 13.333 / 7.5;
+  background: #f5f7fa;
+  color: #0b1220;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  container-type: inline-size;
+}
+.slideInk {
+  background: #0b1220;
+  color: #f5f7fa;
+}
+.slideBar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1.6%;
+  background: #19b6a4;
+}
+.slideTitle,
+.slideTitleBig,
+.slideSub,
+.slideBullets,
+.slideMetric,
+.slideSources,
+.slideNum {
+  position: absolute;
+  margin: 0;
+  overflow: hidden;
+}
+.slideTitle {
+  font-size: 2.6cqw;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+.slideTitleBig {
+  font-size: 3.7cqw;
+  font-weight: 700;
+  display: flex;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+.slideAccent {
+  position: absolute;
+  height: 0.5cqw;
+  background: #19b6a4;
+}
+.slideSub {
+  font-size: 1.85cqw;
+  color: #5b6779;
+}
+.slideInk .slideSub {
+  color: #b9c3d1;
+}
+.slideBullets {
+  padding-left: 1.6cqw;
+  font-size: 1.85cqw;
+  line-height: 1.35;
+}
+.slideBullets li {
+  margin-bottom: 0.9cqw;
+}
+.slideMetric {
+  font-size: 6.1cqw;
+  font-weight: 700;
+  color: #0b6f65;
+}
+.slideInk .slideMetric {
+  color: #19b6a4;
+}
+.slideSources {
+  font-size: 0.85cqw;
+  color: #5b6779;
+}
+.slideNum {
+  font-size: 0.75cqw;
+  color: #5b6779;
+  text-align: right;
+}
+.notes {
+  margin-top: 6px;
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+
+.sources ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sources li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+.quote {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  padding-left: 12px;
+  border-left: 2px solid var(--line-strong);
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.editBlock {
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  padding: var(--s-3);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.editRow {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 2;
+}
+.panelBody {
+  padding: var(--s-4);
+}

@@ -1,0 +1,25 @@
+import { chromium } from "@playwright/test";
+const base = process.argv[2] ?? "http://localhost:4310";
+const out = process.argv[3];
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const errors = [];
+page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+page.on("pageerror", (e) => errors.push(String(e)));
+await page.goto(`${base}/app/`);
+await page.getByRole("button", { name: "Start demo workspace" }).click();
+await page.waitForTimeout(800);
+await page.screenshot({ path: `${out}/home.png`, fullPage: false });
+await page.goto(`${base}/app/chat/?new=1`);
+await page.getByRole("button", { name: "Start demo workspace" }).click().catch(() => {});
+await page.waitForTimeout(500);
+await page.locator("#composer-input").fill("How long do approved refunds take?");
+await page.keyboard.press("Enter");
+await page.waitForTimeout(1200);
+await page.screenshot({ path: `${out}/chat.png` });
+const chip = page.getByRole("button", { name: /Open source S1/ }).first();
+if (await chip.count()) { await chip.click(); await page.waitForTimeout(600); }
+await page.screenshot({ path: `${out}/evidence.png` });
+console.log("url", page.url());
+console.log("errors", JSON.stringify(errors, null, 1));
+await browser.close();
