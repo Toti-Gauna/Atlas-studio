@@ -1,5 +1,5 @@
 "use client";
-import { InboxView } from "@/features/desk/InboxView";
+import { InboxView } from "@/features/inbox/InboxView";
 
 export default function InboxPage() {
   return <InboxView />;

@@ -2,13 +2,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, FolderKanban, MessageSquarePlus, MessagesSquare, Moon, Search } from "lucide-react";
+import { Bot, Compass, FolderKanban, MessageSquarePlus, MessagesSquare, Moon, Search } from "lucide-react";
 import { can } from "@atlas/domain";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/state/session";
 import { useTheme } from "@/lib/state/theme";
 import { Kbd } from "@/components/ui";
-import { ALL_NAV } from "./nav";
+import { ALL_NAV, canSee } from "./nav";
 import s from "./shell.module.css";
 
 interface Item {
@@ -51,9 +51,10 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const items = useMemo<Item[]>(() => {
     const out: Item[] = [];
-    for (const n of ALL_NAV) if (!n.requires || (role && can(role, n.requires))) out.push({ id: `nav-${n.href}`, group: "Go to", label: n.label, icon: <n.icon size={16} />, run: go(n.href) });
-    out.push({ id: "new-chat", group: "Actions", label: "New conversation", icon: <MessageSquarePlus size={16} />, run: go("/app/chat/?new=1") });
+    if (role && can(role, "conversation.use")) out.push({ id: "new-chat", group: "Actions", label: "Ask a question", hint: "New chat", icon: <MessageSquarePlus size={16} />, run: go("/app/chat/?new=1") });
+    out.push({ id: "tours", group: "Actions", label: "Take a guided tour", icon: <Compass size={16} />, run: go("/app/showcase/") });
     out.push({ id: "theme", group: "Actions", label: `Switch to ${theme === "dark" ? "light" : "dark"} theme`, icon: <Moon size={16} />, run: () => { setTheme(theme === "dark" ? "light" : "dark"); onClose(); } });
+    for (const n of ALL_NAV) if (canSee(role, n)) out.push({ id: `nav-${n.href}`, group: "Go to", label: n.label, icon: <n.icon size={16} />, run: go(n.href) });
     for (const p of projects.data ?? []) out.push({ id: `p-${p.id}`, group: "Projects", label: p.name, hint: `${p.documentCount} sources`, icon: <FolderKanban size={16} />, run: go(`/app/project/?id=${p.id}`) });
     for (const a of agents.data ?? []) out.push({ id: `a-${a.id}`, group: "Agents", label: a.name, hint: `v${a.currentVersion}`, icon: <Bot size={16} />, run: go(`/app/agent/?id=${a.id}`) });
     for (const c of (convs.data ?? []).slice(0, 8)) out.push({ id: `c-${c.id}`, group: "Recent conversations", label: c.title, icon: <MessagesSquare size={16} />, run: go(`/app/chat/?c=${c.id}`) });

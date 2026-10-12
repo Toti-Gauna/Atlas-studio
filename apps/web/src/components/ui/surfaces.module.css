@@ -97,7 +97,7 @@
   border-collapse: collapse;
   font-size: var(--fs-14);
 }
-.table th {
+.table thead th {
   text-align: left;
   font-size: var(--fs-12);
   font-weight: 650;
@@ -109,15 +109,22 @@
   background: var(--surface-2);
   white-space: nowrap;
 }
-.table td {
+.table td,
+.table tbody th {
   padding: 11px 14px;
+  text-align: left;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
-.table tr:last-child td {
+.table tbody th {
+  font-weight: 600;
+}
+.table tr:last-child td,
+.table tr:last-child th {
   border-bottom: 0;
 }
-.table tbody tr:hover td {
+.table tbody tr:hover td,
+.table tbody tr:hover th {
   background: var(--surface-2);
 }
 .num {

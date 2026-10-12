@@ -9,7 +9,7 @@ mkdirSync(out, { recursive: true });
 const routes = [
   "/", "/login/", "/app/", "/app/chat/?new=1", "/app/projects/", "/app/project/?id=prj_compliance", "/app/library/",
   "/app/document/?id=doc_retention", "/app/document/?id=doc_shipments", "/app/agents/", "/app/agent/?id=agt_compliance_advisor",
-  "/app/workflows/", "/app/workflow/?id=wfl_csv_analysis&run=wfr_seed_csv", "/app/artifacts/", "/app/reviews/", "/app/runs/",
+  "/app/workflows/", "/app/workflow/?id=wfl_csv_analysis&run=wfr_seed_csv", "/app/artifacts/", "/app/reviews/", "/app/runs/", "/app/inbox/?tab=support", "/app/inbox/?tab=privacy",
   "/app/usage/", "/app/privacy/", "/app/inbox/", "/app/evaluations/", "/app/showcase/", "/app/settings/?tab=models",
 ];
 const widths = (process.argv[4] ?? "1440,768,360").split(",").map(Number);

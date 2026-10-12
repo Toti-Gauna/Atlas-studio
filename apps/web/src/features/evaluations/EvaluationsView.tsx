@@ -8,7 +8,7 @@ import { formatDateTime, modelName } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { evaluationsCopy as c } from "@/copy/evaluations";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, Button, Callout, DemoTag, EmptyState, PageHeader, QueryState, SectionHead, Table, numCell, useToast } from "@/components/ui";
+import { Badge, Button, Callout, EmptyState, PageHeader, QueryState, SectionHead, Table, numCell, useToast } from "@/components/ui";
 import { CasesTable } from "./CasesTable";
 import { RunResults } from "./RunResults";
 import s from "./evaluations.module.css";
@@ -37,7 +37,7 @@ function SuiteBlock({ suite }: { suite: EvaluationSuite }) {
     <section aria-labelledby={`suite-${suite.id}`} className={s.suite}>
       <div className={s.suiteHead}>
         <h2 id={`suite-${suite.id}`} className={s.suiteTitle}>
-          {suite.name} {suite.label === "DEMO" ? <DemoTag /> : null}
+          {suite.name}
         </h2>
         <div className={s.runAction}>
           <Button variant="primary" icon={<Play size={14} aria-hidden />} onClick={() => run.mutate()} loading={run.isPending} disabled={!canRun} aria-describedby={canRun ? undefined : `run-hint-${suite.id}`}>
@@ -107,7 +107,7 @@ export function EvaluationsView() {
   const q = useQuery({ queryKey: ["evaluation-suites"], queryFn: api.evaluations.suites });
   return (
     <Page wide>
-      <PageHeader eyebrow={c.eyebrow} title={c.title} description={c.description} />
+      <PageHeader title={c.title} description={c.description} />
       <QueryState query={q} isEmpty={(d) => d.length === 0} empty={<EmptyState title={c.emptySuites} body={c.emptySuitesBody} />}>
         {(suites) => (
           <div className={s.suites}>

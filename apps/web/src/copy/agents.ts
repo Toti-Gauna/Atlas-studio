@@ -2,7 +2,7 @@
 export const agentsCopy = {
   gallery: {
     eyebrow: "Build",
-    title: "Agent Studio",
+    title: "Agents",
     description: "Agents are versioned configurations of instructions, tools, sources, model and limits. Pick one in chat or in a workflow and it changes how the real run behaves.",
     explainTitle: "What choosing an agent changes",
     explain: [

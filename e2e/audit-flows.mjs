@@ -6,10 +6,11 @@ const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromi
 const shot = (p, n) => p.screenshot({ path: `${out}/${n}.png` });
 async function fresh(w = 1440, h = 900, opts = {}) {
   const p = await browser.newPage({ viewport: { width: w, height: h }, ...opts });
+  // Entering /app creates the demo session (single door); ?preview=1 exposes the preview-state tooling.
   await p.goto(`${base}/login/`, { waitUntil: "networkidle" });
   await shot(p, `${w}-00-login`);
-  await p.getByRole("button", { name: "Start demo workspace" }).click();
-  await p.waitForURL(/\/app\/$/); await p.waitForTimeout(700);
+  await p.goto(`${base}/app/?preview=1`, { waitUntil: "networkidle" });
+  await p.getByRole("heading", { level: 1 }).first().waitFor(); await p.waitForTimeout(700);
   return p;
 }
 const nav = async (p, label) => { await p.getByRole("link", { name: label, exact: true }).first().click(); await p.waitForTimeout(700); };
@@ -28,7 +29,7 @@ await step("chat", async () => {
 });
 await step("chat-new-send", async () => {
   await p.goto(`${base}/app/chat/?new=1`); await p.waitForTimeout(400);
-  const start = p.getByRole("button", { name: "Start demo workspace" }); if (await start.count()) { await start.click(); await p.waitForTimeout(600); }
+  await p.getByRole("heading", { level: 1 }).first().waitFor();
   await p.getByLabel("Project", { exact: true }).selectOption({ label: "Help desk" }).catch(() => {});
   await p.locator("#composer-input").fill("What is the fee for cancelling a pickup late?");
   await p.keyboard.press("Enter"); await p.waitForTimeout(1200);
@@ -59,7 +60,7 @@ await step("preview-states", async () => {
   await p.getByRole("button", { name: "Preview states" }).first().click(); await p.getByRole("radio", { name: "Live" }).click(); await p.keyboard.press("Escape");
 });
 await step("role", async () => {
-  await p.getByLabel("Demo role").selectOption("viewer"); await p.waitForTimeout(600);
+  await p.getByRole("button", { name: /View as/ }).first().click(); await p.getByRole("button", { name: /^Viewer/ }).click(); await p.waitForTimeout(600);
   await nav(p, "Home"); await shot(p, "1440-16-viewer-home");
   await p.goto(`${base}/app/usage/`).catch(() => {});
 });
@@ -69,12 +70,13 @@ await step("workflow-run", async () => {
   await shot(q, "1440-17-workflow-detail");
   await q.getByRole("button", { name: /Preview plan/ }).first().click(); await q.waitForTimeout(600);
   await q.screenshot({ path: `${out}/1440-18-workflow-preview.png`, fullPage: true });
-  await nav(q, "Showcase"); await q.screenshot({ path: `${out}/1440-19-showcase.png`, fullPage: true });
+  await q.getByRole("link", { name: "Guided tours", exact: true }).first().click(); await q.waitForTimeout(700); await q.screenshot({ path: `${out}/1440-19-showcase.png`, fullPage: true });
+  await q.getByRole("button", { name: "Admin", exact: true }).click().catch(() => {}); await q.waitForTimeout(200);
   await nav(q, "Usage & costs"); await q.screenshot({ path: `${out}/1440-20-usage-full.png`, fullPage: true });
   await nav(q, "Privacy"); await shot(q, "1440-21-privacy");
-  await nav(q, "Help desk"); await shot(q, "1440-22-helpdesk");
+  await q.getByRole("link", { name: /^Inbox/ }).first().click(); await q.waitForTimeout(700); await shot(q, "1440-22-inbox");
   await nav(q, "Settings"); await shot(q, "1440-23-settings");
-  await nav(q, "Agent Studio"); await q.screenshot({ path: `${out}/1440-24-agents-full.png`, fullPage: true });
+  await nav(q, "Agents"); await q.screenshot({ path: `${out}/1440-24-agents-full.png`, fullPage: true });
 });
 await step("dark", async () => {
   const d = await fresh(1440, 900, { colorScheme: "dark" });

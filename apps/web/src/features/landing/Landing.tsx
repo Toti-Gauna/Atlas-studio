@@ -27,7 +27,7 @@ export function Landing() {
         Skip to content
       </a>
       <div className={s.notice} role="note">
-        {copy.demo.banner} · {landing.noticeDetail}
+        {copy.demo.tag} · {copy.demo.banner}
       </div>
       <header className={s.nav}>
         <Link href="/" className={s.brand} aria-label={`${copy.brand.product} home`}>
@@ -41,7 +41,7 @@ export function Landing() {
           <a href="#status">Status</a>
         </nav>
         <LinkButton href="/app/" variant="ink" size="sm">
-          Open demo
+          {landing.ctaPrimary}
         </LinkButton>
       </header>
 
@@ -53,10 +53,10 @@ export function Landing() {
             <p className={s.lead}>{landing.lead}</p>
             <div className={s.ctas}>
               <LinkButton href="/app/" variant="primary" size="lg" icon={<ArrowRight size={16} />}>
-                {copy.demo.start}
+                {landing.ctaPrimary}
               </LinkButton>
               <LinkButton href="/app/showcase/" variant="secondary" size="lg">
-                See the three guided tours
+                {landing.ctaTour}
               </LinkButton>
             </div>
             <p className={s.fine}>{copy.demo.startHint}</p>

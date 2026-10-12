@@ -5,7 +5,7 @@ import { FileStack, FolderOpen, MessageSquare, MessageSquarePlus } from "lucide-
 import type { ArtifactSummary, Project } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
-import { ArtifactIcon, Badge, DemoTag, EmptyState, LinkButton, QueryState } from "@/components/ui";
+import { ArtifactIcon, Badge, EmptyState, LinkButton, QueryState } from "@/components/ui";
 import { projectsCopy as P } from "@/copy/projects";
 import { DocumentsTable } from "@/features/library/DocumentsTable";
 import s from "./projects.module.css";
@@ -91,7 +91,6 @@ export function DeliverablesTab({ project }: { project: Project }) {
                 </span>
                 <span className={s.rowAside}>
                   <Badge tone={REVIEW[a.reviewState].tone}>{REVIEW[a.reviewState].label}</Badge>
-                  {a.label === "DEMO" ? <DemoTag /> : null}
                   <span>{relativeTime(a.updatedAt)}</span>
                 </span>
               </Link>

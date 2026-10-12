@@ -1,7 +1,7 @@
 /** Settings, model registry and routing copy (R13). */
 export const settingsCopy = {
   title: "Settings",
-  description: "Workspace details, members, provider connections, the versioned model registry and routing policy.",
+  description: "Workspace details, members, model providers and routing.",
   tabsLabel: "Settings sections",
   tabs: { workspace: "Workspace", members: "Members", providers: "Providers", models: "Models", routing: "Routing", audit: "Audit" },
   workspace: {
@@ -19,7 +19,7 @@ export const settingsCopy = {
     readOnly: "Workspace details are read-only in this preview.",
     resetTitle: "Reset demo data",
     resetBody:
-      "Demo workspaces hold synthetic data for the fictional company Corvid Freight and are reset when they expire. Resetting restores the seeded projects, sources, agents, runs and budgets and discards everything you created. In this preview the reset lives in the Preview states menu in the top bar.",
+      "Demo workspaces hold synthetic data for the fictional company Corvid Freight and are reset when they expire. Resetting restores the seeded projects, sources, agents, runs and budgets and discards everything you created. In this preview, reloading the page resets it.",
   },
   members: {
     heading: "Members",

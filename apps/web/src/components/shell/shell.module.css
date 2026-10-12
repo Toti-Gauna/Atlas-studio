@@ -11,47 +11,146 @@
 }
 .banner {
   grid-column: 1 / -1;
+  position: relative;
+  z-index: 6;
   display: flex;
   align-items: center;
   gap: var(--s-3);
-  min-height: 30px;
-  padding: 4px var(--s-4);
+  min-height: 34px;
+  padding: 3px var(--s-4);
   background: var(--ink);
   color: #cbd5e1;
   font-size: var(--fs-12);
-  overflow: hidden;
 }
 :global([data-theme="dark"]) .banner {
   background: #060a13;
   border-bottom: 1px solid var(--line);
 }
-.bannerStrong {
-  color: var(--pearl);
-  font-weight: 700;
-  white-space: nowrap;
+.bannerTag {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: var(--r-1);
+  background: var(--teal);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.08em;
 }
 .bannerDetail {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  color: var(--pearl);
 }
-.bannerDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--teal);
+.bannerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
   flex: none;
 }
+.bannerLink,
 .bannerBtn {
-  margin-left: auto;
-  border: 1px solid rgba(245, 247, 250, 0.22);
-  background: transparent;
-  color: var(--pearl);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 26px;
+  padding: 0 8px;
+  border: 0;
   border-radius: var(--r-1);
+  background: transparent;
+  color: #e2e8f0;
   font-size: var(--fs-12);
-  padding: 2px 8px;
+  font-weight: 600;
+  text-decoration: none;
   white-space: nowrap;
+}
+.bannerLink:hover,
+.bannerBtn:hover {
+  background: rgba(245, 247, 250, 0.1);
+  color: var(--pearl);
+}
+.bannerBtn {
+  border: 1px solid rgba(245, 247, 250, 0.22);
+}
+.bannerBtn strong {
+  color: var(--pearl);
+}
+.roleMenu {
+  position: relative;
+}
+.roleList {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  width: min(320px, calc(100vw - 24px));
+  padding: var(--s-1);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.roleOption {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-2);
+  background: none;
+  text-align: left;
+}
+.roleOption:hover {
+  background: var(--surface-3);
+}
+.roleOption[aria-pressed="true"] {
+  background: var(--teal-soft);
+}
+.roleCheck {
+  width: 14px;
+  flex: none;
+  margin-top: 2px;
+  color: var(--teal-ink);
+}
+.roleName {
+  display: block;
+  font-weight: 650;
+  font-size: var(--fs-14);
+}
+.roleDesc {
+  display: block;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.realList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.realRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px var(--s-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.realRow:last-child {
+  border-bottom: 0;
+}
+.realItem {
+  font-weight: 600;
+}
+.realNote {
+  grid-column: 1 / -1;
+  font-size: var(--fs-13);
+  color: var(--text-2);
 }
 
 /* Sidebar */
@@ -85,12 +184,17 @@
   font-size: var(--fs-16);
   white-space: nowrap;
 }
+.brandText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 .brandSub {
-  font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-12);
   color: var(--text-3);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .collapseBtn {
   margin-left: auto;
@@ -103,8 +207,62 @@
 .navGroup + .navGroup {
   margin-top: var(--s-4);
 }
-.navLabel {
+.navLabel,
+.navGroupToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
   padding: 0 var(--s-3) 6px;
+  font-size: var(--fs-12);
+  font-weight: 650;
+  color: var(--text-3);
+}
+.navGroupToggle {
+  border: 0;
+  background: none;
+  min-height: 28px;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-radius: var(--r-2);
+}
+.navGroupToggle:hover {
+  color: var(--text);
+}
+.navChevron {
+  margin-left: -4px;
+  transition: transform var(--d-fast) var(--ease-out);
+}
+.navGroupToggle[aria-expanded="true"] .navChevron {
+  transform: rotate(90deg);
+}
+.navRule {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0 var(--s-3) var(--s-3);
+}
+.navBadge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--teal);
+  color: var(--ink);
+  font-size: var(--fs-11);
+  font-weight: 750;
+  display: inline-grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.rail .navBadge {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
 }
 .navList {
   list-style: none;
@@ -149,19 +307,6 @@
 .navItem svg {
   flex: none;
 }
-.navCount {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-11);
-  color: var(--text-3);
-}
-.projectDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 3px;
-  flex: none;
-  margin: 0 4px;
-}
 .navText {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -175,7 +320,6 @@
 }
 .rail .navText,
 .rail .navLabel,
-.rail .navCount,
 .rail .brandText,
 .rail .sidebarFootText {
   display: none;
@@ -312,11 +456,46 @@
 .gate {
   display: grid;
   place-items: center;
-  min-height: 100%;
+  min-height: 100dvh;
   padding: var(--s-6) var(--s-4);
+  background: var(--bg);
 }
 .gateCard {
   width: min(520px, 100%);
+}
+.gateLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--text-2);
+}
+.gateTitle {
+  font-size: var(--fs-22);
+  margin-top: var(--s-4);
+}
+.gateBody {
+  color: var(--text-2);
+  margin-top: var(--s-2);
+}
+.gateActions {
+  margin-top: var(--s-5);
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.gateHint {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  margin-top: var(--s-3);
+}
+.gateError {
+  color: var(--danger);
+  margin-top: var(--s-2);
+}
+
+.newChatText {
+  white-space: nowrap;
 }
 
 @media (max-width: 1279px) {
@@ -329,7 +508,18 @@
   .shellCollapsed {
     grid-template-columns: minmax(0, 1fr);
   }
-  .sidebar {
+  .sidebarDesktop {
+    display: none;
+  }
+  .newChatText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .bannerDetail {
     display: none;
   }
   .menuBtn {

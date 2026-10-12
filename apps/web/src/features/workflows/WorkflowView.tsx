@@ -8,7 +8,7 @@ import type { WorkflowDetail } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { AgentGlyph, Badge, Button, DemoTag, EmptyState, LinkButton, LoadingBlock, PageHeader, QueryState, TabPanel, Tabs } from "@/components/ui";
+import { AgentGlyph, Badge, Button, EmptyState, LinkButton, LoadingBlock, PageHeader, QueryState, TabPanel, Tabs } from "@/components/ui";
 import { wfCopy } from "@/copy/workflows";
 import { RunSetup } from "./RunSetup";
 import { RunMonitor } from "./RunMonitor";
@@ -76,7 +76,6 @@ function WorkflowScreen({ w, runId, projectParam }: { w: WorkflowDetail; runId: 
                 {agent?.name ?? w.agentId}
               </span>
             </span>
-            {w.label === "DEMO" ? <DemoTag /> : null}
           </>
         }
       />

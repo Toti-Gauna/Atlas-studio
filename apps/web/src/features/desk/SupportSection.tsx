@@ -8,20 +8,20 @@ import { api } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
 import { useCan, useSession } from "@/lib/state/session";
 import { deskCopy as c } from "@/copy/desk";
-import { Page } from "@/components/shell/StudioShell";
-import { Badge, DemoTag, EmptyState, LinkButton, PageHeader, QueryState, Select, Switch, Table, numCell } from "@/components/ui";
+import { Badge, EmptyState, LinkButton, QueryState, Select, Switch, Table, numCell } from "@/components/ui";
 import { ServiceRequests } from "./ServiceRequests";
 import { PRIORITY_TONE, STATUS_TONE } from "./tones";
 import s from "./desk.module.css";
 
 type StatusFilter = Ticket["status"] | "all";
 
-export function InboxView() {
+/** Support tickets handed off to a person (Inbox › Support, or "My tickets" for customers). */
+export function SupportSection() {
   const { data: session } = useSession();
   const isOperator = useCan("ticket.inbox");
   const isCustomer = session?.role === "customer";
   const tickets = useQuery({ queryKey: ["tickets"], queryFn: api.tickets.list });
-  const [status, setStatus] = useState<StatusFilter>("all");
+  const [status, setStatus] = useState<StatusFilter>(isOperator ? "open" : "all");
   const [mine, setMine] = useState(false);
 
   const me = session?.user.id;
@@ -30,8 +30,7 @@ export function InboxView() {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
   return (
-    <Page wide>
-      <PageHeader eyebrow={c.eyebrow} title={isCustomer ? c.myTitle : c.inboxTitle} description={isCustomer ? c.myDesc : c.inboxDesc} meta={<DemoTag />} />
+    <>
 
       {isOperator ? (
         <div className={s.filters} role="group" aria-label={c.filters.label}>
@@ -94,7 +93,7 @@ export function InboxView() {
         }
       </QueryState>
 
-      <ServiceRequests />
-    </Page>
+      {!isCustomer ? <ServiceRequests /> : null}
+    </>
   );
 }

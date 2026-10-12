@@ -35,7 +35,7 @@ export function RunsView() {
 
   return (
     <Page wide>
-      <PageHeader eyebrow={c.eyebrow} title={c.title} description={c.description} />
+      <PageHeader title={c.title} description={c.description} />
       <div className={selected ? s.layoutWithDetail : undefined}>
         <div className={s.listCol}>
           <QueryState

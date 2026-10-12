@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, DemoTag, EmptyState, ErrorState, LoadingBlock, PageHeader, Skeleton, TabPanel, Tabs, type TabDef } from "@/components/ui";
+import { Badge, EmptyState, ErrorState, LoadingBlock, PageHeader, Skeleton, TabPanel, Tabs, type TabDef } from "@/components/ui";
 import { libraryCopy as L } from "@/copy/library";
 import { CsvProfilePanel } from "./CsvProfilePanel";
 import { DocumentActions } from "./DocumentActions";
@@ -99,7 +99,6 @@ function DocumentDetailView({ id, v }: { id: string; v: string | null }) {
                 #{t}
               </Badge>
             ))}
-            {doc.label === "DEMO" ? <DemoTag /> : null}
             <span className={s.subtle} style={{ alignSelf: "center" }}>
               {L.detail.updated} {formatDateTime(doc.updatedAt)}
             </span>

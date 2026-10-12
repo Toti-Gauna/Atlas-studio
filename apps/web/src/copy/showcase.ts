@@ -1,7 +1,7 @@
 /** Centralized English copy for the Showcase (R14). */
 export const showcaseCopy = {
   eyebrow: "Guided tours",
-  title: "Showcase",
+  title: "Guided tours",
   description: "Three end-to-end tours through the real screens of this workspace. Each step opens the screen where you do the work yourself.",
   honesty: "The guide never simulates success. Every status and deliverable below comes from a real run in this visitor workspace.",
   honestyPreview: "Frontend preview: runs execute in an in-browser fixture with synthetic data, and everything resets on reload.",

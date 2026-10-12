@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { AgentGlyph, Badge, Card, DemoTag, EmptyState, LoadingBlock, PageHeader, QueryState } from "@/components/ui";
+import { AgentGlyph, Badge, Card, EmptyState, LoadingBlock, PageHeader, QueryState } from "@/components/ui";
 import { wfCopy } from "@/copy/workflows";
 import { runStatusLabel, runStatusTone, workflowHref } from "./status";
 import s from "./workflows.module.css";
@@ -21,7 +21,7 @@ export function WorkflowsView() {
 
   return (
     <Page wide>
-      <PageHeader eyebrow={c.eyebrow} title={c.title} description={c.description} meta={<DemoTag />} />
+      <PageHeader title={c.title} description={c.description} />
       <QueryState
         query={workflows}
         isEmpty={(d) => d.length === 0}
@@ -46,7 +46,6 @@ function WorkflowCard({ w, agentName, agentProfile }: { w: WorkflowSummary; agen
     <Card as="li" interactive className={s.wfCard}>
       <div className={s.wfCardTop}>
         <Badge tone="neutral">{wfCopy.recipe[w.recipe]}</Badge>
-        {w.label === "DEMO" ? <DemoTag /> : null}
       </div>
       <h2 className={s.wfCardTitle}>
         <Link href={workflowHref(w.id)} className={s.stretched}>

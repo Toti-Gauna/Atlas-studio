@@ -6,7 +6,7 @@ import { ArrowLeft, Brain, MessageSquarePlus, Pencil } from "lucide-react";
 import type { Project } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
-import { Badge, Button, Card, DemoTag, LinkButton, PageHeader, Select, TextArea } from "@/components/ui";
+import { Badge, Button, Card, LinkButton, PageHeader, Select, TextArea } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { projectsCopy as P } from "@/copy/projects";
 import { PROJECT_DOT } from "./ProjectsView";
@@ -51,7 +51,6 @@ export function ProjectHeader({ project }: { project: Project }) {
             <Badge tone={project.memoryEnabled ? "teal" : "neutral"} icon={<Brain size={12} aria-hidden />}>
               {project.memoryEnabled ? P.list.memoryOn : P.list.memoryOff}
             </Badge>
-            {project.label === "DEMO" ? <DemoTag /> : null}
           </>
         }
         actions={

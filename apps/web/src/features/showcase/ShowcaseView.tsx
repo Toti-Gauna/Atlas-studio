@@ -8,7 +8,7 @@ import { DATA_MODE } from "@/lib/config";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, Callout, Card, DemoTag, EmptyState, LinkButton, LoadingBlock, ModeBadge, PageHeader, QueryState } from "@/components/ui";
+import { Badge, Callout, Card, EmptyState, LinkButton, LoadingBlock, ModeBadge, PageHeader, QueryState } from "@/components/ui";
 import { showcaseCopy as c } from "@/copy/showcase";
 import { runStatusLabel, runStatusTone, workflowHref } from "@/features/workflows/status";
 import { tourSteps } from "./tourSteps";
@@ -18,7 +18,7 @@ export function ShowcaseView() {
   const scenarios = useQuery({ queryKey: ["demo-scenarios"], queryFn: api.demo.scenarios });
   return (
     <Page wide>
-      <PageHeader eyebrow={c.eyebrow} title={c.title} description={c.description} meta={<DemoTag />} />
+      <PageHeader title={c.title} description={c.description} />
       <Callout tone="teal" icon={<ShieldCheck size={16} aria-hidden />}>
         <strong>{c.honesty}</strong> {DATA_MODE === "fixture" ? c.honestyPreview : c.honestyApi}
       </Callout>

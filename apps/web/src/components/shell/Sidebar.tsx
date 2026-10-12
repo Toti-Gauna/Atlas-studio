@@ -1,86 +1,109 @@
 "use client";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { can } from "@atlas/domain";
-import { api } from "@/lib/api";
+import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useSession } from "@/lib/state/session";
+import { readPref, writePref } from "@/lib/state/prefs";
 import { copy } from "@/copy/en";
 import { IconButton, cx } from "@/components/ui";
+import { useInbox } from "@/features/inbox/useInbox";
 import { AtlasMark } from "./AtlasMark";
-import { NAV, isActive } from "./nav";
+import { NAV, canSee, isActive, type NavGroup } from "./nav";
 import s from "./shell.module.css";
 
-const DOT: Record<string, string> = { teal: "var(--teal)", violet: "var(--violet)", amber: "#E0A32B", slate: "#64748B" };
+const noopSubscribe = () => () => {};
 
-export function Sidebar({ rail, onToggle, onNavigate }: { rail: boolean; onToggle?: () => void; onNavigate?: () => void }) {
+function useFolded(group: NavGroup, pathname: string): [boolean, () => void] {
+  const [open, setOpen] = useState<boolean | null>(null);
+  const inside = group.items.some((i) => isActive(pathname, i));
+  const remembered = useSyncExternalStore(noopSubscribe, () => readPref("local", `nav.${group.id}`) === "open", () => false);
+  const stored = open ?? remembered;
+  const expanded = !group.collapsible || inside || stored;
+  const toggle = () => {
+    const next = !expanded;
+    setOpen(next);
+    writePref("local", `nav.${group.id}`, next ? "open" : null);
+  };
+  return [expanded, toggle];
+}
+
+function Group({ group, rail, pathname, onNavigate, badge }: { group: NavGroup; rail: boolean; pathname: string; onNavigate?: () => void; badge: (href: string) => number }) {
+  const { data: session } = useSession();
+  const items = group.items.filter((i) => canSee(session?.role, i));
+  const [expanded, toggle] = useFolded(group, pathname);
+  if (!items.length) return null;
+  const listId = `nav-${group.id}`;
+  return (
+    <div className={s.navGroup}>
+      {group.label && !rail ? (
+        group.collapsible ? (
+          <button type="button" className={s.navGroupToggle} aria-expanded={expanded} aria-controls={listId} onClick={toggle}>
+            <ChevronRight size={14} aria-hidden className={s.navChevron} />
+            {group.label}
+          </button>
+        ) : (
+          <div className={s.navLabel}>{group.label}</div>
+        )
+      ) : null}
+      {rail && group.label ? <hr className={s.navRule} aria-hidden /> : null}
+      {expanded || rail ? (
+        <ul className={s.navList} id={listId}>
+          {items.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(pathname, item);
+            const n = badge(item.href);
+            return (
+              <li key={item.href}>
+                <Link href={item.href} className={s.navItem} aria-current={active ? "page" : undefined} onClick={onNavigate} title={rail ? item.label : undefined}>
+                  <Icon size={18} strokeWidth={1.8} aria-hidden />
+                  <span className={s.navText}>{item.label}</span>
+                  {n > 0 ? (
+                    <span className={s.navBadge}>
+                      {n}
+                      <span className="sr-only"> waiting</span>
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+export function Sidebar({ rail, variant = "desktop", onToggle, onExpand, onNavigate }: { rail: boolean; variant?: "desktop" | "sheet"; onToggle?: () => void; onExpand?: () => void; onNavigate?: () => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const role = session?.role;
-  const projects = useQuery({ queryKey: ["projects"], queryFn: api.projects.list, enabled: Boolean(role && can(role, "project.read")) });
+  const inbox = useInbox();
+  const badge = (href: string) => (href === "/app/inbox/" ? inbox.total : 0);
 
   return (
-    <nav className={cx(s.sidebar, rail && s.rail)} aria-label="Primary">
+    <nav className={cx(s.sidebar, variant === "desktop" && s.sidebarDesktop, rail && s.rail)} aria-label="Primary">
       <div className={s.brandRow}>
         <Link href="/app/" className={s.brandLink} onClick={onNavigate} aria-label={`${copy.brand.product} home`}>
           <AtlasMark size={28} />
           <span className={s.brandText}>
             <span className={s.brandName}>{copy.brand.product}</span>
-            <br />
-            <span className={s.brandSub}>{copy.brand.agency} demo</span>
+            {session ? <span className={s.brandSub}>{session.workspace.name}</span> : null}
           </span>
         </Link>
-        {onToggle ? (
+        {onToggle && !rail ? (
           <IconButton label="Collapse sidebar" size="sm" className={s.collapseBtn} onClick={onToggle}>
             <PanelLeftClose size={16} />
           </IconButton>
         ) : null}
       </div>
       <div className={s.nav}>
-        {NAV.map((group) => {
-          const items = group.items.filter((i) => !i.requires || (role && can(role, i.requires)));
-          if (!items.length) return null;
-          return (
-            <div key={group.label} className={s.navGroup}>
-              <div className={cx("eyebrow", s.navLabel)}>{group.label}</div>
-              <ul className={s.navList}>
-                {items.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(pathname, item);
-                  return (
-                    <li key={item.href}>
-                      <Link href={item.href} className={s.navItem} aria-current={active ? "page" : undefined} onClick={onNavigate} title={rail ? item.label : undefined}>
-                        <Icon size={18} strokeWidth={1.8} aria-hidden />
-                        <span className={s.navText}>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })}
-        {projects.data?.length && !rail ? (
-          <div className={s.navGroup}>
-            <div className={cx("eyebrow", s.navLabel)}>Recent projects</div>
-            <ul className={s.navList}>
-              {projects.data.slice(0, 4).map((p) => (
-                <li key={p.id}>
-                  <Link href={`/app/project/?id=${p.id}`} className={s.navItem} onClick={onNavigate} aria-current={pathname.startsWith("/app/project") && typeof window !== "undefined" && window.location.search.includes(p.id) ? "page" : undefined}>
-                    <span className={s.projectDot} style={{ background: DOT[p.color] }} aria-hidden />
-                    <span className={s.navText}>{p.name}</span>
-                    <span className={s.navCount}>{p.conversationCount}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+        {NAV.map((group) => (
+          <Group key={group.id} group={group} rail={rail} pathname={pathname} onNavigate={onNavigate} badge={badge} />
+        ))}
       </div>
-      {rail && onToggle ? (
+      {rail && (onToggle || onExpand) ? (
         <div className={s.sidebarFoot}>
-          <IconButton label="Expand sidebar" onClick={onToggle}>
+          <IconButton label="Expand sidebar" onClick={onToggle ?? onExpand}>
             <PanelLeftOpen size={18} />
           </IconButton>
         </div>

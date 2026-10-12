@@ -1,7 +1,7 @@
 /** Evaluations (core) copy. Counts only — never accuracy percentages. */
 export const evaluationsCopy = {
   eyebrow: "Operate · Quality",
-  title: "Evaluations",
+  title: "Quality",
   description: "Repeatable checks of help-desk behavior against a fixed corpus and configuration.",
   scopeDefault:
     "Local evaluation checks citation, abstention, prompt-injection resistance and tenant isolation behavior. It does not measure the semantic accuracy of a generative model.",

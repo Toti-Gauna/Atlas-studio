@@ -1,8 +1,10 @@
 /** Privacy Center (R10) copy. Shared disclaimers live in copy/en.ts. */
 export const privacyCopy = {
   eyebrow: "Operate · Privacy",
-  title: "Privacy Center",
-  description: "Review sensitive findings before anything leaves Atlas, manage external-transfer consents and set the workspace policy.",
+  title: "Privacy",
+  description: "Test detection, manage external-transfer consents and set the workspace policy.",
+  pendingInInbox: (n: number) => `${n} ${n === 1 ? "check is" : "checks are"} waiting for a decision.`,
+  openInbox: "Open in Inbox",
   notDlp: "Detection is pattern-based (with checksum validation where possible). It is not a DLP guarantee — a person decides.",
   tabs: { reviews: "Review queue", scanner: "Scanner", consents: "Consents", policy: "Policy" },
   severity: { low: "Low", medium: "Medium", high: "High" } as Record<string, string>,

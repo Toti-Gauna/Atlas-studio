@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { modelName, relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { AgentGlyph, Badge, Callout, Card, DemoTag, EmptyState, LinkButton, PageHeader, QueryState } from "@/components/ui";
+import { AgentGlyph, Badge, Callout, Card, EmptyState, LinkButton, PageHeader, QueryState } from "@/components/ui";
 import { agentsCopy as c } from "@/copy/agents";
 import s from "./agents.module.css";
 
@@ -25,7 +25,6 @@ function AgentCard({ a }: { a: AgentSummary }) {
         <p className={s.cardDesc}>{a.description || "—"}</p>
         <div className={s.badges}>
           {a.builtIn ? <Badge>{c.gallery.builtIn}</Badge> : <Badge tone="violet">{c.gallery.custom}</Badge>}
-          {a.label === "DEMO" ? <DemoTag /> : null}
           <Badge>{c.style[a.style]}</Badge>
           <Badge tone="info">{modelName(a.modelKey)}</Badge>
           <Badge>{c.gallery.tools(a.allowedTools.length)}</Badge>
@@ -48,7 +47,7 @@ export function AgentsView() {
 
   return (
     <Page wide>
-      <PageHeader eyebrow={c.gallery.eyebrow} title={c.gallery.title} description={c.gallery.description} actions={create} />
+      <PageHeader title={c.gallery.title} description={c.gallery.description} actions={create} />
 
       <Card className={s.explain} aria-labelledby="agents-explain-h">
         <h2 id="agents-explain-h" className={s.explainTitle}>

@@ -5,7 +5,7 @@ import { ShieldAlert } from "lucide-react";
 import type { DocumentSummary, Project } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
-import { Badge, DemoTag, Table, numCell } from "@/components/ui";
+import { Badge, Table, numCell } from "@/components/ui";
 import { libraryCopy as L } from "@/copy/library";
 import { ClassificationBadge, StatusBadge } from "./docBadges";
 import s from "./library.module.css";
@@ -43,7 +43,6 @@ export function DocumentsTable({ docs, projects, highlightId, caption = L.list.c
                 </Link>
                 <span className={s.subtle}>
                   {d.id === highlightId ? <Badge tone="teal">{L.list.newlyUploaded}</Badge> : null}
-                  {d.label === "DEMO" ? <DemoTag /> : null}
                   {relativeTime(d.updatedAt)}
                 </span>
               </div>

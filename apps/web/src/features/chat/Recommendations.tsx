@@ -14,11 +14,16 @@ const KIND = {
   deliverable: { label: "Deliverable", icon: FileOutput, tone: "violet" as const },
 };
 
-/**
- * R02: suggestions explain why they exist and which data they used.
- * "Use" only prepares the composer — nothing runs or costs until you send.
- */
-export function Recommendations({ projectId, conversationId, agentId, onUse, limit = 4 }: { projectId?: string; conversationId?: string; agentId?: string; onUse: (s: Suggestion) => void; limit?: number }) {
+/** Sources the suggestion builds on, as one readable line (agents are implied by the project). */
+function basis(sg: Suggestion): string {
+  const names = sg.basedOn.filter((b) => b.type !== "agent").map((b) => (b.type === "objective" ? "the project objective" : b.label));
+  return names.length ? listFormat.format(names.slice(0, 3)) : "";
+}
+
+const listFormat = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
+
+/** R02: suggestions explain why they exist and which data they used. */
+export function Recommendations({ projectId, conversationId, agentId, onUse, actionLabel = () => "Use", limit = 4 }: { projectId?: string; conversationId?: string; agentId?: string; onUse: (s: Suggestion) => void; actionLabel?: (s: Suggestion) => string; limit?: number }) {
   const qc = useQueryClient();
   const key = ["recommendations", projectId ?? null, conversationId ?? null, agentId ?? null];
   const q = useQuery({ queryKey: key, queryFn: () => api.recommendations.list({ projectId, conversationId, agentId }) });
@@ -63,18 +68,11 @@ export function Recommendations({ projectId, conversationId, agentId, onUse, lim
               <span className="sr-only">Why: </span>
               {sg.reason}
             </p>
-            <div className={s.recoBasis} aria-label="Based on">
-              {sg.basedOn.slice(0, 3).map((b) => (
-                <Badge key={`${b.type}-${b.id}`} mono>
-                  {b.type}: {b.label.length > 28 ? `${b.label.slice(0, 27)}…` : b.label}
-                </Badge>
-              ))}
-            </div>
+            {basis(sg) ? <p className={s.recoBasis}>Uses {basis(sg)}</p> : null}
             <div className={s.recoActions}>
               <Button size="sm" variant="secondary" onClick={() => onUse(sg)}>
-                Prepare
+                {actionLabel(sg)}
               </Button>
-              <span style={{ fontSize: 12, color: "var(--text-3)", alignSelf: "center" }}>Edit before sending</span>
             </div>
           </article>
         );

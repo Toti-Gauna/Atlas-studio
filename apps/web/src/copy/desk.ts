@@ -38,8 +38,8 @@ export const deskCopy = {
     statusLabel: { received: "Received", in_progress: "In progress", done: "Done" } as Record<string, string>,
   },
   ticket: {
-    back: "Back to inbox",
-    backMine: "Back to my tickets",
+    back: "Inbox",
+    backMine: "My tickets",
     missing: "No ticket selected",
     missingBody: "Open a ticket from the inbox.",
     status: "Status",

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { copy } from "@/copy/en";
+import { DATA_MODE } from "@/lib/config";
 import { useStartDemo } from "@/lib/state/session";
 import { AtlasMark } from "@/components/shell/AtlasMark";
 import { Button, Callout, Card, TextField } from "@/components/ui";
@@ -32,23 +33,48 @@ export function LoginView() {
             {copy.demo.start}
           </Button>
         </Card>
-        <Card>
-          <h2 style={{ fontSize: 18 }}>Workspace login</h2>
-          <form
-            style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              login.mutate();
-            }}
-          >
-            <TextField label="Email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
-            <TextField label="Password" type="password" autoComplete="current-password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
-            {login.isError ? <Callout tone="warn">{(login.error as Error).message}</Callout> : null}
-            <Button type="submit" variant="secondary" loading={login.isPending}>
-              Sign in
-            </Button>
-          </form>
-        </Card>
+        {DATA_MODE === "fixture" ? (
+          <details className="login-more">
+            <summary style={{ cursor: "pointer", color: "var(--text-2)", fontSize: 14, fontWeight: 600 }}>Have a company account?</summary>
+            <div style={{ marginTop: 12 }}>
+            <Card>
+              <h2 style={{ fontSize: 18 }}>Workspace login</h2>
+              <form
+                style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  login.mutate();
+                }}
+              >
+                <TextField label="Email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <TextField label="Password" type="password" autoComplete="current-password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
+                {login.isError ? <Callout tone="warn">{(login.error as Error).message}</Callout> : null}
+                <Button type="submit" variant="secondary" loading={login.isPending}>
+                  Sign in
+                </Button>
+              </form>
+            </Card>
+            </div>
+          </details>
+        ) : (
+          <Card>
+            <h2 style={{ fontSize: 18 }}>Workspace login</h2>
+            <form
+              style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                login.mutate();
+              }}
+            >
+              <TextField label="Email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <TextField label="Password" type="password" autoComplete="current-password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
+              {login.isError ? <Callout tone="warn">{(login.error as Error).message}</Callout> : null}
+              <Button type="submit" variant="secondary" loading={login.isPending}>
+                Sign in
+              </Button>
+            </form>
+          </Card>
+        )}
         <p style={{ fontSize: 12, color: "var(--text-3)", textAlign: "center" }}>{copy.disclaimers.demoData}</p>
       </div>
     </main>

@@ -1,6 +1,8 @@
 # Auditoría UX/UI y plan de 4 fases — Atlas Studio (preview P02)
 
-**Fecha:** 2026-10-12 · **Estado:** propuesta, **requiere revisión de Ignacio** · Sin cambios de código todavía.
+**Fecha:** 2026-10-12 · **Estado:** plan aprobado para arrancar; **Fase 1 implementada, requiere revisión de Ignacio** · Fases 2–4 pendientes.
+
+**Decisiones de Ignacio:** arrancar con la Fase 1; la interfaz **queda en inglés** (las etiquetas en español de este documento son descriptivas). Nombres finales en la UI: Home, Chat, Projects, Sources, Deliverables, Inbox (Reviews · Support · Sensitive data), Agents, Workflows, Admin › Usage & costs, Privacy, Activity, Quality, Settings; Guided tours en la barra de demo.
 
 ## 1. Diagnóstico en una frase
 
@@ -78,7 +80,7 @@ Atlas tiene un buen motor de producto (respuesta con evidencia, abstención hone
 Banner (única señal demo):  Demo · Corvid Freight (ficticio) · Ver como: Admin ▾ · Tour guiado · Qué es real
 Sidebar
   Inicio
-  Preguntar            (= Chat; también botón primario arriba)
+  Chat                 (también botón primario "New chat" arriba)
   Proyectos            (Resumen · Fuentes · Conversaciones · Entregables · Memoria — pestaña en la URL)
   Fuentes
   Entregables
@@ -118,7 +120,7 @@ Cada fase termina con: lint/typecheck/tests verdes, `e2e/routes.mjs` (22 rutas �
 - **Reglas de badges:** solo excepciones (no "Ready", "Memory on", "Owner"), máximo 3 por cabecera; DEMO nunca por fila (N14, N16, N21, N27).
 - **Recorte editorial de los 14 archivos `copy/*.ts`:** un aviso por contexto; descripciones de 1 línea orientadas a la tarea; fuera jerga (coverage/threshold, chunk, BM25, idempotency, branch, API worker, pending backend, Claude Max/ChatGPT); errores con título específico y salida accionable; plurales con `Intl.PluralRules` (N03, N05, N13, N23, N26, N33, C03, C04, C22, E21, E22).
 - **Tokens:** eliminar los 31 hex sueltos y ~80 % de los 169 estilos inline; contraste en oscuro (burbuja de usuario, `--line`) (N32); paleta de proyectos sin reutilizar warn/violeta (N15); skeletons por tipo (E23); targets ≥ 32 px (E30).
-- **Decisión a tomar con Ignacio:** idioma de la interfaz (hoy inglés). El recorte editorial es el momento natural para cambiarlo o confirmarlo.
+- **Idioma:** la interfaz queda en inglés (decisión de Ignacio); el recorte editorial se hace sobre el copy en inglés.
 
 **Criterios:** 0 términos de la lista negra en copy visible (chequeo por grep en CI) · eyebrows de página 0 · DemoTag ≤ 1 por pantalla · Callouts −60 % · estilos inline < 40 · contraste AA en ambos temas.
 
@@ -152,3 +154,28 @@ Cada fase termina con: lint/typecheck/tests verdes, `e2e/routes.mjs` (22 rutas �
 2. **F2 antes que las pantallas** porque la mayoría de los hallazgos son instancias de las mismas 7 causas raíz; arreglarlos en componentes y copy limpia las 22 rutas a la vez y evita rehacer trabajo en F3/F4.
 3. **F3** es lo que el comprador evalúa en la demo; **F4** son superficies de control que pesan en la decisión de compra pero se visitan menos.
 4. El plan **no cambia el dominio ni los contratos**: todo es `apps/web` (menú, componentes, copy, vistas), así que no bloquea ni se bloquea con P03 (Render + Neon).
+
+## 10. Fase 1 — resultado (implementada, requiere revisión de Ignacio)
+
+| Criterio | Antes | Después |
+|---|---|---|
+| Landing → respuesta citada | 4+ clics y doble envío, con una segunda "puerta" | **2 clics** ("Try the demo" → pregunta de ejemplo), verificado por `e2e/smoke.mjs` |
+| Destinos visibles en el menú (Admin) | 15 + 4 proyectos recientes | **8** + grupo Admin plegado (5) |
+| Menú en móvil | vacío | 8 destinos visibles + Admin |
+| Señales de demo en Home | 8 ("DEMO DEMO", FIXTURE, ECLIPSE DEMO…) | **1** barra: `DEMO · Corvid Freight · fictional company and data` |
+| `<DemoTag>` en páginas | 28 | 3, solo en costos y ejecuciones sintéticas (Usage, Activity, Run trace) — se mantiene la regla "costos fixture etiquetados DEMO" |
+| Nombre menú = H1 | 3 diferencias (Deliverables/Artifacts, Run history/Runs, Privacy/Privacy Center) | 0 (24 rutas verificadas) |
+| Eyebrows decorativos en páginas de primer nivel | 11 | 0 (quedan 6 en detalle; pasan a breadcrumb en Fase 2) |
+
+**Qué cambió**
+- **Una sola puerta:** entrar a `/app` crea el workspace demo; el rol elegido sobrevive a la recarga (sessionStorage). Login de empresa plegado en el preview.
+- **Navegación:** Home, Chat, Projects, Sources, Deliverables, **Inbox** (badge) · Build: Agents, Workflows · **Admin** plegado: Usage & costs, Privacy, Activity, Quality, Settings. Sin proyectos recientes duplicados. En tablet el rail tiene botón para expandir.
+- **Inbox unificado** (`/app/inbox/?tab=reviews|support|privacy`): revisiones, tickets y datos sensibles según el rol; `/app/reviews/` redirige. Privacy conserva escáner, consentimientos y política, y enlaza a la cola.
+- **Barra de demo única:** Guided tours, What's real (modal con lo real/pendiente), **View as: rol ▾** con descripción de cada rol. Preview states solo con `?preview=1`. Topbar: búsqueda, **New chat**, tema.
+- **Home "What do you need to get done?":** compositor con proyecto, **envío directo** al chat; bloque **Start here** (3 preguntas que responden con cita en un clic + 3 tours); sugerencias con "Uses …" en lenguaje natural; Needs attention con Inbox y presupuesto; Home de lectura para Viewer.
+- **Settings:** Models, Providers, Routing y Audit solo para Admin; Customer no ve Settings.
+- **Bugs:** menú móvil vacío; encabezados de fila de tablas en mayúsculas grises; plurales ("1 deliverable").
+
+**Verificación (resultados reales):** `pnpm -r lint` ✓ · `pnpm -r typecheck` ✓ · tests 30 + 16 + 6 + 8 ✓ · `pnpm build:pages` ✓ · `e2e/smoke.mjs` 9/9 ✓ · `e2e/routes.mjs` 24 rutas × 360/768/1440: 0 errores de consola, 0 overflow.
+
+**Queda para fases siguientes:** datos técnicos en mensajes de chat (coverage/threshold), badge Local por mensaje, eyebrows de detalle, estados de error/vacío (F2); acción "respuesta → entregable" y layout de 4 columnas del chat (F3); búsqueda de documentos en ⌘K y pantallas de Admin (F4). Las URLs internas (`/artifacts`, `/library`, `/runs`, `/evaluations`) no cambiaron para no romper enlaces.

@@ -43,10 +43,8 @@ export function UsageView() {
   return (
     <Page wide>
       <PageHeader
-        eyebrow={c.eyebrow}
         title={c.title}
         description={c.description}
-        meta={<DemoTag />}
         actions={
           <Button icon={<Download size={14} aria-hidden />} onClick={() => exportCsv.mutate()} loading={exportCsv.isPending} disabled={!isAdmin} title={isAdmin ? undefined : c.ledger.exportAdminOnly}>
             {c.ledger.export}

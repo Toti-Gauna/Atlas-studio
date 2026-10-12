@@ -1,5 +1,6 @@
 export const landing = {
-  noticeDetail: "Frontend preview with an in-browser fixture; backend integration pending",
+  ctaPrimary: "Try the demo",
+  ctaTour: "Take a guided tour",
   eyebrow: "Evidence-first AI workspace",
   title: "Answers you can trace. Deliverables you can ship.",
   lead: "Atlas Studio answers from your documents with page-level citations, abstains when evidence is missing, hands work to configurable agents and keeps every report, table and deck versioned, reviewable and cost-accounted.",

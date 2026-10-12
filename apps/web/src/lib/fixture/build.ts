@@ -121,7 +121,7 @@ export function buildDb(): Db {
   const now = Date.now();
   const workspace: Workspace = {
     id: "wsp_demo_visitor",
-    name: "Corvid Freight · Demo",
+    name: "Corvid Freight",
     kind: "demo_visitor",
     timeZone: "America/Argentina/Buenos_Aires",
     currency: "USD",

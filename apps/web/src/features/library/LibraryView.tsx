@@ -6,7 +6,7 @@ import type { DocumentSummary, IngestionStatus } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { Button, Callout, DemoTag, EmptyState, PageHeader, QueryState, Select } from "@/components/ui";
+import { Button, Callout, EmptyState, PageHeader, QueryState, Select } from "@/components/ui";
 import { libraryCopy as L } from "@/copy/library";
 import { DocumentsTable, FailureReason } from "./DocumentsTable";
 import { SearchPanel } from "./SearchPanel";
@@ -40,10 +40,8 @@ export function LibraryView() {
   return (
     <Page wide>
       <PageHeader
-        eyebrow={L.list.eyebrow}
         title={L.list.title}
         description={L.list.description}
-        meta={<DemoTag />}
         actions={
           canUpload ? (
             <Button variant="primary" icon={<Upload size={14} />} onClick={() => setUploadOpen(true)} disabled={!projects.data?.length}>

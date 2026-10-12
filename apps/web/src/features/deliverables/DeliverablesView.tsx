@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { deliverablesCopy as c } from "@/copy/deliverables";
 import { Page } from "@/components/shell/StudioShell";
-import { ArtifactIcon, Badge, Button, DemoTag, EmptyState, LinkButton, PageHeader, QueryState, Select, Table, numCell } from "@/components/ui";
+import { ArtifactIcon, Badge, Button, EmptyState, LinkButton, PageHeader, QueryState, Select, Table, numCell } from "@/components/ui";
 import { REVIEW_LABEL, REVIEW_TONE } from "@/features/artifacts/ArtifactWorkspace";
 import { keys, useProjects } from "./queries";
 import s from "./deliverables.module.css";
@@ -29,7 +29,7 @@ export function DeliverablesView() {
 
   return (
     <Page wide>
-      <PageHeader eyebrow={c.list.eyebrow} title={c.list.title} description={c.list.description} meta={<DemoTag />} />
+      <PageHeader title={c.list.title} description={c.list.description} />
       <QueryState
         query={artifacts}
         isEmpty={(d) => d.length === 0}
@@ -85,7 +85,6 @@ function ArtifactTable({ rows, projectName }: { rows: ArtifactSummary[]; project
                 </span>
                 <span>{a.title}</span>
               </Link>
-              {a.label === "DEMO" ? <span className={s.inlineTag}><DemoTag /></span> : null}
             </td>
             <td>{projectName.get(a.projectId) ?? <span className="mono">{a.projectId}</span>}</td>
             <td className={numCell}>v{a.currentVersion}</td>

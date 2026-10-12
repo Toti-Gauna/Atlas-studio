@@ -9,7 +9,7 @@ import { relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { gsap, MOTION, useGSAP, useReducedMotion } from "@/lib/motion";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, Button, DemoTag, EmptyState, PageHeader, QueryState } from "@/components/ui";
+import { Badge, Button, EmptyState, PageHeader, QueryState } from "@/components/ui";
 import { projectsCopy as P } from "@/copy/projects";
 import { NewProjectModal } from "./NewProjectModal";
 import s from "./projects.module.css";
@@ -45,7 +45,6 @@ function ProjectCard({ p }: { p: Project }) {
         <Badge tone={p.memoryEnabled ? "teal" : "neutral"} icon={<Brain size={12} aria-hidden />}>
           {p.memoryEnabled ? P.list.memoryOn : P.list.memoryOff}
         </Badge>
-        {p.label === "DEMO" ? <DemoTag /> : null}
         <span className={s.updated}>{relativeTime(p.updatedAt)}</span>
       </div>
     </li>
@@ -73,7 +72,7 @@ export function ProjectsView() {
 
   return (
     <Page wide>
-      <PageHeader eyebrow={P.list.eyebrow} title={P.list.title} description={P.list.description} actions={newBtn} />
+      <PageHeader title={P.list.title} description={P.list.description} actions={newBtn} />
       <QueryState
         query={projects}
         isEmpty={(d) => d.length === 0}

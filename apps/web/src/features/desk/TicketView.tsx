@@ -9,7 +9,7 @@ import { formatDateTime } from "@/lib/format";
 import { useCan, useSession } from "@/lib/state/session";
 import { deskCopy as c } from "@/copy/desk";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, Card, DemoTag, EmptyState, LinkButton, PageHeader, QueryState, Select, useToast } from "@/components/ui";
+import { Badge, Card, EmptyState, LinkButton, PageHeader, QueryState, Select, useToast } from "@/components/ui";
 import { TicketThread } from "./TicketThread";
 import { PRIORITY_TONE, STATUS_TONE } from "./tones";
 import s from "./desk.module.css";
@@ -118,13 +118,12 @@ export function TicketView() {
         {(t) => (
           <>
             <PageHeader
-              eyebrow={`${c.eyebrow} · #${t.number}`}
+              eyebrow={`Ticket #${t.number}`}
               title={t.subject}
               meta={
                 <>
                   <Badge tone={STATUS_TONE[t.status]} dot>{c.status[t.status]}</Badge>
                   <Badge tone={PRIORITY_TONE[t.priority]}>{c.ticket.priority}: {c.priority[t.priority]}</Badge>
-                  {t.label === "DEMO" ? <DemoTag /> : null}
                 </>
               }
               description={`${c.ticket.requester}: ${t.requesterName} · ${c.ticket.opened} ${formatDateTime(t.createdAt)}`}

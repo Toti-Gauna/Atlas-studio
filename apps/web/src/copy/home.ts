@@ -1,0 +1,43 @@
+/** Home: one task-first starting point per role. */
+export const homeCopy = {
+  title: "What do you need to get done?",
+  askLabel: "Ask a question or describe a deliverable",
+  placeholder: (project: string) => `Ask about “${project}”, or describe a report, table or deck…`,
+  projectLabel: "Project",
+  ask: "Ask",
+  askHint: "Enter to send · Shift+Enter for a new line",
+  start: {
+    title: "Start here",
+    dismiss: "Hide the getting-started guide",
+    questionsTitle: "Try a question",
+    questionsHint: "Answers cite the exact passage they come from.",
+    toursTitle: "Take a guided tour",
+    toursHint: "Each tour walks a real workflow from sources to a deliverable.",
+    tourStart: "Start",
+    allTours: "All tours",
+  },
+  examples: [
+    { project: "prj_support", text: "How long do approved refunds take?" },
+    { project: "prj_compliance", text: "Is customer data encrypted at rest?" },
+    { project: "prj_compliance", text: "How fast are deletion requests completed?" },
+  ],
+  suggestions: (project: string) => `Suggested for ${project}`,
+  attention: "Needs attention",
+  inboxRow: "Waiting in your Inbox",
+  budget: "Workspace budget · 30 days",
+  budgetNote: (unknown: number) => `DEMO usage · ${unknown} ${unknown === 1 ? "entry" : "entries"} with unknown cost shown separately`,
+  continue: "Continue",
+  projects: "Projects",
+  all: "All",
+  viewer: {
+    title: "Browse your team’s work",
+    lead: "You have read access to sources and deliverables.",
+    deliverables: "Recent deliverables",
+  },
+  customer: {
+    title: "How can we help?",
+    lead: "Ask about published policies and follow your tickets.",
+    ask: "Ask a question",
+    tickets: "My tickets",
+  },
+} as const;

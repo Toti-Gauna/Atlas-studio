@@ -307,9 +307,8 @@
   color: var(--text-2);
 }
 .recoBasis {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
 }
 .recoActions {
   display: flex;

@@ -117,7 +117,8 @@ export function ChatView() {
   }
 
   const send = useMutation({
-    mutationFn: async (approvalKey?: string) => {
+    mutationFn: async (vars?: { approvalKey?: string; content?: string }) => {
+      const approvalKey = vars?.approvalKey;
       const controller = new AbortController();
       abortRef.current = controller;
       let id = convId;
@@ -133,7 +134,7 @@ export function ChatView() {
       return api.conversations.send(
         id!,
         {
-          content: draft.trim(),
+          content: (vars?.content ?? draft).trim(),
           branchId: branchId ?? activeBranch!,
           agentId: agentId!,
           pinnedModelKey: state.pinnedModelKey,
@@ -169,6 +170,22 @@ export function ChatView() {
       if (isApiError(e) && e.code === "CANCELLED") toast({ tone: "info", title: "Stopped", body: "Your message is kept in the composer. Resending reuses the same idempotency key, so nothing is duplicated." });
     },
   });
+
+  // Home and suggestions send straight away (`send=1&q=…`): the first answer appears without a second click.
+  const autoText = isNew && params.get("send") === "1" ? params.get("q") : null;
+  const autoSent = useRef(false);
+  const ready = Boolean(projectId && agentId);
+  const { mutate: sendNow } = send;
+  useEffect(() => {
+    if (!autoText || autoSent.current || !ready) return;
+    autoSent.current = true;
+    setDraft(autoText);
+    sendNow({ content: autoText });
+    const q = new URLSearchParams(params.toString());
+    q.delete("send");
+    q.delete("q");
+    router.replace(`/app/chat/?${q.toString()}`);
+  }, [autoText, ready, sendNow, setDraft, params, router]);
 
   const handoff = useMutation({
     mutationFn: () => api.conversations.handoff(convId!),
@@ -265,7 +282,7 @@ export function ChatView() {
                 <strong>Not sent.</strong> {blocked.message}
                 {blocked.pendingFallback ? (
                   <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                    <Button size="sm" variant="primary" loading={send.isPending} onClick={() => send.mutate(blocked.pendingFallback!.modelKey)}>
+                    <Button size="sm" variant="primary" loading={send.isPending} onClick={() => send.mutate({ approvalKey: blocked.pendingFallback!.modelKey })}>
                       Approve {modelName(blocked.pendingFallback.modelKey)} for this message
                     </Button>
                     <span style={{ fontSize: 12 }}>

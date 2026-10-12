@@ -7,7 +7,7 @@ import type { AgentConfig, AgentDetail } from "@atlas/contracts";
 import { api, isApiError } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { AgentGlyph, Badge, Button, Callout, DemoTag, Modal, PageHeader, TabPanel, Tabs, TextField, useToast } from "@/components/ui";
+import { AgentGlyph, Badge, Button, Callout, Modal, PageHeader, TabPanel, Tabs, TextField, useToast } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { agentsCopy as c } from "@/copy/agents";
 import { BackLink } from "./BackLink";
@@ -94,7 +94,6 @@ export function AgentForm({ agent, initial, readOnly, profile, duplicatedFrom }:
     <>
       {agent ? agent.builtIn ? <Badge>{c.gallery.builtIn}</Badge> : <Badge tone="violet">{c.gallery.custom}</Badge> : <Badge tone="violet">{c.gallery.custom}</Badge>}
       {agent ? <Badge mono>v{agent.currentVersion}</Badge> : null}
-      {agent?.label === "DEMO" ? <DemoTag /> : null}
       {duplicatedFrom ? <Badge>Duplicated from {duplicatedFrom}</Badge> : null}
       {dirty && !readOnly ? <Badge tone="warn">{c.editor.unsaved}</Badge> : null}
     </>

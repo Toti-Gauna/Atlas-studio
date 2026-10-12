@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { useSession } from "@/lib/state/session";
-import { Avatar, Badge, DemoTag, EmptyState, QueryState, SectionHead, Table } from "@/components/ui";
+import { Avatar, Badge, EmptyState, QueryState, SectionHead, Table } from "@/components/ui";
 import { settingsCopy as c } from "@/copy/settings";
 import s from "./settings.module.css";
 
@@ -32,7 +32,6 @@ export function MembersTab() {
                       <Avatar name={m.user.displayName} />
                       <span>{m.user.displayName}</span>
                       {m.user.id === session?.user.id ? <Badge tone="teal">{c.members.you}</Badge> : null}
-                      {m.user.label === "DEMO" ? <DemoTag /> : null}
                     </span>
                   </th>
                   <td className="mono">{m.user.email}</td>

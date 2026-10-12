@@ -6,7 +6,7 @@ import type { ArtifactDetail } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { deliverablesCopy as c } from "@/copy/deliverables";
 import { Page } from "@/components/shell/StudioShell";
-import { ArtifactIcon, Badge, Card, DemoTag, EmptyState, LinkButton, PageHeader, QueryState } from "@/components/ui";
+import { ArtifactIcon, Badge, Card, EmptyState, LinkButton, PageHeader, QueryState } from "@/components/ui";
 import { ArtifactWorkspace } from "@/features/artifacts/ArtifactWorkspace";
 import { keys, useProjects } from "./queries";
 import { SharingPanel } from "./SharingPanel";
@@ -53,7 +53,6 @@ function ArtifactLayout({ detail }: { detail: ArtifactDetail }) {
             <Badge mono>v{detail.currentVersion}</Badge>
             <Badge tone="violet">{c.detail.myRole(c.roles[detail.myRole] ?? detail.myRole)}</Badge>
             <Badge>{c.detail.sources(detail.sourceCount)}</Badge>
-            {detail.label === "DEMO" ? <DemoTag /> : null}
           </>
         }
       />

@@ -2,7 +2,7 @@
 import { RotateCcw } from "lucide-react";
 import { useSession } from "@/lib/state/session";
 import { formatDateTime, relativeTime } from "@/lib/format";
-import { Callout, Card, DemoTag, DescList, ErrorState, LoadingBlock, SectionHead } from "@/components/ui";
+import { Callout, Card, DescList, ErrorState, LoadingBlock, SectionHead } from "@/components/ui";
 import { settingsCopy as c } from "@/copy/settings";
 import s from "./settings.module.css";
 
@@ -15,7 +15,7 @@ export function WorkspaceTab() {
   return (
     <div className={s.stack}>
       <section aria-labelledby="ws-h">
-        <SectionHead id="ws-h" title={c2.heading} aside={w.label === "DEMO" ? <DemoTag /> : null} />
+        <SectionHead id="ws-h" title={c2.heading} />
         <Card>
           <DescList
             items={[
