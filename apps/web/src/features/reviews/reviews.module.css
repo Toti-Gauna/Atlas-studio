@@ -1,0 +1,23 @@
+.link {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.link:hover {
+  color: var(--teal-ink);
+  text-decoration: underline;
+}
+.dates {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.note {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  max-width: 36ch;
+  overflow-wrap: anywhere;
+}
+.none {
+  color: var(--text-3);
+}
