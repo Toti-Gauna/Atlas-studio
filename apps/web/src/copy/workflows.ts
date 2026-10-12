@@ -108,7 +108,7 @@ export const wfCopy = {
     unsaved: "Unsaved changes are not used by Preview or Run until you save a new version.",
     stepTitle: "Title",
     inputHint: "Input hint",
-    confirm: "Requires confirmation",
+    confirmStep: (n: number) => `Step ${n} requires confirmation`,
     confirmDesc: "The run pauses here until someone confirms.",
     moveUp: (n: number) => `Move step ${n} up`,
     moveDown: (n: number) => `Move step ${n} down`,
