@@ -1,0 +1,23 @@
+{
+  "name": "atlas-studio",
+  "private": true,
+  "description": "Atlas Studio — enterprise AI workspace with verifiable sources, configurable agents, editable deliverables and per-model cost control. Eclipse Demo.",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @atlas/web dev",
+    "build": "pnpm -r --filter ./packages/** run build && pnpm --filter @atlas/web build",
+    "build:pages": "pnpm -r --filter ./packages/** run build && pnpm --filter @atlas/web build:pages",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5",
+    "@eslint/js": "9.39.5",
+    "typescript-eslint": "8.71.1",
+    "typescript": "6.0.3"
+  }
+}
