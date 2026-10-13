@@ -87,7 +87,7 @@ export const copy = {
   },
   disclaimers: {
     reasoning: "Atlas shows operational steps and summarized tool results — never private reasoning.",
-    finops: "Costs of Atlas API calls only. Not Claude Max, ChatGPT or development costs. Unknown costs are never counted as zero.",
+    finops: "Only Atlas’s own model calls are counted. Unknown costs are shown separately, never as zero.",
     privacy: "Detection is rule-based and limited. It assists review; it is not a guarantee.",
     compliance: "Checklist comparison, not a legal opinion or certification.",
     comparison: "No winner is declared without a rubric-based evaluation.",

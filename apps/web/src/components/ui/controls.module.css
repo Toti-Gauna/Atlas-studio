@@ -45,7 +45,7 @@
   color: var(--ink);
 }
 .primary:hover:not(:disabled) {
-  background: #2cc5b3;
+  background: var(--teal-hover);
 }
 .secondary {
   background: var(--surface);

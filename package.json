@@ -10,7 +10,8 @@
     "dev": "pnpm --filter @atlas/web dev",
     "build": "pnpm -r --filter ./packages/** run build && pnpm --filter @atlas/web build",
     "build:pages": "pnpm -r --filter ./packages/** run build && pnpm --filter @atlas/web build:pages",
-    "lint": "pnpm -r run lint",
+    "lint": "pnpm -r run lint && node scripts/check-copy.mjs",
+    "check:copy": "node scripts/check-copy.mjs",
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm -r run test"
   },

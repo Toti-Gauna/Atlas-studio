@@ -125,5 +125,5 @@
   color: var(--teal);
 }
 .toastError svg:first-child {
-  color: #ff8a80;
+  color: var(--danger-on-ink, #ff8a80);
 }

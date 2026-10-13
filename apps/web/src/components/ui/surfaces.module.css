@@ -27,6 +27,33 @@
   margin-bottom: var(--s-5);
   border-bottom: 1px solid var(--line);
 }
+.pageHeadMain {
+  min-width: 0;
+}
+.pageBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: var(--s-2);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+  text-decoration: none;
+}
+.pageBack:hover {
+  color: var(--teal-ink);
+}
+.pageKicker {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+.pageMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
 .pageTitle {
   font-size: clamp(var(--fs-22), 2.4vw, var(--fs-28));
   font-weight: 700;
@@ -291,7 +318,7 @@ button.chip:hover {
   background: repeating-linear-gradient(135deg, var(--teal-line), var(--teal-line) 3px, transparent 3px, transparent 6px);
 }
 .meterWarn .meterFill {
-  background: #e0a32b;
+  background: var(--meter-warn);
 }
 .meterOver .meterFill {
   background: var(--danger);
@@ -311,4 +338,96 @@ button.chip:hover {
   margin: 0;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.tech {
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+}
+.techSummary {
+  cursor: pointer;
+  padding: 8px 12px;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.techBody {
+  padding: 4px 12px 12px;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+/* Stacked tables (mobile): each row becomes a labelled card. */
+@media (max-width: 767px) {
+  .tableStack {
+    border: 0;
+    background: none;
+  }
+  .tableStack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+  .tableStack table,
+  .tableStack tbody,
+  .tableStack tr {
+    display: block;
+    width: 100%;
+  }
+  .tableStack tr {
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    background: var(--surface);
+    padding: 6px 0;
+    margin-bottom: var(--s-2);
+  }
+  .tableStack td,
+  .tableStack tbody th {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding: 5px 14px;
+    border-bottom: 0;
+    text-align: right;
+  }
+  .tableStack td > *,
+  .tableStack tbody th > * {
+    min-width: 0;
+  }
+  .tableStack td:first-child,
+  .tableStack tbody th:first-child {
+    font-weight: 650;
+    text-align: left;
+  }
+  .tableStack td[data-label]::before,
+  .tableStack tbody th[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--text-3);
+    font-weight: 500;
+    font-size: var(--fs-12);
+    text-align: left;
+  }
+  .tableStack td:first-child::before,
+  .tableStack tbody th:first-child::before {
+    display: none;
+  }
+  .tableStack td:empty {
+    display: none;
+  }
+  .tableStack .num {
+    text-align: right !important;
+  }
+}
+
+/* Tabs that overflow on small screens fade at the edge to show there is more. */
+@media (max-width: 767px) {
+  .tabs {
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+    padding-right: 24px;
+  }
 }

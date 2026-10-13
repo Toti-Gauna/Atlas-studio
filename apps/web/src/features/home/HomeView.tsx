@@ -11,13 +11,12 @@ import { useCan } from "@/lib/state/session";
 import { readPref, writePref } from "@/lib/state/prefs";
 import { homeCopy as c } from "@/copy/home";
 import { Page } from "@/components/shell/StudioShell";
-import { ArtifactIcon, Button, Card, ErrorState, IconButton, LinkButton, LoadingBlock, Meter, SectionHead, Skeleton } from "@/components/ui";
+import { ArtifactIcon, projectColor, Button, Card, ErrorState, IconButton, LinkButton, LoadingBlock, Meter, SectionHead, Skeleton } from "@/components/ui";
 import { Recommendations } from "@/features/chat/Recommendations";
 import { tourSteps } from "@/features/showcase/tourSteps";
 import { useInbox } from "@/features/inbox/useInbox";
 import s from "./home.module.css";
 
-const DOT: Record<string, string> = { teal: "var(--teal)", violet: "var(--violet)", amber: "#E0A32B", slate: "#64748B" };
 const noopSubscribe = () => () => {};
 
 /** Sends straight to chat: the conversation opens with the answer already running. */
@@ -217,7 +216,7 @@ function ProjectList() {
           {projects.data.slice(0, 4).map((p) => (
             <li key={p.id}>
               <Link href={`/app/project/?id=${p.id}`} className={s.projectRow}>
-                <span className={s.dot} style={{ background: DOT[p.color] }} aria-hidden />
+                <span className={s.dot} style={{ background: projectColor(p.color) }} aria-hidden />
                 <span style={{ minWidth: 0 }}>
                   <span className={s.rowTitle}>{p.name}</span>
                   <span className={s.rowMeta}>
