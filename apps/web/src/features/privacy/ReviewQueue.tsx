@@ -9,28 +9,36 @@ import { formatDateTime, relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { copy } from "@/copy/en";
 import { privacyCopy as c } from "@/copy/privacy";
-import { Badge, Button, Callout, Card, EmptyState, Modal, QueryState, Table, TextArea, useToast } from "@/components/ui";
-import { SEVERITY_TONE, STATUS_TONE } from "./tones";
+import { Badge, Button, Callout, Card, EmptyState, Modal, QueryState, StatusBadge, Table, TextArea, useToast } from "@/components/ui";
+import { SEVERITY_TONE } from "./tones";
 import s from "./privacy.module.css";
 
 type Decision = "redact" | "approve_original" | "reject";
+type Confirmed = Exclude<Decision, "redact">;
 
-function DecisionModal({ review, decision, onClose }: { review: RedactionReview; decision: Decision; onClose: () => void }) {
+/** Shared decision request + cache refresh + toast. */
+function useDecide(review: RedactionReview, onDone?: () => void) {
   const qc = useQueryClient();
   const toast = useToast();
-  const [note, setNote] = useState("");
-  const t = c.reviews.confirm[decision];
-  const m = useMutation({
-    mutationFn: () => api.privacy.decide(review.id, { decision, note: note.trim() || undefined }),
-    onSuccess: () => {
+  const title = review.documentTitle ?? c.reviews.composer;
+  return useMutation({
+    mutationFn: ({ decision, note }: { decision: Decision; note?: string }) => api.privacy.decide(review.id, { decision, note }),
+    onSuccess: (_r, { decision }) => {
       void qc.invalidateQueries({ queryKey: ["privacy-reviews"] });
       void qc.invalidateQueries({ queryKey: ["documents"] });
       if (review.documentId) void qc.invalidateQueries({ queryKey: ["document", review.documentId] });
-      toast({ tone: "success", title: c.reviews.done[decision] ?? copy.actions.confirm, body: review.documentTitle ?? c.reviews.composer });
-      onClose();
+      toast({ tone: "success", title: c.reviews.done[decision] ?? copy.actions.confirm, body: decision === "redact" ? c.reviews.redactedBody(title) : title });
+      onDone?.();
     },
     onError: (e) => toast({ tone: "error", title: c.reviews.failed, body: (e as Error).message }),
   });
+}
+
+/** Approving the original or rejecting changes what may leave Atlas, so both are confirmed. */
+function DecisionModal({ review, decision, onClose }: { review: RedactionReview; decision: Confirmed; onClose: () => void }) {
+  const [note, setNote] = useState("");
+  const t = c.reviews.confirm[decision];
+  const m = useDecide(review, onClose);
   return (
     <Modal
       open
@@ -40,7 +48,7 @@ function DecisionModal({ review, decision, onClose }: { review: RedactionReview;
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>{copy.actions.cancel}</Button>
-          <Button variant={decision === "reject" ? "danger" : "primary"} onClick={() => m.mutate()} loading={m.isPending}>
+          <Button variant={decision === "reject" ? "danger" : "primary"} onClick={() => m.mutate({ decision, note: note.trim() || undefined })} loading={m.isPending}>
             {t.cta}
           </Button>
         </>
@@ -48,34 +56,31 @@ function DecisionModal({ review, decision, onClose }: { review: RedactionReview;
     >
       <div className={s.stack}>
         <p>{t.body}</p>
-        <Callout tone="teal" icon={<CloudOff size={16} aria-hidden />}>{c.reviews.confirm.local}</Callout>
+        <Callout icon={<CloudOff size={16} aria-hidden />}>{c.reviews.confirm.local}</Callout>
         <TextArea label={c.reviews.confirm.note} value={note} maxLength={500} rows={3} onChange={(e) => setNote(e.target.value)} />
       </div>
     </Modal>
   );
 }
 
-function ReviewCard({ r, canDecide, onDecide }: { r: RedactionReview; canDecide: boolean; onDecide: (d: Decision) => void }) {
+function ReviewCard({ r, canDecide, onConfirm }: { r: RedactionReview; canDecide: boolean; onConfirm: (d: Confirmed) => void }) {
   const title = r.documentTitle ?? c.reviews.composer;
   const pending = r.status === "pending_review";
+  const redact = useDecide(r);
   return (
     <Card as="li" className={s.review}>
       <div className={s.reviewHead}>
-        <div style={{ minWidth: 0 }}>
+        <div className={s.reviewMain}>
+          <p className={s.itemLabel}>{c.reviews.itemLabel}</p>
           <h3 className={s.reviewTitle}>{r.documentId ? <Link href={`/app/document/?id=${r.documentId}`}>{title}</Link> : title}</h3>
           <p className={s.muted}>
-            {c.reviews.created} {relativeTime(r.createdAt)} · {c.reviews.findings(r.findings.length)}
+            {c.reviews.created} {relativeTime(r.createdAt)} · {c.reviews.findings(r.findings.length)} · {c.reviews.suggested}: {c.classification[r.suggestedClassification]}
             {r.decidedAt ? ` · ${c.reviews.decided} ${formatDateTime(r.decidedAt)}` : ""}
           </p>
         </div>
-        <div className={s.badges}>
-          <Badge tone={STATUS_TONE[r.status]}>{c.reviewStatus[r.status]}</Badge>
-          <Badge tone="violet" title={c.reviews.suggested}>
-            {c.reviews.suggested}: {c.classification[r.suggestedClassification]}
-          </Badge>
-        </div>
+        <StatusBadge kind="privacy" status={r.status} />
       </div>
-      <Table caption={`${c.reviews.caption} · ${title}`}>
+      <Table stack caption={`${c.reviews.caption} · ${title}`}>
         <thead>
           <tr>
             <th scope="col">{c.reviews.detector}</th>
@@ -87,20 +92,31 @@ function ReviewCard({ r, canDecide, onDecide }: { r: RedactionReview; canDecide:
         <tbody>
           {r.findings.map((f, i) => (
             <tr key={i}>
-              <td style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{f.label}</td>
-              <td className="mono">{f.preview}</td>
-              <td><Badge tone={SEVERITY_TONE[f.severity]}>{c.severity[f.severity]}</Badge></td>
-              <td className={s.muted}>{f.explanation}</td>
+              <td className={s.detector}>{f.label}</td>
+              <td className="mono" data-label={c.reviews.preview}>{f.preview}</td>
+              <td data-label={c.reviews.severity}>
+                <Badge tone={SEVERITY_TONE[f.severity]}>{c.severity[f.severity]}</Badge>
+              </td>
+              <td className={s.muted} data-label={c.reviews.why}>
+                {f.explanation}
+              </td>
             </tr>
           ))}
         </tbody>
       </Table>
       {pending ? (
         canDecide ? (
-          <div className={s.actions}>
-            <Button variant="primary" onClick={() => onDecide("redact")}>{c.reviews.redact}</Button>
-            <Button onClick={() => onDecide("approve_original")}>{c.reviews.approve}</Button>
-            <Button variant="danger" onClick={() => onDecide("reject")}>{c.reviews.reject}</Button>
+          <div className={s.decide}>
+            <div className={s.actions}>
+              <Button variant="primary" loading={redact.isPending} onClick={() => redact.mutate({ decision: "redact" })}>
+                {c.reviews.redact}
+              </Button>
+              <Button onClick={() => onConfirm("approve_original")}>{c.reviews.approve}</Button>
+              <Button variant="ghost" onClick={() => onConfirm("reject")}>
+                {c.reviews.reject}
+              </Button>
+            </div>
+            <p className={s.muted}>{c.reviews.redactHint}</p>
           </div>
         ) : (
           <p className={s.muted}>{c.reviews.adminOnly}</p>
@@ -110,9 +126,10 @@ function ReviewCard({ r, canDecide, onDecide }: { r: RedactionReview; canDecide:
   );
 }
 
+/** Sensitive data waiting for a person: Redact applies directly; approving the original or rejecting asks first. */
 export function ReviewQueue({ query }: { query: UseQueryResult<RedactionReview[]> }) {
   const canDecide = useCan("privacy.admin");
-  const [active, setActive] = useState<{ review: RedactionReview; decision: Decision } | null>(null);
+  const [active, setActive] = useState<{ review: RedactionReview; decision: Confirmed } | null>(null);
   return (
     <>
       <QueryState query={query} isEmpty={(d) => d.length === 0} empty={<EmptyState title={c.reviews.empty} body={c.reviews.emptyBody} />}>
@@ -121,7 +138,7 @@ export function ReviewQueue({ query }: { query: UseQueryResult<RedactionReview[]
           return (
             <ul className={s.list}>
               {sorted.map((r) => (
-                <ReviewCard key={r.id} r={r} canDecide={canDecide} onDecide={(decision) => setActive({ review: r, decision })} />
+                <ReviewCard key={r.id} r={r} canDecide={canDecide} onConfirm={(decision) => setActive({ review: r, decision })} />
               ))}
             </ul>
           );

@@ -16,7 +16,7 @@ export const usageCopy = {
     user: "User",
     any: "All",
     clear: "Clear filters",
-    notAffected: "Not affected by filters",
+    notAffected: "Not affected by filters or time range",
     modelOnly: "Filtered by time range and model only",
   },
   providers: { anthropic: "Anthropic", google_gemini: "Google Gemini", local: "Local (Atlas)" } as Record<string, string>,
@@ -63,6 +63,8 @@ export const usageCopy = {
     cost: "Calculated cost",
     unknown: "Unknown-cost entries",
     local: "Local entries",
+    tipUnknown: (n: number) => `${n} unknown-cost (not included)`,
+    tipLocal: (n: number) => `${n} local · no charge`,
   },
   groups: {
     title: "Where it goes",

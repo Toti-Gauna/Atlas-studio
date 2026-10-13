@@ -14,9 +14,46 @@ const DAY = 86_400_000;
 const MODELS = ["anthropic:claude-sonnet-5-5", "anthropic:claude-opus-5-5", "anthropic:claude-haiku-5-5"] as const;
 const USERS = ["usr_visitor", "usr_leo", "usr_maya", "usr_priya"];
 
+/** Realistic objectives per project for the synthetic runs (picked by index, so the seeded numbers stay stable). */
+const OBJECTIVES: Record<string, string[]> = {
+  compliance: [
+    "Map the vendor checklist to our data retention policy",
+    "Find evidence for encryption at rest",
+    "Summarize incident response commitments for the customer",
+    "Check backup retention against the checklist",
+    "Draft answers for the access control section",
+  ],
+  analysis: [
+    "Explain Q3 on-time performance by region",
+    "Compare claims by service level for Q3",
+    "Summarize late shipments in the West region",
+    "Find the drivers of Q3 refund volume",
+    "Break down Q3 shipments by service level",
+  ],
+  deck: [
+    "Outline the Q3 leadership update",
+    "Draft the service levels slide",
+    "Summarize refund trends for leadership",
+    "Draft the pricing update slide",
+    "Write speaker notes for the Q3 update",
+  ],
+  support: [
+    "Answer: how long do approved refunds take?",
+    "Answer: what does the claims process require?",
+    "Summarize the SLA for express shipments",
+    "Answer: can a delivery address be changed in transit?",
+    "Explain damaged-goods claim deadlines",
+  ],
+};
+
 export function seedUsage(db: Db, ids: { projectIds: Record<string, string>; agentIds: Record<string, string> }) {
   const rand = mulberry32(9137);
   const projects = Object.values(ids.projectIds);
+  const projectKey = new Map(Object.entries(ids.projectIds).map(([k, v]) => [v, k]));
+  const objectiveFor = (projectId: string, i: number) => {
+    const pool = OBJECTIVES[projectKey.get(projectId) ?? ""] ?? OBJECTIVES.support!;
+    return pool[i % pool.length]!;
+  };
   const agents = Object.values(ids.agentIds);
   const entries: LedgerEntry[] = [];
 
@@ -63,7 +100,7 @@ export function seedUsage(db: Db, ids: { projectIds: Record<string, string>; age
       modelKey,
       mode: "connected",
       status: scenario === "cancelled" ? "cancelled" : scenario === "failed_unknown" ? "failed" : "succeeded",
-      objective: "DEMO fixture run (synthetic usage)",
+      objective: objectiveFor(projectId, i),
       startedAt: iso(occurred),
       finishedAt: iso(occurred + 4000),
       latencyMs: 0,
@@ -77,7 +114,7 @@ export function seedUsage(db: Db, ids: { projectIds: Record<string, string>; age
         modelKey,
         modelId: model.modelId,
         priceVersionId: model.currentPrice?.id ?? null,
-        routing: { modelKey, source: "policy_rule", reason: "DEMO fixture", pendingFallback: null, blocked: null },
+        routing: { modelKey, source: "policy_rule", reason: "Demo data: routing policy rule", pendingFallback: null, blocked: null },
         documentVersions: [],
         memoryItemIds: [],
         projectId,
@@ -86,7 +123,7 @@ export function seedUsage(db: Db, ids: { projectIds: Record<string, string>; age
       },
       steps: [],
       attempts: [],
-      disclaimer: "DEMO fixture: synthetic usage shaped like Anthropic API responses and priced with the verified price table. Not real telemetry, no provider was called.",
+      disclaimer: "Demo data: synthetic usage priced with the verified price table. No provider was called and this is not real telemetry.",
     };
     let total = 0n;
     let unknown = false;
@@ -126,7 +163,7 @@ export function seedUsage(db: Db, ids: { projectIds: Record<string, string>; age
     });
     run.costStatus = unknown ? "unknown" : "calculated";
     run.costNanoUsd = unknown ? null : total.toString();
-    run.steps.push({ id: newId("stp"), runId, ordinal: 0, kind: "model_call", title: "Model call (DEMO fixture)", status: run.status === "succeeded" ? "succeeded" : run.status === "cancelled" ? "cancelled" : "failed", tool: null, summary: `${attempts.length} attempt(s); synthetic usage`, startedAt: run.startedAt, finishedAt: run.finishedAt });
+    run.steps.push({ id: newId("stp"), runId, ordinal: 0, kind: "model_call", title: "Model call (demo data)", status: run.status === "succeeded" ? "succeeded" : run.status === "cancelled" ? "cancelled" : "failed", tool: null, summary: `${attempts.length} attempt(s); synthetic usage`, startedAt: run.startedAt, finishedAt: run.finishedAt });
     db.runs.push(run);
   }
   db.ledger.push(...entries);

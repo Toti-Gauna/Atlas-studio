@@ -32,6 +32,7 @@ export function UsageView() {
   const [groupBy, setGroupBy] = useState<UsageGroupBy>("model");
   const [filters, setFilters] = useState<UsageFilterState>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [techOpen, setTechOpen] = useState(false);
   const query: UsageQuery = { range, groupBy, ...filters };
   const report = useQuery({ queryKey: ["usage", query], queryFn: () => api.usage.report(query), placeholderData: keepPreviousData });
   /** The 30-day daily series (same filters) gives "last 7 days vs previous 7" for either range. */
@@ -97,36 +98,30 @@ export function UsageView() {
               <UsageKpis report={r} daily30={daily30} workspaceBudget={workspaceBudget} />
               <DailyChart daily={r.daily} rangeLabel={range === "7d" ? c.range.d7 : c.range.d30} />
               <section aria-labelledby="usage-groups-h">
-                <SectionHead
-                  id="usage-groups-h"
-                  title={c.groups.title}
-                  aside={
-                    <Select
-                      label={c.groupBy.label}
-                      value={groupBy}
-                      onChange={(e) => setGroupBy(e.target.value as UsageGroupBy)}
-                      options={GROUPS.map((g) => ({ value: g, label: c.groupBy[g] }))}
-                    />
-                  }
-                />
+                <SectionHead id="usage-groups-h" title={c.groups.title} />
+                <div className={s.groupBar}>
+                  <Select label={c.groupBy.label} value={groupBy} onChange={(e) => setGroupBy(e.target.value as UsageGroupBy)} options={GROUPS.map((g) => ({ value: g, label: c.groupBy[g] }))} />
+                </div>
                 {r.groups.length ? <GroupsTable groups={r.groups} groupBy={r.query.groupBy} /> : <EmptyState title={c.groups.empty} body={c.groups.emptyBody} />}
               </section>
 
-              <details className={s.technical}>
+              <details className={s.technical} onToggle={(e) => setTechOpen(e.currentTarget.open)}>
                 <summary>
                   <span className={s.technicalTitle}>{c.technical.title}</span>
                   <span className={s.muted}>{c.technical.summary}</span>
                 </summary>
-                <div className={s.technicalBody}>
-                  <TokenTotals totals={r.totals} />
-                  {r.groups.length ? (
-                    <Card>
-                      <h3 className={s.cardTitle}>{c.groups.tokensTitle}</h3>
-                      <GroupsTable groups={r.groups} groupBy={r.query.groupBy} variant="tokens" />
-                    </Card>
-                  ) : null}
-                  <LedgerSection range={range} modelKey={filters.modelKey} />
-                </div>
+                {techOpen ? (
+                  <div className={s.technicalBody}>
+                    <TokenTotals totals={r.totals} />
+                    {r.groups.length ? (
+                      <Card>
+                        <h3 className={s.cardTitle}>{c.groups.tokensTitle}</h3>
+                        <GroupsTable groups={r.groups} groupBy={r.query.groupBy} variant="tokens" />
+                      </Card>
+                    ) : null}
+                    <LedgerSection range={range} modelKey={filters.modelKey} />
+                  </div>
+                ) : null}
               </details>
             </div>
           )}

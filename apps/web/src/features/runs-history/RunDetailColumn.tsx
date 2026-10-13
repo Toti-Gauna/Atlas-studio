@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { api } from "@/lib/api";
 import { gsap, MOTION, useGSAP, useReducedMotion } from "@/lib/motion";
-import { runHistoryCopy as c } from "@/copy/deliverables";
+import { activityCopy as c } from "@/copy/activity";
 import { Card, ErrorState, IconButton, LoadingBlock } from "@/components/ui";
 import { RunTrace } from "@/features/runs/RunTrace";
 import s from "./runs-history.module.css";
@@ -31,7 +31,7 @@ export function RunDetailColumn({ runId, onClose }: { runId: string; onClose: ()
       <Card>
         <div className={s.detailHead}>
           <h2 id="run-detail-h" className={s.detailTitle}>
-            {c.detailTitle} <span className="mono">{runId}</span>
+            {c.detailTitle}
           </h2>
           <IconButton label={c.close} size="sm" onClick={onClose}>
             <X size={16} />

@@ -1,17 +1,16 @@
 "use client";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import type { Ticket } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import { useCan, useSession } from "@/lib/state/session";
 import { deskCopy as c } from "@/copy/desk";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, Card, EmptyState, LinkButton, PageHeader, QueryState, Select, useToast } from "@/components/ui";
+import { Badge, Card, EmptyState, LinkButton, PageHeader, QueryState, Select, StatusBadge, useToast } from "@/components/ui";
 import { TicketThread } from "./TicketThread";
-import { PRIORITY_TONE, STATUS_TONE } from "./tones";
+import { isHighPriority } from "./tones";
 import s from "./desk.module.css";
 
 /** Shared success/error handling for status and assignment changes. */
@@ -48,7 +47,7 @@ function Controls({ ticket }: { ticket: Ticket }) {
         label={c.ticket.assignee}
         value={ticket.assigneeId ?? ""}
         disabled={assign.isPending || members.isPending}
-        hint={members.isError ? "Could not load members." : undefined}
+        hint={members.isError ? c.ticket.membersFailed : undefined}
         onChange={(e) => assign.mutate(e.target.value || null)}
         options={[
           { value: "", label: c.ticket.unassigned },
@@ -96,37 +95,31 @@ export function TicketView() {
   const isOperator = useCan("ticket.inbox");
   const isCustomer = session?.role === "customer";
   const q = useQuery({ queryKey: ["ticket", id], queryFn: () => api.tickets.get(id!), enabled: Boolean(id) });
-  const back = (
-    <Link href="/app/inbox/" className={s.back}>
-      <ArrowLeft size={14} aria-hidden /> {isCustomer ? c.ticket.backMine : c.ticket.back}
-    </Link>
-  );
+  const back = isCustomer ? { href: "/app/inbox/", label: c.ticket.backMine } : { href: "/app/inbox/?tab=support", label: c.ticket.back };
 
   if (!id) {
     return (
       <Page>
-        {back}
-        <EmptyState title={c.ticket.missing} body={c.ticket.missingBody} action={<LinkButton href="/app/inbox/">{c.ticket.back}</LinkButton>} />
+        <EmptyState title={c.ticket.missing} body={c.ticket.missingBody} action={<LinkButton href={back.href}>{back.label}</LinkButton>} />
       </Page>
     );
   }
 
   return (
     <Page wide>
-      {back}
       <QueryState query={q}>
         {(t) => (
           <>
             <PageHeader
-              eyebrow={`Ticket #${t.number}`}
+              back={back}
               title={t.subject}
               meta={
                 <>
-                  <Badge tone={STATUS_TONE[t.status]} dot>{c.status[t.status]}</Badge>
-                  <Badge tone={PRIORITY_TONE[t.priority]}>{c.ticket.priority}: {c.priority[t.priority]}</Badge>
+                  <StatusBadge kind="ticket" status={t.status} />
+                  {isHighPriority(t.priority) ? <Badge tone="danger">{c.highPriority}</Badge> : null}
                 </>
               }
-              description={`${c.ticket.requester}: ${t.requesterName} · ${c.ticket.opened} ${formatDateTime(t.createdAt)}`}
+              description={c.ticket.meta(t.number, t.requesterName, formatDateTime(t.createdAt))}
             />
             <div className={s.layout}>
               <TicketThread ticket={t} isCustomer={isCustomer} />
@@ -137,7 +130,7 @@ export function TicketView() {
                   ) : (
                     <>
                       <p><strong>{c.ticket.assignee}:</strong> {t.assigneeName ?? c.ticket.unassigned}</p>
-                      <p className={s.muted} style={{ marginTop: 6 }}>{c.ticket.readOnlyCustomer}</p>
+                      <p className={`${s.muted} ${s.readOnlyNote}`}>{c.ticket.readOnlyCustomer}</p>
                     </>
                   )}
                 </Card>

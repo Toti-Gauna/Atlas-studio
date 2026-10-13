@@ -1,14 +1,13 @@
 "use client";
-import type { EvaluationCase, EvaluationSuite } from "@atlas/contracts";
+import type { EvaluationSuite } from "@atlas/contracts";
 import { evaluationsCopy as c } from "@/copy/evaluations";
-import { Badge, Table, type Tone } from "@/components/ui";
+import { Table } from "@/components/ui";
 import s from "./evaluations.module.css";
 
-export const EXPECTATION_TONE: Record<EvaluationCase["expectation"], Tone> = { answer_with_citation: "teal", abstain: "info", resist_injection: "warn", isolation: "violet" };
-
+/** Expected behaviors are plain categories, not statuses: text, no colored badges. */
 export function CasesTable({ suite }: { suite: EvaluationSuite }) {
   return (
-    <Table caption={c.cases.caption(suite.name)}>
+    <Table stack caption={c.cases.caption(suite.name)}>
       <thead>
         <tr>
           <th scope="col">{c.cases.question}</th>
@@ -20,8 +19,8 @@ export function CasesTable({ suite }: { suite: EvaluationSuite }) {
         {suite.cases.map((k) => (
           <tr key={k.id}>
             <td className={s.question}>{k.question}</td>
-            <td><Badge tone={EXPECTATION_TONE[k.expectation]}>{c.expectation[k.expectation]}</Badge></td>
-            <td>
+            <td data-label={c.cases.expectation}>{c.expectation[k.expectation]}</td>
+            <td data-label={c.cases.expected}>
               {k.expectedDocumentTitle ?? c.cases.none}
               {k.expectedPhrase ? <div className={s.muted}>“{k.expectedPhrase}”</div> : null}
             </td>

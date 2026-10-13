@@ -107,8 +107,31 @@
   font-weight: 650;
   overflow-wrap: anywhere;
 }
-.detailTitle :global(.mono) {
+.demoNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 var(--s-4);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.demoCell {
   font-size: var(--fs-12);
   color: var(--text-3);
-  font-weight: 400;
+}
+.unknown {
+  color: var(--text-2);
+}
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+.pageLabel {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
 }

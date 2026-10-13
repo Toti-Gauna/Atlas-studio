@@ -6,5 +6,5 @@ export const inboxCopy = {
   customerDescription: "Questions you handed off to a person. Replies appear here and in the conversation.",
   tabsLabel: "Inbox sections",
   tabs: { reviews: "Reviews", support: "Support", privacy: "Sensitive data" },
-  privacyNote: "Detected personal data is held until a person decides. Detection is rule-based.",
+  privacyNote: "Sensitive data stays out of external calls until someone here decides. Detection is rule-based and can miss things.",
 } as const;

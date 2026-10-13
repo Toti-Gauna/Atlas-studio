@@ -36,7 +36,7 @@ function GrantForm() {
   return (
     <Card>
       <h2 className={s.h2}>{c.consents.grantTitle}</h2>
-      <p className={s.muted} style={{ marginBottom: 12 }}>{c.consents.grantBody}</p>
+      <p className={`${s.muted} ${s.introText}`}>{c.consents.grantBody}</p>
       <form
         className={s.stack}
         onSubmit={(e) => {
@@ -99,7 +99,7 @@ export function ConsentsTab() {
     <div className={s.stack}>
       <QueryState query={q} isEmpty={(d) => d.length === 0} empty={<EmptyState title={c.consents.empty} body={c.consents.emptyBody} />}>
         {(list) => (
-          <Table caption={c.consents.caption}>
+          <Table stack caption={c.consents.caption}>
             <thead>
               <tr>
                 <th scope="col">{c.consents.provider}</th>
@@ -117,17 +117,17 @@ export function ConsentsTab() {
                 const name = c.consents.providers[x.provider] ?? x.provider;
                 return (
                   <tr key={x.id}>
-                    <td style={{ fontWeight: 600 }}>{name}</td>
-                    <td>{x.documentIds.map(title).join(", ") || "—"}</td>
-                    <td>{c.consents.scopes[x.scope] ?? x.scope}</td>
-                    <td>{x.grantedByName}</td>
-                    <td style={{ whiteSpace: "nowrap" }}>{formatDateTime(x.expiresAt)}</td>
-                    <td>
+                    <td className={s.strong}>{name}</td>
+                    <td data-label={c.consents.documents}>{x.documentIds.map(title).join(", ") || "—"}</td>
+                    <td data-label={c.consents.scope}>{c.consents.scopes[x.scope] ?? x.scope}</td>
+                    <td data-label={c.consents.grantedBy}>{x.grantedByName}</td>
+                    <td className={s.nowrap} data-label={c.consents.expires}>{formatDateTime(x.expiresAt)}</td>
+                    <td data-label={c.consents.status}>
                       <Badge tone={st === "active" ? "teal" : "neutral"}>{c.consents[st]}</Badge>
                       {x.revokedAt ? <div className={s.muted}>{formatDateTime(x.revokedAt)}</div> : null}
                     </td>
                     {isAdmin ? (
-                      <td>
+                      <td data-label={c.consents.revoke}>
                         {st === "active" ? (
                           <Button size="sm" variant="danger" aria-label={c.consents.revokeLabel(name)} loading={revoke.isPending && revoke.variables === x.id} onClick={() => revoke.mutate(x.id)}>
                             {c.consents.revoke}

@@ -20,7 +20,7 @@ export function AuditTab() {
       ) : (
         <QueryState query={audit} isEmpty={(d) => d.length === 0} empty={<EmptyState title={c.audit.empty} />}>
           {(events) => (
-            <Table caption={c.audit.caption}>
+            <Table stack caption={c.audit.caption}>
               <thead>
                 <tr>
                   <th scope="col">{c.audit.when}</th>
@@ -33,11 +33,11 @@ export function AuditTab() {
               <tbody>
                 {events.map((e) => (
                   <tr key={e.id}>
-                    <td style={{ whiteSpace: "nowrap" }}>{formatDateTime(e.createdAt)}</td>
-                    <td>{e.actorName}</td>
-                    <td className="mono">{e.action}</td>
-                    <td className="mono">{e.target}</td>
-                    <td className="mono">{e.requestId}</td>
+                    <td className={s.nowrap}>{formatDateTime(e.createdAt)}</td>
+                    <td data-label={c.audit.actor}>{e.actorName}</td>
+                    <td className="mono" data-label={c.audit.action}>{e.action}</td>
+                    <td className="mono" data-label={c.audit.target}>{e.target}</td>
+                    <td className="mono" data-label={c.audit.request}>{e.requestId}</td>
                   </tr>
                 ))}
               </tbody>

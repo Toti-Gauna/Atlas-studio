@@ -15,7 +15,7 @@ export function MembersTab() {
       <SectionHead id="mem-h" title={c.members.heading} aside={c.members.note} />
       <QueryState query={members} isEmpty={(d) => d.length === 0} empty={<EmptyState title={c.members.empty} />}>
         {(list) => (
-          <Table caption={c.members.caption}>
+          <Table stack caption={c.members.caption}>
             <thead>
               <tr>
                 <th scope="col">{c.members.member}</th>
@@ -34,11 +34,11 @@ export function MembersTab() {
                       {m.user.id === session?.user.id ? <Badge tone="teal">{c.members.you}</Badge> : null}
                     </span>
                   </th>
-                  <td className="mono">{m.user.email}</td>
-                  <td>
+                  <td data-label={c.members.email}>{m.user.email}</td>
+                  <td data-label={c.members.role}>
                     <Badge tone="violet">{c.roles[m.role] ?? m.role}</Badge>
                   </td>
-                  <td>{formatDate(m.joinedAt)}</td>
+                  <td data-label={c.members.joined}>{formatDate(m.joinedAt)}</td>
                 </tr>
               ))}
             </tbody>

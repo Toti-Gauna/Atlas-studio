@@ -100,7 +100,7 @@ export function DailyChart({ daily, rangeLabel }: { daily: Day[]; rangeLabel: st
           <tbody>
             {daily.map((d) => (
               <tr key={d.day}>
-                <th scope="row" style={{ fontWeight: 500 }}>{dayLabel(d.day)}</th>
+                <th scope="row" className={s.dayCell}>{dayLabel(d.day)}</th>
                 <td className={numCell}>{money(d.calculatedNanoUsd)}</td>
                 <td className={numCell}>{d.unknownCostEntries}</td>
                 <td className={numCell}>{d.localEntries}</td>
@@ -157,8 +157,8 @@ export function DailyChart({ daily, rangeLabel }: { daily: Day[]; rangeLabel: st
             <div className={s.tooltip} style={{ left: Math.min(width - 90, Math.max(90, PAD.left + band * (active ?? 0) + band / 2)), top: y(values[active ?? 0] ?? 0) - 8 }} aria-hidden>
               <strong>{money(activeDay.calculatedNanoUsd)}</strong>
               <span>{dayLabel(activeDay.day)}</span>
-              {activeDay.unknownCostEntries ? <span>{activeDay.unknownCostEntries} unknown-cost (not included)</span> : null}
-              {activeDay.localEntries ? <span>{activeDay.localEntries} local · no charge</span> : null}
+              {activeDay.unknownCostEntries ? <span>{c.chart.tipUnknown(activeDay.unknownCostEntries)}</span> : null}
+              {activeDay.localEntries ? <span>{c.chart.tipLocal(activeDay.localEntries)}</span> : null}
             </div>
           ) : null}
           <p className="sr-only" aria-live="polite">
