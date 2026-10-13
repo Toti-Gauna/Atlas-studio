@@ -2,19 +2,63 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Download, Eye, Maximize2, PenLine, Save } from "lucide-react";
-import type { ArtifactContent, ArtifactDetail, ExportFormat } from "@atlas/contracts";
-import { supportedFormats } from "@atlas/renderers";
-import { api } from "@/lib/api";
+import { ChevronDown, Download, Maximize2, PenLine, Save } from "lucide-react";
+import type { ArtifactContent, ArtifactDetail, ReviewState } from "@atlas/contracts";
 import { canOnArtifact } from "@atlas/domain";
-import { Badge, Button, Callout, ErrorState, LoadingBlock, Segmented, TextField } from "@/components/ui";
+import { api } from "@/lib/api";
+import { deliverablesCopy } from "@/copy/deliverables";
+import { Button, Callout, ErrorState, LoadingBlock, Segmented, StatusBadge, TextField } from "@/components/ui";
+import { MenuItem, Popover } from "@/components/ui";
 import { ArtifactPreview } from "./ArtifactPreview";
 import { ArtifactEditor } from "./ArtifactEditor";
 import { useExportArtifact, useSaveArtifact } from "./useArtifactActions";
+import { nativeFormat, otherFormats } from "./formats";
 import s from "./artifact.module.css";
 
-export const REVIEW_TONE = { draft: "neutral", in_review: "info", approved: "teal", changes_requested: "warn" } as const;
-export const REVIEW_LABEL = { draft: "Draft", in_review: "In review", approved: "Approved", changes_requested: "Changes requested" } as const;
+const c = deliverablesCopy.canvas;
+
+/** Artifact review state in the shared status dictionary ("in review" = an open review request). */
+export const reviewStatusKey = (state: ReviewState) => (state === "in_review" ? "open" : state);
+
+/** Review state as a badge, or nothing for a plain draft (badges mark exceptions). */
+export function ReviewStateBadge({ state, showDraft }: { state: ReviewState; showDraft?: boolean }) {
+  if (state === "draft" && !showDraft) return null;
+  return <StatusBadge kind="review" status={reviewStatusKey(state)} />;
+}
+
+function ExportActions({ id, version, content }: { id: string; version: number; content: ArtifactContent }) {
+  const exp = useExportArtifact();
+  const native = nativeFormat(content);
+  const others = otherFormats(content);
+  return (
+    <div className={s.exportGroup}>
+      <Button size="sm" variant="primary" icon={<Download size={14} />} loading={exp.isPending && exp.variables?.format === native} onClick={() => exp.mutate({ id, version, format: native })}>
+        {c.export(native.toUpperCase())}
+      </Button>
+      {others.length ? (
+        <Popover
+          kind="menu"
+          align="end"
+          label={c.otherFormats}
+          trigger={(p) => (
+            <Button size="sm" loading={exp.isPending && exp.variables?.format !== native} {...p}>
+              {c.otherFormats}
+              <ChevronDown size={13} aria-hidden />
+            </Button>
+          )}
+        >
+          {(close) =>
+            others.map((f) => (
+              <MenuItem key={f} icon={<Download size={15} />} onSelect={() => { close(); exp.mutate({ id, version, format: f }); }}>
+                {c.formats[f] ?? f.toUpperCase()}
+              </MenuItem>
+            ))
+          }
+        </Popover>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * Canvas: preview and structured edit of the version you are viewing. Export
@@ -26,7 +70,6 @@ export function ArtifactWorkspace({ detail, compact }: { detail: ArtifactDetail;
   const [draft, setDraft] = useState<ArtifactContent>(detail.current.content);
   const [note, setNote] = useState("");
   const save = useSaveArtifact(detail.id);
-  const exp = useExportArtifact();
   const canEdit = canOnArtifact(detail.myRole, "edit");
 
   // Reset view and draft when a new version is saved (render-time sync, no effect).
@@ -44,41 +87,48 @@ export function ArtifactWorkspace({ detail, compact }: { detail: ArtifactDetail;
   });
   const shown = viewVersion === detail.currentVersion ? detail.current : versionQ.data;
   const dirty = JSON.stringify(draft) !== JSON.stringify(detail.current.content);
+  const editing = mode === "edit" && viewVersion === detail.currentVersion;
+  const bound = detail.current.reviewState === "approved" || detail.current.reviewState === "in_review";
 
   return (
     <div>
       <div className={s.toolbar}>
-        <Badge tone={REVIEW_TONE[shown?.reviewState ?? "draft"]}>{REVIEW_LABEL[shown?.reviewState ?? "draft"]}</Badge>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
-          <span className="sr-only">Version</span>
-          <select value={viewVersion} onChange={(e) => { setViewVersion(Number(e.target.value)); setMode("preview"); }} style={{ height: 30, borderRadius: 6, border: "1px solid var(--line)", background: "var(--surface)", padding: "0 8px" }}>
+        <label className={s.versionPick}>
+          <span className="sr-only">{c.version}</span>
+          <select
+            value={viewVersion}
+            onChange={(e) => {
+              setViewVersion(Number(e.target.value));
+              setMode("preview");
+            }}
+          >
             {[...detail.versions].reverse().map((v) => (
               <option key={v.version} value={v.version}>
-                v{v.version}{v.version === detail.currentVersion ? " (current)" : ""}{v.reviewState === "approved" ? " ✓" : ""}
+                {c.versionOption(v.version, v.version === detail.currentVersion, v.reviewState === "approved")}
               </option>
             ))}
           </select>
         </label>
+        {compact && shown ? <ReviewStateBadge state={shown.reviewState} /> : null}
         {canEdit && viewVersion === detail.currentVersion ? (
-          <Segmented<"preview" | "edit"> label="Canvas mode" value={mode} onChange={setMode} options={[{ value: "preview", label: "Preview" }, { value: "edit", label: "Edit" }]} />
+          <Segmented<"preview" | "edit"> label={c.mode} value={mode} onChange={setMode} options={[{ value: "preview", label: c.preview }, { value: "edit", label: c.edit }]} />
         ) : null}
-        <div style={{ marginLeft: "auto", display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div className={s.toolbarEnd}>
           {compact ? (
-            <Link href={`/app/artifact/?id=${detail.id}`} className="sr-only-focusable" aria-label="Open full view" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 600, color: "var(--teal-ink)", textDecoration: "none" }}>
-              <Maximize2 size={14} aria-hidden /> Full view
+            <Link href={`/app/artifact/?id=${detail.id}`} className={s.fullView}>
+              <Maximize2 size={14} aria-hidden /> {c.fullView}
             </Link>
           ) : null}
+          {!editing && shown ? <ExportActions id={detail.id} version={shown.version} content={shown.content} /> : null}
         </div>
       </div>
       <div className={s.panelBody}>
-        {mode === "edit" && viewVersion === detail.currentVersion ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <ArtifactEditor value={draft} onChange={setDraft} />
-            <TextField label="Change note" placeholder="What changed?" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
-            {detail.current.reviewState === "approved" || detail.current.reviewState === "in_review" ? (
-              <Callout tone="warn">Saving creates v{detail.currentVersion + 1}. The {detail.current.reviewState === "approved" ? "approval" : "open review"} stays bound to v{detail.currentVersion}; the new version needs its own review.</Callout>
-            ) : null}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {editing ? (
+          <div className={s.editWrap}>
+            {bound ? <Callout tone="warn">{c.versionRule(detail.currentVersion + 1, detail.currentVersion, detail.current.reviewState === "approved")}</Callout> : null}
+            <ArtifactEditor value={draft} onChange={setDraft} sources={detail.current.sources} />
+            <TextField label={c.changeNote} placeholder={c.changeNotePlaceholder} value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
+            <div className={s.saveBar}>
               <Button
                 variant="primary"
                 icon={<Save size={14} />}
@@ -86,36 +136,37 @@ export function ArtifactWorkspace({ detail, compact }: { detail: ArtifactDetail;
                 loading={save.isPending}
                 onClick={() =>
                   save.mutate(
-                    { baseVersion: detail.currentVersion, content: draft, sources: detail.current.sources, changeNote: note.trim() || "Edited in canvas" },
-                    { onSuccess: () => { setMode("preview"); setNote(""); } },
+                    { baseVersion: detail.currentVersion, content: draft, sources: detail.current.sources, changeNote: note.trim() || c.defaultNote },
+                    {
+                      onSuccess: () => {
+                        setMode("preview");
+                        setNote("");
+                      },
+                    },
                   )
                 }
               >
-                Save as v{detail.currentVersion + 1}
+                {c.save(detail.currentVersion + 1)}
               </Button>
-              <Button icon={<Eye size={14} />} onClick={() => setMode("preview")}>
-                Preview
-              </Button>
-              {dirty ? <Button variant="ghost" onClick={() => setDraft(detail.current.content)}>Discard changes</Button> : null}
+              {dirty ? (
+                <Button variant="ghost" onClick={() => setDraft(detail.current.content)}>
+                  {c.discard}
+                </Button>
+              ) : null}
+              <span className={s.saveState} aria-live="polite">
+                {dirty ? c.unsaved : c.noChanges}
+              </span>
             </div>
           </div>
         ) : !shown ? (
           versionQ.isError ? <ErrorState error={versionQ.error} compact /> : <LoadingBlock rows={3} />
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-              <span className="eyebrow" style={{ marginRight: 4 }}>Export v{shown.version}</span>
-              {supportedFormats(shown.content).map((f: ExportFormat) => (
-                <Button key={f} size="sm" icon={<Download size={13} />} loading={exp.isPending && exp.variables?.format === f} onClick={() => exp.mutate({ id: detail.id, version: shown.version, format: f })}>
-                  {f.toUpperCase()}
-                </Button>
-              ))}
-            </div>
-            {!canEdit ? <Callout>You have {detail.myRole} access: you can view and export this artifact but not edit it.</Callout> : null}
+          <div className={s.editWrap}>
+            {!canEdit ? <p className={s.byline}>{c.readOnly(deliverablesCopy.roles[detail.myRole] ?? detail.myRole)}</p> : null}
             <ArtifactPreview content={shown.content} sources={shown.sources} />
-            <div style={{ fontSize: 12, color: "var(--text-3)", display: "flex", gap: 6, alignItems: "center" }}>
-              <PenLine size={12} aria-hidden /> v{shown.version} by {shown.authorName} · {shown.changeNote.replace(/\s*\[idem:[^\]]+\]/, "")}
-            </div>
+            <p className={s.byline}>
+              <PenLine size={12} aria-hidden /> {c.byline(shown.version, shown.authorName, shown.changeNote.replace(/\s*\[idem:[^\]]+\]/, ""))}
+            </p>
           </div>
         )}
       </div>
@@ -125,11 +176,11 @@ export function ArtifactWorkspace({ detail, compact }: { detail: ArtifactDetail;
 
 export function CanvasPanel({ artifactId }: { artifactId: string }) {
   const q = useQuery({ queryKey: ["artifact", artifactId], queryFn: () => api.artifacts.get(artifactId) });
-  if (q.isPending) return <div style={{ padding: 16 }}><LoadingBlock rows={4} /></div>;
-  if (q.isError) return <div style={{ padding: 16 }}><ErrorState error={q.error} onRetry={() => void q.refetch()} /></div>;
+  if (q.isPending) return <div className={s.panelPad}><LoadingBlock rows={4} /></div>;
+  if (q.isError) return <div className={s.panelPad}><ErrorState error={q.error} onRetry={() => void q.refetch()} /></div>;
   return (
     <div>
-      <div style={{ padding: "12px 16px 0", fontFamily: "var(--font-display)", fontWeight: 700 }}>{q.data.title}</div>
+      <div className={s.canvasTitle}>{q.data.title}</div>
       <ArtifactWorkspace detail={q.data} compact />
     </div>
   );

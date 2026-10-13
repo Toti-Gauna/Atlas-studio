@@ -6,7 +6,7 @@ import { modelName, relativeTime, formatDateTime } from "@/lib/format";
 import { usePanel } from "@/lib/state/panel";
 import { chatCopy } from "@/copy/chat";
 import { Badge, Button, CitationChip, ModeBadge } from "@/components/ui";
-import { MenuItem, Popover } from "./Menu";
+import { MenuItem, Popover } from "@/components/ui";
 import type { DeliverableKind } from "./deliverableFromAnswer";
 import s from "./chat.module.css";
 

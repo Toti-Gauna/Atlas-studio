@@ -1,8 +1,7 @@
 import type { ReviewRequest } from "@atlas/contracts";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { reviewsCopy as c } from "@/copy/reviews";
-import { Badge } from "@/components/ui";
-import { REQUEST_TONE, requestLabel } from "@/features/reviews/status";
+import { StatusBadge } from "@/components/ui";
 import s from "./deliverables.module.css";
 
 export function ReviewRequestItem({ r, currentVersion }: { r: ReviewRequest; currentVersion: number }) {
@@ -11,8 +10,8 @@ export function ReviewRequestItem({ r, currentVersion }: { r: ReviewRequest; cur
   return (
     <li className={s.reviewItem}>
       <div className={s.reviewTop}>
-        <Badge mono>v{r.version}</Badge>
-        <Badge tone={REQUEST_TONE[status]}>{requestLabel(status)}</Badge>
+        <strong>v{r.version}</strong>
+        <StatusBadge kind="review" status={status} />
         <span className={s.grow}>
           {r.requestedByName} → <strong>{r.reviewerName}</strong>
         </span>

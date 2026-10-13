@@ -1,3 +1,20 @@
+.preview,
+.slide {
+  /* "Paper" palette: the preview mirrors the light export in both themes, so it derives from theme-invariant tokens. */
+  --paper: var(--pearl);
+  --paper-white: color-mix(in srgb, var(--pearl) 40%, white);
+  --paper-ink: var(--ink);
+  --paper-muted: color-mix(in srgb, var(--ink) 66%, var(--pearl));
+  --paper-line: color-mix(in srgb, var(--ink) 12%, var(--pearl));
+  --paper-head: color-mix(in srgb, var(--ink) 5%, var(--pearl));
+  --paper-accent: color-mix(in srgb, var(--teal) 55%, var(--ink));
+  --paper-info-bg: color-mix(in srgb, var(--cat-2) 12%, var(--pearl));
+  --paper-info: color-mix(in srgb, var(--cat-2) 45%, var(--ink));
+  --paper-gap-bg: color-mix(in srgb, var(--cat-3) 14%, var(--pearl));
+  --paper-gap: color-mix(in srgb, var(--cat-3) 55%, var(--ink));
+  --paper-warn-bg: color-mix(in srgb, var(--meter-warn) 16%, var(--pearl));
+  --paper-warn: color-mix(in srgb, var(--meter-warn) 45%, var(--ink));
+}
 .preview {
   display: flex;
   flex-direction: column;
@@ -33,7 +50,7 @@
 .ref {
   font-family: var(--font-mono);
   font-size: 0.72em;
-  color: #0b6f65;
+  color: var(--paper-accent);
   margin-left: 2px;
 }
 .ul {
@@ -44,17 +61,17 @@
   padding: 10px 14px;
   border-radius: 8px;
   margin: 0 0 1em;
-  background: #e8eef7;
-  color: #2c4a73;
+  background: var(--paper-info-bg);
+  color: var(--paper-info);
   font-size: var(--fs-14);
 }
 .callout_gap {
-  background: #fbe9e7;
-  color: #b3261e;
+  background: var(--paper-gap-bg);
+  color: var(--paper-gap);
 }
 .callout_warning {
-  background: #fdf3dc;
-  color: #8a5a00;
+  background: var(--paper-warn-bg);
+  color: var(--paper-warn);
 }
 .figure {
   margin: 0 0 1.2em;
@@ -66,9 +83,9 @@
 }
 .tableScroll {
   overflow-x: auto;
-  border: 1px solid #dde3ea;
+  border: 1px solid var(--paper-line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--paper-white);
 }
 .table {
   width: 100%;
@@ -78,12 +95,12 @@
 .table th,
 .table td {
   padding: 8px 10px;
-  border-bottom: 1px solid #e6eaf0;
+  border-bottom: 1px solid var(--paper-line);
   text-align: left;
   vertical-align: top;
 }
 .table th {
-  background: #f1f4f8;
+  background: var(--paper-head);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -94,11 +111,11 @@
 .note {
   margin-top: 10px;
   font-size: var(--fs-13);
-  color: #5b6779;
+  color: var(--paper-muted);
 }
 .code {
-  background: #0b1220;
-  color: #e6edf5;
+  background: var(--ink);
+  color: var(--on-ink);
   padding: 12px 14px;
   border-radius: 8px;
   overflow-x: auto;
@@ -117,8 +134,8 @@
   position: relative;
   width: 100%;
   aspect-ratio: 13.333 / 7.5;
-  background: #f5f7fa;
-  color: #0b1220;
+  background: var(--pearl);
+  color: var(--ink);
   border: 1px solid var(--line);
   border-radius: var(--r-2);
   overflow: hidden;
@@ -126,14 +143,14 @@
   container-type: inline-size;
 }
 .slideInk {
-  background: #0b1220;
-  color: #f5f7fa;
+  background: var(--ink);
+  color: var(--pearl);
 }
 .slideBar {
   position: absolute;
   inset: 0 0 auto 0;
   height: 1.6%;
-  background: #19b6a4;
+  background: var(--teal);
 }
 .slideTitle,
 .slideTitleBig,
@@ -162,14 +179,14 @@
 .slideAccent {
   position: absolute;
   height: 0.5cqw;
-  background: #19b6a4;
+  background: var(--teal);
 }
 .slideSub {
   font-size: 1.85cqw;
-  color: #5b6779;
+  color: var(--paper-muted);
 }
 .slideInk .slideSub {
-  color: #b9c3d1;
+  color: var(--on-ink-2);
 }
 .slideBullets {
   padding-left: 1.6cqw;
@@ -182,18 +199,18 @@
 .slideMetric {
   font-size: 6.1cqw;
   font-weight: 700;
-  color: #0b6f65;
+  color: var(--paper-accent);
 }
 .slideInk .slideMetric {
-  color: #19b6a4;
+  color: var(--teal);
 }
 .slideSources {
   font-size: 0.85cqw;
-  color: #5b6779;
+  color: var(--paper-muted);
 }
 .slideNum {
   font-size: 0.75cqw;
-  color: #5b6779;
+  color: var(--paper-muted);
   text-align: right;
 }
 .notes {
@@ -257,4 +274,227 @@
 }
 .panelBody {
   padding: var(--s-4);
+}
+
+/* Editing tables use the app theme, not the paper palette. */
+.editor {
+  --paper-white: var(--surface);
+  --paper-line: var(--line);
+  --paper-head: var(--surface-2);
+}
+.sourcesHead {
+  font-size: var(--fs-13);
+  font-weight: 650;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+.toolbarEnd {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.versionPick select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 650;
+}
+.fullView {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 6px;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--teal-ink);
+  text-decoration: none;
+}
+.fullView:hover {
+  text-decoration: underline;
+}
+.exportGroup {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.editWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0 calc(-1 * var(--s-4)) calc(-1 * var(--s-4));
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 -6px 16px -12px rgba(0, 0, 0, 0.35);
+}
+.saveState {
+  margin-left: auto;
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+.byline {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.panelPad {
+  padding: var(--s-4);
+}
+.canvasTitle {
+  padding: 12px 16px 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.editGrid3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--s-3);
+}
+.editGrid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--s-3);
+}
+.editHead {
+  font-size: var(--fs-13);
+  font-weight: 650;
+  color: var(--text-2);
+}
+.editRowEnd {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 2px;
+}
+.editHint {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+.cellInput {
+  width: 100%;
+  min-width: 80px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  padding: 4px 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+/* Deck editor: slide list beside the selected slide's preview and fields; stacks in narrow containers. */
+.editorHost {
+  container-type: inline-size;
+}
+.deckEditor {
+  display: grid;
+  grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+.slideRail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  position: sticky;
+  top: 64px;
+}
+.slideList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.slideItem {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.slideItem:hover {
+  border-color: var(--line-strong);
+}
+.slideItem[aria-current="true"] {
+  border-color: var(--teal-ink);
+  box-shadow: inset 0 0 0 1px var(--teal-ink);
+  background: var(--teal-soft);
+}
+.slideNo {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-1);
+  background: var(--surface-3);
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+.slideItemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.slideItemTitle {
+  font-size: var(--fs-13);
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.slideItemLayout {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.slideForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+@container (max-width: 560px) {
+  .deckEditor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .slideRail {
+    position: static;
+  }
+  .slideList {
+    flex-direction: row;
+    overflow-x: auto;
+    max-height: none;
+  }
+  .slideList li {
+    flex: 0 0 160px;
+  }
 }

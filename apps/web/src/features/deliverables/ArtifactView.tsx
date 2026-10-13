@@ -1,16 +1,17 @@
 "use client";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileQuestion } from "lucide-react";
+import { FileQuestion } from "lucide-react";
 import type { ArtifactDetail } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { deliverablesCopy as c } from "@/copy/deliverables";
 import { Page } from "@/components/shell/StudioShell";
-import { ArtifactIcon, Badge, Card, EmptyState, LinkButton, PageHeader, QueryState } from "@/components/ui";
-import { ArtifactWorkspace } from "@/features/artifacts/ArtifactWorkspace";
+import { ArtifactIcon, Badge, Card, EmptyState, LinkButton, PageHeader, QueryState, TabPanel, Tabs } from "@/components/ui";
+import { ArtifactWorkspace, ReviewStateBadge } from "@/features/artifacts/ArtifactWorkspace";
 import { keys, useProjects } from "./queries";
-import { SharingPanel } from "./SharingPanel";
-import { ReviewPanel } from "./ReviewPanel";
+import { ShareButton } from "./SharingPanel";
+import { RequestReview, ReviewDecisionCard, ReviewHistory } from "./ReviewPanel";
 import { CommentsPanel } from "./CommentsPanel";
 import { VersionHistory } from "./VersionHistory";
 import s from "./deliverables.module.css";
@@ -33,26 +34,31 @@ export function ArtifactView() {
   );
 }
 
+type SideTab = "comments" | "history";
+
 function ArtifactLayout({ detail }: { detail: ArtifactDetail }) {
   const projects = useProjects();
   const project = projects.data?.find((p) => p.id === detail.projectId);
+  const comments = useQuery({ queryKey: keys.comments(detail.id), queryFn: () => api.artifacts.comments(detail.id) });
+  const [tab, setTab] = useState<SideTab>("comments");
+  const limited = c.detail.limitedRole[detail.myRole];
   return (
     <>
-      <div className={s.backRow}>
-        <LinkButton href="/app/artifacts/" variant="ghost" size="sm" icon={<ArrowLeft size={14} aria-hidden />}>
-          {c.detail.back}
-        </LinkButton>
-      </div>
       <PageHeader
-        eyebrow={c.detail.eyebrow}
+        back={{ href: "/app/artifacts/", label: c.detail.back }}
         title={detail.title}
+        description={[project?.name, c.detail.sources(detail.sourceCount)].filter(Boolean).join(" · ")}
         meta={
           <>
             <Badge icon={<ArtifactIcon type={detail.type} size={12} />}>{c.types[detail.type] ?? detail.type}</Badge>
-            {project ? <Badge>{project.name}</Badge> : null}
-            <Badge mono>v{detail.currentVersion}</Badge>
-            <Badge tone="violet">{c.detail.myRole(c.roles[detail.myRole] ?? detail.myRole)}</Badge>
-            <Badge>{c.detail.sources(detail.sourceCount)}</Badge>
+            <ReviewStateBadge state={detail.reviewState} />
+            {limited ? <Badge>{limited}</Badge> : null}
+          </>
+        }
+        actions={
+          <>
+            <RequestReview detail={detail} />
+            <ShareButton detail={detail} />
           </>
         }
       />
@@ -61,10 +67,29 @@ function ArtifactLayout({ detail }: { detail: ArtifactDetail }) {
           <ArtifactWorkspace detail={detail} />
         </Card>
         <div className={s.sideCol}>
-          <ReviewPanel detail={detail} />
-          <SharingPanel detail={detail} />
-          <CommentsPanel detail={detail} />
-          <VersionHistory detail={detail} />
+          <ReviewDecisionCard detail={detail} />
+          <Card className={s.sideCard}>
+            <Tabs<SideTab>
+              idPrefix="deliverable"
+              label={c.detail.tabs}
+              value={tab}
+              onChange={setTab}
+              tabs={[
+                { id: "comments", label: c.detail.comments, count: comments.data?.length || undefined },
+                { id: "history", label: c.detail.history, count: detail.versions.length },
+              ]}
+            />
+            <TabPanel idPrefix="deliverable" id={tab}>
+              {tab === "comments" ? (
+                <CommentsPanel detail={detail} />
+              ) : (
+                <div className={s.tabBody}>
+                  <VersionHistory detail={detail} />
+                  <ReviewHistory detail={detail} />
+                </div>
+              )}
+            </TabPanel>
+          </Card>
         </div>
       </div>
     </>

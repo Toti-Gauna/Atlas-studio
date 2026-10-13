@@ -7,7 +7,7 @@ import { canOnArtifact } from "@atlas/domain";
 import { api, isApiError } from "@/lib/api";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { deliverablesCopy as c } from "@/copy/deliverables";
-import { Avatar, Button, Callout, Card, ErrorState, LoadingBlock, SectionHead, TextArea, TextField, useToast } from "@/components/ui";
+import { Avatar, Button, ErrorState, LoadingBlock, TextArea, TextField, useToast } from "@/components/ui";
 import { keys } from "./queries";
 import s from "./deliverables.module.css";
 
@@ -42,8 +42,29 @@ export function CommentsPanel({ detail }: { detail: ArtifactDetail }) {
   });
 
   return (
-    <Card as="section" aria-labelledby="comments-h">
-      <SectionHead id="comments-h" title={c.comments.title} aside={comments.data ? String(comments.data.length) : undefined} />
+    <section aria-label={c.comments.title} className={s.tabBody}>
+      {canComment ? (
+        <form
+          className={s.stackForm}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (text.trim()) post.mutate();
+          }}
+        >
+          <TextArea label={c.comments.label} hideLabel placeholder={c.comments.placeholder(cur)} rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)} />
+          <details className={s.fold} open={anchor ? true : undefined}>
+            <summary>{c.comments.anchorToggle}</summary>
+            <TextField label={c.comments.anchor} hint={c.comments.anchorHint} value={anchor} maxLength={300} onChange={(e) => setAnchor(e.target.value)} />
+          </details>
+          <div>
+            <Button type="submit" variant="primary" icon={<MessageSquare size={14} aria-hidden />} disabled={!text.trim()} loading={post.isPending}>
+              {c.comments.post}
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <p className={s.muted}>{c.comments.viewerOnly}</p>
+      )}
       <div className={s.panelBody}>
         {comments.isPending ? (
           <LoadingBlock rows={2} />
@@ -63,7 +84,7 @@ export function CommentsPanel({ detail }: { detail: ArtifactDetail }) {
                       <div className={s.meta}>
                         <strong className={s.author}>{cm.authorName}</strong> ·{" "}
                         <time dateTime={cm.createdAt} title={formatDateTime(cm.createdAt)}>{relativeTime(cm.createdAt)}</time>
-                        {cm.resolved ? " · resolved" : ""}
+                        {cm.resolved ? ` · ${c.comments.resolved}` : ""}
                       </div>
                       {cm.anchor ? <blockquote className={s.quote}>{cm.anchor}</blockquote> : null}
                       <p className={s.commentBody}>{cm.body}</p>
@@ -74,27 +95,7 @@ export function CommentsPanel({ detail }: { detail: ArtifactDetail }) {
             </section>
           ))
         )}
-
-        {canComment ? (
-          <form
-            className={s.stackForm}
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (text.trim()) post.mutate();
-            }}
-          >
-            <TextField label={c.comments.anchor} hint={c.comments.anchorHint} value={anchor} maxLength={300} onChange={(e) => setAnchor(e.target.value)} />
-            <TextArea label={c.comments.label} rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)} />
-            <div>
-              <Button type="submit" icon={<MessageSquare size={14} aria-hidden />} disabled={!text.trim()} loading={post.isPending}>
-                {c.comments.post} on v{cur}
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <Callout>{c.comments.viewerOnly}</Callout>
-        )}
       </div>
-    </Card>
+    </section>
   );
 }

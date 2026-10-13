@@ -26,9 +26,9 @@ export const chatCopy = {
   /** One-click example questions per seeded project (they send immediately). */
   examples: {
     prj_support: ["How long do approved refunds take?", "What is the fee for cancelling a pickup late?", "How many days do I have to file a damage claim?"],
-    prj_compliance: ["Is customer data encrypted at rest?", "How fast are deletion requests completed?", "How long are encrypted backups retained?"],
+    prj_compliance: ["Is customer data encrypted at rest?", "How long are encrypted backups retained?", "Within how many hours are customers notified of incidents?"],
     prj_deck: ["How much does the Growth plan cost per month?", "What is the maximum discount sales can offer without approval?", "How long do approved refunds take?"],
-    prj_analysis: ["Which region has the most shipments?", "What is the average on-time rate by service level?", "Which carriers have the most claims?"],
+    prj_analysis: ["Total shipments by region", "Total claims by carrier", "Total shipments by carrier"],
   } as Record<string, readonly string[]>,
   message: {
     you: "You",

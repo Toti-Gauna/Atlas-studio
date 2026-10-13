@@ -16,7 +16,7 @@ import { Badge, Button, Callout, ErrorState, LoadingBlock, Select, Sheet, TechDe
 import { Composer, type ComposerHandle, type ComposerState } from "./Composer";
 import { MessageItem, type CreatedDeliverable } from "./MessageItem";
 import { Recommendations } from "./Recommendations";
-import { MenuItem, Popover } from "./Menu";
+import { MenuItem, Popover } from "@/components/ui";
 import { CompareDialog, EditQuestionDialog, ServiceRequestDialog } from "./dialogs";
 import { deliverableFromAnswer, type DeliverableKind } from "./deliverableFromAnswer";
 import s from "./chat.module.css";

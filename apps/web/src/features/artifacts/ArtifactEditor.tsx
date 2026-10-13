@@ -28,7 +28,7 @@ function DeckEditor({ value, onChange, sources }: { value: Extract<ArtifactConte
     setSel(i + 1);
   };
   return (
-    <div className={s.editor}>
+    <div className={`${s.editor} ${s.editorHost}`}>
       <div className={s.editGrid3}>
         <TextField label={e.deckTitle} value={value.title} maxLength={200} onChange={(ev) => onChange({ ...value, title: ev.target.value })} />
         <TextField label={e.audience} value={value.audience} maxLength={200} onChange={(ev) => onChange({ ...value, audience: ev.target.value })} />

@@ -35,11 +35,18 @@ export function Popover({
   const panel = useRef<HTMLDivElement>(null);
   const id = useId();
 
-  const close = (refocus = true) => {
+  const [refocus, setRefocus] = useState(false);
+  const close = (thenFocus = true) => {
     setOpen(false);
     setPos({ visibility: "hidden" });
-    if (refocus) (wrap.current?.querySelector("button, a") as HTMLElement | null)?.focus();
+    setRefocus(thenFocus);
   };
+
+  // Escape or a choice returns focus to the trigger (outside clicks leave focus where the user put it).
+  useEffect(() => {
+    if (open || !refocus) return;
+    (wrap.current?.querySelector("button, a") as HTMLElement | null)?.focus();
+  }, [open, refocus]);
 
   useLayoutEffect(() => {
     if (!open || !wrap.current || !panel.current) return;
@@ -52,9 +59,15 @@ export function Popover({
     const rawLeft = align === "end" ? t.right - p.width : t.left;
     const left = Math.min(Math.max(8, rawLeft), Math.max(8, vw - p.width - 8));
     setPos({ top, left });
-    if (kind === "menu") (panel.current.querySelector('[role="menuitem"]:not([aria-disabled="true"])') as HTMLElement | null)?.focus();
-    else (panel.current.querySelector("select, input, textarea, button") as HTMLElement | null)?.focus();
-  }, [open, align, kind]);
+  }, [open, align]);
+
+  // Move focus into the panel once it is positioned (a hidden panel cannot take focus).
+  const placed = open && pos.top !== undefined;
+  useEffect(() => {
+    if (!placed || !panel.current) return;
+    const first = kind === "menu" ? panel.current.querySelector('[role="menuitem"]:not([aria-disabled="true"])') : panel.current.querySelector("select, input, textarea, button");
+    (first as HTMLElement | null)?.focus({ preventScroll: true });
+  }, [placed, kind]);
 
   useEffect(() => {
     if (!open) return;

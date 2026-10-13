@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { modelName } from "@/lib/format";
 import { chatCopy } from "@/copy/chat";
 import { Badge, Button, IconButton, Modal, Segmented, Select } from "@/components/ui";
-import { Popover } from "./Menu";
+import { Popover } from "@/components/ui";
 import s from "./chat.module.css";
 
 const c = chatCopy.composer;

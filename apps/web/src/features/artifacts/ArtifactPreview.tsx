@@ -1,6 +1,7 @@
 "use client";
 import type { ArtifactContent, ReportBlock, Slide, SourceRef } from "@atlas/contracts";
 import { SLIDE_LAYOUT } from "@atlas/renderers";
+import { deliverablesCopy } from "@/copy/deliverables";
 import { CitationChip } from "@/components/ui";
 import s from "./artifact.module.css";
 
@@ -136,14 +137,14 @@ export function ArtifactPreview({ content, sources }: { content: ArtifactContent
           {content.slides.map((sl, i) => (
             <figure key={sl.id} className={s.slideFigure}>
               <SlidePreview slide={sl} index={i} total={content.slides.length} theme={content.theme} sources={sources} />
-              {sl.notes ? <figcaption className={s.notes}>Notes: {sl.notes}</figcaption> : null}
+              {sl.notes ? <figcaption className={s.notes}>{deliverablesCopy.preview.notes}: {sl.notes}</figcaption> : null}
             </figure>
           ))}
         </div>
       )}
       {sources.length ? (
         <section className={s.sources} aria-label="Sources">
-          <div className="eyebrow" style={{ marginBottom: 8 }}>Sources kept with this version</div>
+          <h3 className={s.sourcesHead}>{deliverablesCopy.preview.sources}</h3>
           <ul>
             {sources.map((src) => (
               <li key={src.ref}>

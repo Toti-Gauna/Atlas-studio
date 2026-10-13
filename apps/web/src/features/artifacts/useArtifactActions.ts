@@ -2,7 +2,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ArtifactContent, ExportFormat, SourceRef } from "@atlas/contracts";
 import { api } from "@/lib/api";
+import { deliverablesCopy } from "@/copy/deliverables";
 import { useToast } from "@/components/ui";
+
+const c = deliverablesCopy.canvas;
 
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -21,9 +24,9 @@ export function useExportArtifact() {
     mutationFn: ({ id, version, format }: { id: string; version: number; format: ExportFormat }) => api.artifacts.export(id, version, format),
     onSuccess: (file) => {
       downloadBlob(file.blob, file.filename);
-      toast({ tone: "success", title: "Export ready", body: file.filename });
+      toast({ tone: "success", title: c.exported, body: file.filename });
     },
-    onError: (e) => toast({ tone: "error", title: "Export failed", body: (e as Error).message }),
+    onError: (e) => toast({ tone: "error", title: c.exportFailed, body: (e as Error).message }),
   });
 }
 
@@ -36,8 +39,8 @@ export function useSaveArtifact(id: string) {
       qc.setQueryData(["artifact", id], d);
       void qc.invalidateQueries({ queryKey: ["artifacts"] });
       void qc.invalidateQueries({ queryKey: ["reviews"] });
-      toast({ tone: "success", title: `Saved as v${d.currentVersion}`, body: "Edits create a new version; earlier approvals stay with their version." });
+      toast({ tone: "success", title: c.saved(d.currentVersion) });
     },
-    onError: (e) => toast({ tone: "error", title: "Not saved", body: (e as Error).message }),
+    onError: (e) => toast({ tone: "error", title: c.notSaved, body: (e as Error).message }),
   });
 }

@@ -6,6 +6,7 @@ import { reviewsCopy as c } from "@/copy/reviews";
 import { EmptyState, LinkButton, QueryState, Segmented } from "@/components/ui";
 import { useAllReviews } from "@/features/deliverables/queries";
 import { ReviewsTable } from "./ReviewsTable";
+import s from "./reviews.module.css";
 
 type TabId = "assigned" | "requested" | "all";
 const EMPTY: Record<TabId, string> = { assigned: c.page.emptyAssigned, requested: c.page.emptyRequested, all: c.page.emptyAll };
@@ -26,19 +27,19 @@ export function ReviewsSection() {
           const rows = pick(sorted, tab);
           return (
             <>
-              <Segmented<TabId>
-                label={c.page.tabsLabel}
-                value={tab}
-                onChange={setTab}
-                options={(["assigned", "requested", "all"] as const).map((id) => ({ value: id, label: `${LABEL[id]} · ${pick(sorted, id).length}` }))}
-              />
-              <div style={{ marginTop: 16 }}>
-                {rows.length === 0 ? (
-                  <EmptyState title={EMPTY[tab]} body={c.page.emptyBody} action={<LinkButton href="/app/artifacts/" variant="primary">{c.page.emptyCta}</LinkButton>} />
-                ) : (
-                  <ReviewsTable rows={rows} caption={c.page.caption(LABEL[tab])} />
-                )}
+              <div className={s.tabs}>
+                <Segmented<TabId>
+                  label={c.page.tabsLabel}
+                  value={tab}
+                  onChange={setTab}
+                  options={(["assigned", "requested", "all"] as const).map((id) => ({ value: id, label: `${LABEL[id]} · ${pick(sorted, id).length}` }))}
+                />
               </div>
+              {rows.length === 0 ? (
+                <EmptyState title={EMPTY[tab]} body={c.page.emptyBody} action={<LinkButton href="/app/artifacts/" variant="primary">{c.page.emptyCta}</LinkButton>} />
+              ) : (
+                <ReviewsTable rows={rows} caption={c.page.caption(LABEL[tab])} me={me} />
+              )}
             </>
           );
         }}
