@@ -4,36 +4,43 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Comparison, ComparisonRun, ToolProposal } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { copy } from "@/copy/en";
+import { chatCopy } from "@/copy/chat";
 import { modelName, ms } from "@/lib/format";
 import { costLabel } from "@/features/runs/RunTrace";
-import { Badge, Button, Callout, CitationChip, Modal, Select, TextArea, TextField, useToast } from "@/components/ui";
+import { Button, Callout, CitationChip, Modal, Select, StatusBadge, TextArea, TextField, useToast } from "@/components/ui";
 import s from "./chat.module.css";
+
+const cc = chatCopy.compare;
+const sc = chatCopy.service;
 
 function CompareCol({ r }: { r: ComparisonRun }) {
   return (
     <section className={s.compareCol} aria-label={modelName(r.modelKey)}>
-      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+      <div className={s.compareHead}>
         <strong>{modelName(r.modelKey)}</strong>
-        <Badge tone={r.status === "succeeded" ? "teal" : r.status === "abstained" ? "info" : "warn"}>{r.status}</Badge>
+        <StatusBadge kind="run" status={r.status} />
       </div>
-      {r.error ? <Callout tone="warn">{r.error}</Callout> : <p style={{ whiteSpace: "pre-wrap", fontSize: 14 }}>{r.answer}</p>}
+      {r.error ? <Callout tone="warn">{r.error}</Callout> : <p className={s.compareAnswer}>{r.answer}</p>}
       <div className={s.chips}>{r.citations.map((c, i) => <CitationChip key={c.id} index={i + 1} citation={c} />)}</div>
-      <dl style={{ fontSize: 13, display: "grid", gridTemplateColumns: "auto 1fr", gap: "2px 12px", margin: 0 }}>
-        <dt style={{ color: "var(--text-3)" }}>Latency</dt>
-        <dd style={{ margin: 0 }}>{ms(r.latencyMs)}</dd>
-        <dt style={{ color: "var(--text-3)" }}>Tokens</dt>
-        <dd style={{ margin: 0 }}>{r.inputTokens === null ? "not reported (local)" : `${r.inputTokens} in / ${r.outputTokens} out`}</dd>
-        <dt style={{ color: "var(--text-3)" }}>Cost</dt>
-        <dd style={{ margin: 0 }}>{costLabel(r.costStatus, r.costNanoUsd)}</dd>
+      <dl className={s.compareStats}>
+        <dt>{cc.latency}</dt>
+        <dd>{ms(r.latencyMs)}</dd>
+        <dt>{cc.tokens}</dt>
+        <dd>{r.inputTokens === null ? cc.tokensLocal : `${r.inputTokens} in / ${r.outputTokens} out`}</dd>
+        <dt>{cc.cost}</dt>
+        <dd>{costLabel(r.costStatus, r.costNanoUsd)}</dd>
       </dl>
     </section>
   );
 }
 
+/** Compares the question behind the clicked answer on two connected models (never a pending one). */
 export function CompareDialog({ open, onClose, conversationId, prompt, agentId }: { open: boolean; onClose: () => void; conversationId: string; prompt: string; agentId: string }) {
   const models = useQuery({ queryKey: ["models"], queryFn: api.models, enabled: open });
-  const [a, setA] = useState("local:atlas-extractive-v1");
-  const [b, setB] = useState("anthropic:claude-sonnet-5-5");
+  const available = (models.data ?? []).filter((m) => m.availability.mode !== "pending");
+  const [picked, setPicked] = useState<{ a: string | null; b: string | null }>({ a: null, b: null });
+  const a = picked.a ?? available[0]?.key ?? "";
+  const b = picked.b ?? available.find((m) => m.key !== a)?.key ?? "";
   const [result, setResult] = useState<Comparison | null>(null);
   const run = useMutation({ mutationFn: () => api.comparisons.create({ conversationId, prompt, modelKeys: [a, b], agentId }), onSuccess: setResult });
   const [wasOpen, setWasOpen] = useState(open);
@@ -41,22 +48,28 @@ export function CompareDialog({ open, onClose, conversationId, prompt, agentId }
     setWasOpen(open);
     if (open) setResult(null);
   }
-  const opts = (models.data ?? []).map((m) => ({ value: m.key, label: `${m.displayName}${m.availability.mode === "pending" ? " (pending)" : ""}` }));
+  const opts = (models.data ?? []).map((m) => ({
+    value: m.key,
+    label: m.availability.mode === "pending" ? `${m.displayName} — ${chatCopy.composer.needsAdmin}` : m.displayName,
+    disabled: m.availability.mode === "pending",
+  }));
+  const enough = available.length >= 2;
   return (
-    <Modal open={open} onClose={onClose} wide title="Compare two models" description="Runs two independent executions of the same prompt; each reserves its own budget before calling.">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <p style={{ fontSize: 14, color: "var(--text-2)" }}>
-          Prompt: <q>{prompt}</q>
+    <Modal open={open} onClose={onClose} wide title={cc.title} description={cc.description}>
+      <div className={s.dialogStack}>
+        <p className={s.compareQuestion}>
+          {cc.question}: <q>{prompt}</q>
         </p>
+        {models.isSuccess && !enough ? <Callout>{cc.needTwo}</Callout> : null}
         <div className={s.compare}>
-          <Select label="Model A" value={a} onChange={(e) => setA(e.target.value)} options={opts} />
-          <Select label="Model B" value={b} onChange={(e) => setB(e.target.value)} options={opts} />
+          <Select label={cc.a} value={a} onChange={(e) => setPicked((p) => ({ ...p, a: e.target.value }))} options={opts} disabled={!enough} />
+          <Select label={cc.b} value={b} onChange={(e) => setPicked((p) => ({ ...p, b: e.target.value }))} options={opts} disabled={!enough} />
         </div>
-        <div>
-          <Button variant="primary" loading={run.isPending} disabled={a === b} onClick={() => run.mutate()}>
-            Run both
+        <div className={s.inlineRow}>
+          <Button variant="primary" loading={run.isPending} disabled={!enough || !a || !b || a === b} onClick={() => run.mutate()}>
+            {cc.run}
           </Button>
-          {a === b ? <span style={{ marginLeft: 8, fontSize: 13, color: "var(--text-3)" }}>Choose two different models.</span> : null}
+          {enough && a === b ? <span className={s.mutedNote}>{cc.same}</span> : null}
         </div>
         {run.isError ? <Callout tone="danger">{(run.error as Error).message}</Callout> : null}
         {result ? (
@@ -73,7 +86,8 @@ export function CompareDialog({ open, onClose, conversationId, prompt, agentId }
   );
 }
 
-export function BranchDialog({ open, onClose, initial, onSubmit, pending }: { open: boolean; onClose: () => void; initial: string; onSubmit: (text: string) => void; pending: boolean }) {
+/** "Edit question": the edited question is answered as a new attempt; the original stays under Version. */
+export function EditQuestionDialog({ open, onClose, initial, onSubmit, pending }: { open: boolean; onClose: () => void; initial: string; onSubmit: (text: string) => void; pending: boolean }) {
   const [text, setText] = useState(initial);
   const [seed, setSeed] = useState({ initial, open });
   if (seed.initial !== initial || seed.open !== open) {
@@ -84,18 +98,18 @@ export function BranchDialog({ open, onClose, initial, onSubmit, pending }: { op
     <Modal
       open={open}
       onClose={onClose}
-      title="Edit as a new branch"
-      description="The original branch and its answers stay intact. The new branch keeps the parent, agent and model configuration."
+      title={chatCopy.edit.title}
+      description={chatCopy.edit.description}
       footer={
         <>
           <Button onClick={onClose}>{copy.actions.cancel}</Button>
           <Button variant="primary" loading={pending} disabled={!text.trim()} onClick={() => onSubmit(text)}>
-            Create branch
+            {chatCopy.edit.submit}
           </Button>
         </>
       }
     >
-      <TextArea label="Message" rows={4} value={text} onChange={(e) => setText(e.target.value)} />
+      <TextArea label={chatCopy.edit.label} rows={4} value={text} onChange={(e) => setText(e.target.value)} />
     </Modal>
   );
 }
@@ -121,7 +135,7 @@ export function ServiceRequestDialog({ open, onClose, conversationId }: { open: 
   const confirm = useMutation({
     mutationFn: () => api.toolProposals.confirm(proposal!.id),
     onSuccess: (r) => {
-      toast({ tone: "success", title: `Service request #${r.serviceRequest.number} created`, body: "Created once. Confirming again would not create another." });
+      toast({ tone: "success", title: chatCopy.toasts.serviceRequest(r.serviceRequest.number) });
       void qc.invalidateQueries({ queryKey: ["service-requests"] });
       onClose();
     },
@@ -130,37 +144,37 @@ export function ServiceRequestDialog({ open, onClose, conversationId }: { open: 
     <Modal
       open={open}
       onClose={onClose}
-      title={proposal ? "Confirm this action" : "Prepare a service request"}
-      description={proposal ? "Nothing has been created yet. Review the effect below." : "Atlas prepares a proposal first; it only takes effect after your confirmation."}
+      title={proposal ? sc.confirm : sc.prepare}
+      description={proposal ? sc.confirmBody : sc.prepareBody}
       footer={
         proposal ? (
           <>
             <Button onClick={onClose}>{copy.actions.cancel}</Button>
             <Button variant="primary" loading={confirm.isPending} onClick={() => confirm.mutate()}>
-              Confirm and create
+              {sc.create}
             </Button>
           </>
         ) : (
           <>
             <Button onClick={onClose}>{copy.actions.cancel}</Button>
             <Button variant="primary" loading={propose.isPending} disabled={!title.trim()} onClick={() => propose.mutate()}>
-              Review proposal
+              {sc.review}
             </Button>
           </>
         )
       }
     >
       {proposal ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className={s.dialogStack}>
           <Callout tone="teal">{proposal.effectSummary}</Callout>
-          <p style={{ fontSize: 13, color: "var(--text-3)" }}>This proposal expires at {new Date(proposal.expiresAt).toLocaleTimeString()}.</p>
+          <p className={s.mutedNote}>{sc.expires(new Date(proposal.expiresAt).toLocaleTimeString())}</p>
           {confirm.isError ? <Callout tone="danger">{(confirm.error as Error).message}</Callout> : null}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <Select label="Category" value={category} onChange={(e) => setCategory(e.target.value as typeof category)} options={[{ value: "shipping", label: "Shipping" }, { value: "billing", label: "Billing" }, { value: "account", label: "Account" }, { value: "other", label: "Other" }]} />
-          <TextField label="Title" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
-          <TextArea label="Details" rows={3} value={details} maxLength={2000} onChange={(e) => setDetails(e.target.value)} />
+        <div className={s.dialogStack}>
+          <Select label={sc.category} value={category} onChange={(e) => setCategory(e.target.value as typeof category)} options={[...sc.categories]} />
+          <TextField label={sc.title} value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
+          <TextArea label={sc.details} rows={3} value={details} maxLength={2000} onChange={(e) => setDetails(e.target.value)} />
           {propose.isError ? <Callout tone="danger">{(propose.error as Error).message}</Callout> : null}
         </div>
       )}

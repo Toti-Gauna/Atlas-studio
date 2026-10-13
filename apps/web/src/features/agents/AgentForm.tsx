@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Copy, Lock, RefreshCw, Trash2 } from "lucide-react";
+import { RefreshCw, Trash2 } from "lucide-react";
 import type { AgentConfig, AgentDetail } from "@atlas/contracts";
 import { api, isApiError } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
@@ -10,7 +10,6 @@ import { Page } from "@/components/shell/StudioShell";
 import { AgentGlyph, Badge, Button, Callout, Modal, PageHeader, TabPanel, Tabs, TextField, useToast } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { agentsCopy as c } from "@/copy/agents";
-import { BackLink } from "./BackLink";
 import { BehaviorSection, IdentitySection, type SectionProps } from "./BehaviorSection";
 import { ModelSection, SourcesSection } from "./SourcesModelSection";
 import { GuardrailsSection, LimitsSection, ToolsSection } from "./ToolsLimitsSection";
@@ -21,7 +20,8 @@ import s from "./agents.module.css";
 
 type Tab = "config" | "versions";
 
-export function AgentForm({ agent, initial, readOnly, profile, duplicatedFrom }: { agent: AgentDetail | null; initial: AgentDraft; readOnly: string | null; profile: string; duplicatedFrom: string | null }) {
+/** Editor for custom agents: Basic fields first; model, temperature and limits under "Advanced". */
+export function AgentForm({ agent, initial, profile, duplicatedFrom }: { agent: AgentDetail | null; initial: AgentDraft; profile: string; duplicatedFrom: string | null }) {
   const router = useRouter();
   const qc = useQueryClient();
   const toast = useToast();
@@ -75,29 +75,14 @@ export function AgentForm({ agent, initial, readOnly, profile, duplicatedFrom }:
     if (valid) save.mutate();
   };
 
-  const actions = agent ? (
-    <>
-      {agent.builtIn && canWrite ? (
-        <Button icon={<Copy size={14} aria-hidden />} onClick={() => router.push(`/app/agent/?new=1&from=${agent.id}`)}>
-          {c.editor.duplicate}
-        </Button>
-      ) : null}
-      {!agent.builtIn && canWrite ? (
-        <Button variant="danger" icon={<Trash2 size={14} aria-hidden />} onClick={() => setConfirmDelete(true)}>
-          {c.editor.delete}
-        </Button>
-      ) : null}
-    </>
-  ) : null;
+  const actions =
+    agent && canWrite ? (
+      <Button variant="danger" icon={<Trash2 size={14} aria-hidden />} onClick={() => setConfirmDelete(true)}>
+        {c.editor.delete}
+      </Button>
+    ) : null;
 
-  const meta = (
-    <>
-      {agent ? agent.builtIn ? <Badge>{c.gallery.builtIn}</Badge> : <Badge tone="violet">{c.gallery.custom}</Badge> : <Badge tone="violet">{c.gallery.custom}</Badge>}
-      {agent ? <Badge mono>v{agent.currentVersion}</Badge> : null}
-      {duplicatedFrom ? <Badge>Duplicated from {duplicatedFrom}</Badge> : null}
-      {dirty && !readOnly ? <Badge tone="warn">{c.editor.unsaved}</Badge> : null}
-    </>
-  );
+  const meta = dirty ? <Badge tone="warn">{c.editor.unsaved}</Badge> : null;
 
   const configBody = (
     <div className={s.editorGrid}>
@@ -109,23 +94,28 @@ export function AgentForm({ agent, initial, readOnly, profile, duplicatedFrom }:
           submit();
         }}
       >
-        {readOnly ? <Callout icon={<Lock size={16} aria-hidden />}>{readOnly}</Callout> : null}
-        <fieldset disabled={Boolean(readOnly)} className={s.formFieldset}>
+        <fieldset className={s.formFieldset}>
           <legend className="sr-only">{c.editor.tabConfig}</legend>
           <IdentitySection {...sectionProps} />
           <BehaviorSection {...sectionProps} />
           <SourcesSection {...sectionProps} />
-          <ModelSection {...sectionProps} />
           <ToolsSection {...sectionProps} />
-          <LimitsSection {...sectionProps} />
+          <details className={s.advanced} open={Boolean(shownErrors.maxSteps || shownErrors.maxSeconds || shownErrors.maxInputTokens || shownErrors.maxOutputTokens || shownErrors.costUsd) || undefined}>
+            <summary>{c.editor.advanced}</summary>
+            <div className={s.advancedBody}>
+              <p className={s.hint}>{c.editor.advancedHint}</p>
+              <ModelSection {...sectionProps} />
+              <LimitsSection {...sectionProps} />
+            </div>
+          </details>
         </fieldset>
         <GuardrailsSection guardrails={agent ? agent.guardrails : null} />
-        {!readOnly ? (
+        {canWrite ? (
           <div className={s.saveBar}>
             {conflict ? (
               <Callout tone="warn">
                 <strong>{c.editor.conflictTitle}.</strong> {conflict} {c.editor.conflictHint}
-                <div style={{ marginTop: 8 }}>
+                <div className={s.conflictActions}>
                   <Button size="sm" icon={<RefreshCw size={14} aria-hidden />} onClick={() => void qc.invalidateQueries({ queryKey: ["agent", agent?.id] })}>
                     {c.editor.conflictReload}
                   </Button>
@@ -155,14 +145,14 @@ export function AgentForm({ agent, initial, readOnly, profile, duplicatedFrom }:
   return (
     <Page wide>
       <PageHeader
-        eyebrow={<BackLink />}
+        back={{ href: "/app/agents/", label: c.editor.back }}
         title={
           <span className={s.titleRow}>
             <AgentGlyph profile={profile} size={36} teal={!agent?.builtIn} />
             {agent ? agent.name : draft.name.trim() || c.editor.newTitle}
           </span>
         }
-        description={agent?.description || undefined}
+        description={agent?.description || (duplicatedFrom ? c.editor.duplicatedFrom(duplicatedFrom) : undefined)}
         meta={meta}
         actions={actions}
       />

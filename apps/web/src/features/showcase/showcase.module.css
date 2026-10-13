@@ -1,5 +1,12 @@
-.gap {
-  height: var(--s-5);
+.honesty {
+  margin: 0 0 var(--s-5);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.lastRunLabel {
+  font-size: var(--fs-13);
+  font-weight: 650;
+  color: var(--text-2);
 }
 .muted {
   color: var(--text-3);
@@ -49,14 +56,6 @@
 .summary {
   color: var(--text-2);
   font-size: var(--fs-14);
-}
-.note {
-  font-size: var(--fs-12);
-  color: var(--text-3);
-  padding: 8px 10px;
-  border-radius: var(--r-2);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
 }
 .steps {
   list-style: none;

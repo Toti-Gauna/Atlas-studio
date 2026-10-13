@@ -9,7 +9,7 @@ import { EmptyState, ErrorState, LinkButton, LoadingBlock, StatePanel } from "@/
 import { copy } from "@/copy/en";
 import { agentsCopy as c } from "@/copy/agents";
 import { AgentForm } from "./AgentForm";
-import { BackLink } from "./BackLink";
+import { AgentSummaryView } from "./AgentSummaryView";
 import { DEFAULT_CONFIG, makeDraft } from "./draft";
 
 function NotFound() {
@@ -49,7 +49,17 @@ export function AgentEditor() {
     if (!canWrite) {
       return (
         <Page>
-          <StatePanel tone="warn" icon={<Lock size={22} />} title={copy.states.forbiddenTitle} body={c.editor.readOnlyRole} action={<BackLink />} />
+          <StatePanel
+            tone="warn"
+            icon={<Lock size={22} />}
+            title={copy.states.forbiddenTitle}
+            body={c.editor.readOnlyRole}
+            action={
+              <LinkButton href="/app/agents/" icon={<ArrowLeft size={14} aria-hidden />}>
+                {c.editor.back}
+              </LinkButton>
+            }
+          />
         </Page>
       );
     }
@@ -57,14 +67,15 @@ export function AgentEditor() {
       if (detail.isPending) return <Page><LoadingBlock rows={4} /></Page>;
       if (detail.isError) return <Page><LoadError error={detail.error} retry={() => void detail.refetch()} /></Page>;
       const src = detail.data;
-      return <AgentForm key={`dup:${src.id}`} agent={null} initial={makeDraft(c.editor.copyOf(src.name), src.current.config)} readOnly={null} profile="custom" duplicatedFrom={src.name} />;
+      return <AgentForm key={`dup:${src.id}`} agent={null} initial={makeDraft(c.editor.copyOf(src.name), src.current.config)} profile="custom" duplicatedFrom={src.name} />;
     }
-    return <AgentForm key="new" agent={null} initial={makeDraft("", DEFAULT_CONFIG)} readOnly={null} profile="custom" duplicatedFrom={null} />;
+    return <AgentForm key="new" agent={null} initial={makeDraft("", DEFAULT_CONFIG)} profile="custom" duplicatedFrom={null} />;
   }
 
   if (detail.isPending) return <Page><LoadingBlock rows={4} /></Page>;
   if (detail.isError) return <Page><LoadError error={detail.error} retry={() => void detail.refetch()} /></Page>;
   const a = detail.data;
-  const readOnly = a.builtIn ? c.editor.readOnlyBuiltIn : !canWrite ? c.editor.readOnlyRole : null;
-  return <AgentForm key={`${a.id}:${a.currentVersion}`} agent={a} initial={makeDraft(a.name, a.current.config)} readOnly={readOnly} profile={a.profile} duplicatedFrom={null} />;
+  // Built-in agents and read-only roles get a summary, not a disabled form.
+  if (a.builtIn || !canWrite) return <AgentSummaryView agent={a} />;
+  return <AgentForm key={`${a.id}:${a.currentVersion}`} agent={a} initial={makeDraft(a.name, a.current.config)} profile={a.profile} duplicatedFrom={null} />;
 }

@@ -2,11 +2,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import type { Citation } from "@atlas/contracts";
 import { api } from "@/lib/api";
-import { gsap, useReducedMotion } from "@/lib/motion";
-import { Badge, CitationChip, ErrorState, Skeleton } from "@/components/ui";
+import { useReducedMotion } from "@/lib/motion";
+import { chatCopy } from "@/copy/chat";
+import { Callout, CitationChip, ErrorState, Skeleton, TechDetails } from "@/components/ui";
 import s from "./evidence.module.css";
 
 /** Highlights the exact quote inside the page text of the cited version. */
@@ -17,7 +18,6 @@ export function HighlightedText({ text, quote }: { text: string; quote: string }
   useEffect(() => {
     if (!ref.current) return;
     ref.current.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
-    if (!reduced) gsap.fromTo(ref.current, { backgroundColor: "rgba(25,182,164,0.45)" }, { backgroundColor: "rgba(25,182,164,0.18)", duration: 0.6, ease: "power1.out" });
   }, [quote, reduced]);
   if (i < 0) return <p className={s.pageText}>{text}</p>;
   return (
@@ -31,6 +31,8 @@ export function HighlightedText({ text, quote }: { text: string; quote: string }
   );
 }
 
+const ec = chatCopy.evidence;
+
 function CitedPage({ citation }: { citation: Citation }) {
   const doc = useQuery({ queryKey: ["document", citation.documentId, citation.versionId], queryFn: () => api.documents.get(citation.documentId, citation.versionId) });
   if (doc.isPending) return <Skeleton lines={6} />;
@@ -42,19 +44,26 @@ function CitedPage({ citation }: { citation: Citation }) {
       <div className={s.docHead}>
         <div>
           <div className={s.docTitle}>{citation.documentTitle}</div>
-          <div className={s.docMeta}>
-            version {citation.version}
-            {citation.page ? ` · page ${citation.page}` : ""} · chunk {citation.chunkId.split("_").slice(-1)[0]}
-          </div>
+          <div className={s.docMeta}>{ec.version(citation.version, citation.page)}</div>
         </div>
         <Link href={`/app/document/?id=${citation.documentId}&v=${citation.version}`} className={s.openLink}>
-          Open <ExternalLink size={13} aria-hidden />
+          {ec.open} <ExternalLink size={13} aria-hidden />
         </Link>
       </div>
-      {published !== null && published !== citation.version ? (
-        <Badge tone="warn">Cited v{citation.version}; current published is v{published}. Showing the cited version.</Badge>
-      ) : null}
-      {page ? <HighlightedText text={page.text} quote={citation.quote} /> : <p className={s.pageText}>This version is no longer available. The citation snapshot is kept: “{citation.quote}”</p>}
+      {published !== null && published !== citation.version ? <Callout tone="warn">{ec.newer(citation.version, published)}</Callout> : null}
+      {page ? <HighlightedText text={page.text} quote={citation.quote} /> : <p className={s.pageText}>{ec.gone(citation.quote)}</p>}
+      <div className={s.tech}>
+        <TechDetails>
+          <dl className={s.techList}>
+            <dt>Passage</dt>
+            <dd className="mono">{citation.chunkId}</dd>
+            <dt>Match score</dt>
+            <dd>{citation.score}</dd>
+            <dt>Document version</dt>
+            <dd className="mono">{citation.versionId}</dd>
+          </dl>
+        </TechDetails>
+      </div>
     </div>
   );
 }
@@ -69,27 +78,7 @@ export function EvidencePanel({ state }: { state: { citations: Citation[]; activ
   const cit = state.citations[active];
   return (
     <div className={s.wrap}>
-      <ol className={s.chain} aria-label="Evidence chain">
-        <li>
-          <span className="eyebrow">1 · Retrieval</span>
-          <span>Authorized, published passages only</span>
-        </li>
-        <li aria-hidden className={s.arrow}>
-          <ArrowDown size={14} />
-        </li>
-        <li>
-          <span className="eyebrow">2 · Answer</span>
-          <span>Quoted sentences, no paraphrase (local)</span>
-        </li>
-        <li aria-hidden className={s.arrow}>
-          <ArrowDown size={14} />
-        </li>
-        <li>
-          <span className="eyebrow">3 · Citation</span>
-          <span>Exact document version and page</span>
-        </li>
-      </ol>
-      <div className={s.chips} role="list">
+      <div className={s.chips} role="list" aria-label={ec.sourcesLabel}>
         {state.citations.map((c, i) => (
           <div role="listitem" key={c.id} className={i === active ? s.chipActive : undefined}>
             <CitationChip index={i + 1} citation={c} onOpen={() => setActive(i)} />

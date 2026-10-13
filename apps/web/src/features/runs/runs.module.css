@@ -56,3 +56,32 @@
   flex-direction: column;
   gap: 4px;
 }
+.panel {
+  padding: var(--s-4);
+}
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cost {
+  margin-top: 8px;
+  font-weight: 600;
+}
+.when {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.techList {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 12px;
+  margin: 0;
+}
+.techList dt {
+  color: var(--text-3);
+}
+.techList dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

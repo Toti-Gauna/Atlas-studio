@@ -152,7 +152,7 @@ export function executeChat(db: Db, input: ChatInput): SendMessageResult {
     builder.step("tool_call", "Compare with checklist", "succeeded", `${covered} covered · ${findings.length - covered - gaps.length} partial · ${gaps.length} gaps`, "checklist_compare");
     const report = gapReport("Vendor checklist gap report", "All production systems", "As stated in the project memory", findings);
     content =
-      `Checklist comparison (local mode, lexical matching): ${covered} of ${findings.length} items covered, ${gaps.length} gaps.\n\nGaps without supporting evidence:\n` +
+      `Checklist comparison (local mode, keyword matching): ${covered} of ${findings.length} items covered, ${gaps.length} gaps.\n\nGaps without supporting evidence:\n` +
       gaps.map((g) => `• ${g.item}`).join("\n") +
       "\n\nThis is a checklist comparison, not a legal opinion or certification.";
     citations = report.sources.slice(0, 4).map((s) => ({
@@ -188,7 +188,7 @@ export function executeChat(db: Db, input: ChatInput): SendMessageResult {
       "retrieval",
       "Retrieve sources",
       "succeeded",
-      `${chunks.length} authorized passages searched · coverage ${retrieval.topScore ?? 0} vs threshold ${answer.threshold}${answer.excludedInjections ? ` · ${answer.excludedInjections} instruction-like sentence(s) ignored` : ""}`,
+      `${chunks.length} authorized passages searched · best match ${retrieval.topScore ?? 0} (needs ${answer.threshold} to answer) · ${answer.decision === "answered" ? "answered" : "not enough evidence"}${answer.excludedInjections ? ` · ${answer.excludedInjections} instruction-like sentence(s) ignored` : ""}`,
       "retrieve_sources",
     );
     if (answer.decision === "abstained") {
@@ -225,7 +225,7 @@ export function executeChat(db: Db, input: ChatInput): SendMessageResult {
     }
   }
 
-  builder.step("review", "Result", "succeeded", abstained ? "Abstained: no supporting evidence. Handoff available." : `${citations.length} citation(s)${artifactIds.length ? ` · ${artifactIds.length} artifact(s)` : ""}`);
+  builder.step("review", "Result", "succeeded", abstained ? "Abstained: no supporting evidence. Handoff available." : `${citations.length} citation(s)${artifactIds.length ? ` · ${artifactIds.length} deliverable(s)` : ""}`);
   builder.finish(abstained ? "abstained" : "succeeded");
 
   const assistant: Message = {
