@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,9957,e=>{"use strict";var t=e.i(48361),i=e.i(76337),o=e.i(57210);e.i(47129);var r=e.i(71040);e.s(["default",0,function(){let e=(0,o.useRouter)();return(0,i.useEffect)(()=>e.replace("/app/inbox/?tab=reviews"),[e]),(0,t.jsx)(r.LoadingBlock,{rows:2})}])}]);

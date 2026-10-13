@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,24271,t=>{t.v(i=>Promise.all(["static/chunks/2ygsoai7_38v3.js"].map(i=>t.l(i))).then(()=>i(54941)))},6542,t=>{"use strict";t.s(["SLIDE_LAYOUT",0,{width:13.333,height:7.5,margin:.7,titleY:.55,bodyY:1.65,font:"Arial"}])}]);
