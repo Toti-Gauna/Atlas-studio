@@ -39,8 +39,8 @@ await step("chat-new-send", async () => {
   await p.locator("select").filter({ hasText: "Agent default" }).first().selectOption({ index: 2 }).catch(() => {});
   await p.locator("#composer-input").fill("How long do approved refunds take?"); await p.keyboard.press("Enter"); await p.waitForTimeout(1000);
   await shot(p, "1440-07-chat-blocked-model");
-  await p.getByRole("button", { name: "Compare models" }).first().click(); await p.waitForTimeout(500);
-  await shot(p, "1440-08-compare-modal");
+  await p.getByRole("button", { name: "More actions for this answer" }).last().click(); await p.waitForTimeout(400);
+  await shot(p, "1440-08-answer-menu");
   await p.keyboard.press("Escape");
 });
 await step("canvas", async () => {
@@ -68,7 +68,7 @@ await step("workflow-run", async () => {
   const q = await fresh();
   await nav(q, "Workflows"); await q.getByRole("link", { name: /Review a policy/ }).first().click(); await q.waitForTimeout(700);
   await shot(q, "1440-17-workflow-detail");
-  await q.getByRole("button", { name: /Preview plan/ }).first().click(); await q.waitForTimeout(600);
+  await q.getByRole("button", { name: /Review & run|Preview plan/ }).first().click(); await q.waitForTimeout(600);
   await q.screenshot({ path: `${out}/1440-18-workflow-preview.png`, fullPage: true });
   await q.getByRole("link", { name: "Guided tours", exact: true }).first().click(); await q.waitForTimeout(700); await q.screenshot({ path: `${out}/1440-19-showcase.png`, fullPage: true });
   await q.getByRole("button", { name: "Admin", exact: true }).click().catch(() => {}); await q.waitForTimeout(200);

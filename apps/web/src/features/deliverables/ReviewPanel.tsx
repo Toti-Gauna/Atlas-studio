@@ -147,7 +147,7 @@ export function ReviewDecisionCard({ detail }: { detail: ArtifactDetail }) {
   if (!canDecideThis || !openOnCurrent) return null;
   return (
     <div aria-live="polite">
-      <ReviewDecision request={openOnCurrent} pending={decide.isPending ? (decide.variables?.decision ?? null) : null} onDecide={(decision, note) => decide.mutate({ r: openOnCurrent, decision, note })} />
+      <ReviewDecision asAdmin={openOnCurrent.reviewerId !== session?.user.id} request={openOnCurrent} pending={decide.isPending ? (decide.variables?.decision ?? null) : null} onDecide={(decision, note) => decide.mutate({ r: openOnCurrent, decision, note })} />
     </div>
   );
 }

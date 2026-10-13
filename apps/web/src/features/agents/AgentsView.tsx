@@ -26,7 +26,7 @@ function AgentCard({ a, canChat }: { a: AgentSummary; canChat: boolean }) {
       <p className={s.cardDesc}>{a.description || "—"}</p>
       <div className={s.cardActions}>
         {canChat ? (
-          <LinkButton size="sm" variant="primary" href={`/app/chat/?new=1&agent=${a.id}`} icon={<MessageSquarePlus size={14} aria-hidden />}>
+          <LinkButton size="sm" variant="secondary" href={`/app/chat/?new=1&agent=${a.id}`} icon={<MessageSquarePlus size={14} aria-hidden />}>
             {c.gallery.useInChat}
             <span className="sr-only"> — {a.name}</span>
           </LinkButton>

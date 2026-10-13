@@ -34,6 +34,8 @@ export const reviewsCopy = {
     requested: (v: number, name: string) => `Review of v${v} requested from ${name}`,
     requestFailed: "Review not requested",
     decideTitle: (v: number) => `Your decision on v${v}`,
+    decideAsAdminTitle: (v: number) => `Decide on v${v} as admin`,
+    decideAsAdminNote: (reviewer: string) => `Assigned to ${reviewer}. Admins can decide on their behalf; the decision is recorded under your name.`,
     note: "Note (optional for approval)",
     noteHint: "Explain what needs to change, or add context to the approval.",
     approve: "Approve",

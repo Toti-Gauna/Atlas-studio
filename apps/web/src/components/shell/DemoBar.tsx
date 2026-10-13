@@ -95,7 +95,7 @@ export function DemoBar({ onPreview }: { onPreview: () => void }) {
   const [real, setReal] = useState(false);
   const preview = useSyncExternalStore(noopSubscribe, previewEnabled, () => false);
   return (
-    <div className={s.banner} role="note" aria-label="Demo workspace">
+    <aside className={s.banner} aria-label="Demo workspace">
       <span className={s.bannerTag}>{copy.demo.tag}</span>
       <span className={s.bannerDetail}>
         {copy.demo.banner}
@@ -116,6 +116,6 @@ export function DemoBar({ onPreview }: { onPreview: () => void }) {
         <RoleMenu />
       </span>
       <WhatsReal open={real} onClose={() => setReal(false)} />
-    </div>
+    </aside>
   );
 }

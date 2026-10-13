@@ -1,6 +1,6 @@
 # Auditoría UX/UI y plan de 4 fases — Atlas Studio (preview P02)
 
-**Fecha:** 2026-10-12 · **Estado:** plan aprobado para arrancar; **Fase 1 implementada, requiere revisión de Ignacio** · Fases 2–4 pendientes.
+**Fecha:** 2026-10-12/13 · **Estado:** **Fases 1–4 implementadas, requieren revisión de Ignacio** (Fase 1 en `main`; Fases 2–4 en la rama `ux/phases-2-4`).
 
 **Decisiones de Ignacio:** arrancar con la Fase 1; la interfaz **queda en inglés** (las etiquetas en español de este documento son descriptivas). Nombres finales en la UI: Home, Chat, Projects, Sources, Deliverables, Inbox (Reviews · Support · Sensitive data), Agents, Workflows, Admin › Usage & costs, Privacy, Activity, Quality, Settings; Guided tours en la barra de demo.
 
@@ -179,3 +179,32 @@ Cada fase termina con: lint/typecheck/tests verdes, `e2e/routes.mjs` (22 rutas �
 **Verificación (resultados reales):** `pnpm -r lint` ✓ · `pnpm -r typecheck` ✓ · tests 30 + 16 + 6 + 8 ✓ · `pnpm build:pages` ✓ · `e2e/smoke.mjs` 9/9 ✓ · `e2e/routes.mjs` 24 rutas × 360/768/1440: 0 errores de consola, 0 overflow.
 
 **Queda para fases siguientes:** datos técnicos en mensajes de chat (coverage/threshold), badge Local por mensaje, eyebrows de detalle, estados de error/vacío (F2); acción "respuesta → entregable" y layout de 4 columnas del chat (F3); búsqueda de documentos en ⌘K y pantallas de Admin (F4). Las URLs internas (`/artifacts`, `/library`, `/runs`, `/evaluations`) no cambiaron para no romper enlaces.
+
+## 11. Fases 2–4 — resultado (implementadas, requieren revisión de Ignacio)
+
+| Criterio | Antes | Después |
+|---|---|---|
+| Pregunta → entregable | ≥ 5 clics y volver a preguntar | **3 clics** (pregunta de ejemplo → "Create deliverable ▾" → Deck), sin reescribir; `e2e/loop.mjs` |
+| Exportar el formato nativo | 5 botones iguales | **1 clic**: "Export PPTX/PDF/CSV" según el tipo + "Other formats" |
+| Pedir revisión | 6 clics en 2 pasos | popover de un paso (elegir revisor → Send) |
+| Jerga visible (coverage/threshold, BM25, chunk, idempotency, branch, hash, FIXTURE…) | presente en 9 pantallas | **0** — `scripts/check-copy.mjs` corre en CI; el detalle vive en "Technical details" (11 usos) |
+| Mapas de estado duplicados | 8 (RUN_TONE, STATUS_TONE, COST_TONE…) | 1 diccionario `StatusBadge` (24 usos) |
+| Tablas en móvil | se cortaban | 17 tablas apiladas como tarjetas < 768px |
+| Estilos inline / hex sueltos | 169 / 31 | 50 / 7 (marca, meta theme-color, ilustración del hero) |
+| `<Badge>` | 121 | 49 |
+| Accesibilidad (axe, 20 rutas × claro/oscuro) | sin medir | **0 violaciones serias o críticas**; `e2e/a11y.mjs` |
+
+**Fase 2 — sistema y voz:** `PageHeader` con `back` (un solo estilo de "volver"), `StatusBadge`, `TechDetails`, `Table stack`, `PlanPreview` único para agentes y workflows, menú/popover compartido, tokens categóricos para proyectos, burbuja de usuario y bordes legibles en oscuro, contraste del botón primario deshabilitado, estados de error con título claro y detalle plegado, esqueletos por tipo, recorte editorial de los 14 archivos de copy.
+
+**Fase 3 — ciclo de valor:** "Create deliverable ▾" en cada respuesta citada (informe/tabla/deck construidos solo con la respuesta y sus citas, sin modelo; fuentes con versión y página); modos visibles en el composer y "Settings" plegado; "Backed by N sources" / "Not enough evidence"; `[S1]` clicable; modelos no conectados deshabilitados con motivo; Compare deshabilitado con motivo cuando hay un solo modelo conectado; el historial se pliega con el panel abierto; chat nuevo con 3 preguntas de ejemplo; documento con "Ask about this document" y panel "About this document"; CSV abre en perfil y tabla; proyectos con pestaña en la URL y Overview útil; entregables con barra de acciones, revisión en un paso, comentarios/historial en pestañas, editor con lista de diapositivas, vista previa y guardado fijo; Inbox › Reviews como lista de tareas; decisión de admin rotulada cuando decide por otro revisor.
+
+**Fase 4 — superficies de control y pulido:** Usage empieza por presupuestos (estado por presupuesto), 3 KPIs de negocio y detalle técnico plegado; un solo aviso DEMO; Workflows con "Needs you", ejecuciones nombradas por fecha · persona · objetivo (quién la pausó y cuándo), "Review & run" con el plan en el mismo panel; Agents con fichas de lectura para los integrados ("Use in chat" / "Duplicate") y editor Básico/Avanzado; Activity con objetivos realistas, una nota DEMO y paginación; Quality con el último resultado primero; Support con resumen y filtro "Open and waiting"; Privacy con una frase de detección y decisiones con confirmación; Settings con modelos como tarjetas; landing con captura real del producto (`e2e/capture-landing.mjs`) y sin copy defensivo; ⌘K con acciones primero y búsqueda de fuentes y entregables.
+
+**Verificación (resultados reales):** `pnpm -r lint` ✓ · `pnpm -r typecheck` ✓ · `node scripts/check-copy.mjs` ✓ · tests 32 + 16 + 6 + 13 ✓ · `pnpm build:pages` ✓ · `e2e/smoke.mjs` 9/9 ✓ · `e2e/loop.mjs` 7/7 ✓ · `e2e/routes.mjs` 24 rutas × 360/768/1440 sin errores ni overflow ✓ · `e2e/a11y.mjs` 0 violaciones serias/críticas ✓.
+
+**No hecho / parcial (con motivo):**
+- *E30 scroll del documento:* se mantiene el scroll en el contenedor principal; cambiarlo afecta el layout del chat y los paneles laterales con riesgo alto para un beneficio menor (barra del navegador en móvil). Queda como mejora futura.
+- *Deshacer al redactar (C23):* no existe endpoint de deshacer; el aviso explica que el original queda en el historial de versiones.
+- *Compare models:* el demo tiene un solo modelo conectado (Atlas Local); la acción aparece deshabilitada con el motivo en lugar de fallar.
+- *Preferencias personales en Settings › Profile (N18):* renombradas ("Your preferences in every project") pero siguen en la pestaña Memory del proyecto.
+- *URLs internas* (`/artifacts`, `/library`, `/runs`, `/evaluations`) sin cambios para no romper enlaces.
