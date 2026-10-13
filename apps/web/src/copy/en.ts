@@ -54,8 +54,8 @@ export const copy = {
   states: {
     loadingLabel: "Loading",
     emptyTitle: "Nothing here yet",
-    errorTitle: "Something went wrong",
-    errorBody: "The request failed. Your input is kept — try again.",
+    errorTitle: "This didn’t load",
+    errorBody: "Nothing you entered was lost. Try again in a moment.",
     retry: "Try again",
     forbiddenTitle: "Not available for your role",
     forbiddenBody: "The server denied this request for your current role. Switch role or ask an admin.",

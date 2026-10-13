@@ -573,6 +573,19 @@
 }
 .paletteGroup {
   padding: 10px 12px 4px;
+  font-size: var(--fs-12);
+  font-weight: 650;
+  color: var(--text-3);
+}
+.paletteSearch {
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  color: var(--text-3);
+}
+.paletteEmpty {
+  padding: 16px;
+  color: var(--text-3);
 }
 .paletteItem {
   display: flex;

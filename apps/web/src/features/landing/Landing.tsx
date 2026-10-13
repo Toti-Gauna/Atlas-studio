@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { ArrowRight, BarChart3, Bot, FileCheck2, Quote, ShieldCheck, Workflow } from "lucide-react";
-import { AGENT_PROFILES } from "@atlas/domain";
 import { copy } from "@/copy/en";
 import { landing } from "@/copy/landing";
 import { AtlasMark } from "@/components/shell/AtlasMark";
-import { AgentGlyph, LinkButton, ModeBadge } from "@/components/ui";
+import { LinkButton, ModeBadge } from "@/components/ui";
+import { asset } from "@/lib/config";
 import { HeroScene } from "./HeroScene";
 import s from "./landing.module.css";
 
@@ -36,9 +36,9 @@ export function Landing() {
         </Link>
         <nav aria-label="Sections" className={s.navLinks}>
           <a href="#how">How it works</a>
-          <a href="#agents">Agents</a>
+          <a href="#product">Product</a>
           <a href="#control">Control</a>
-          <a href="#status">Status</a>
+          <a href="#status">What’s real</a>
         </nav>
         <LinkButton href="/app/" variant="ink" size="sm">
           {landing.ctaPrimary}
@@ -80,23 +80,24 @@ export function Landing() {
           </ol>
         </section>
 
-        <section id="agents" className={s.section} aria-labelledby="agents-h">
-          <h2 id="agents-h" className={s.h2}>
-            {landing.agentsTitle}
+        <section id="product" className={s.section} aria-labelledby="product-h">
+          <h2 id="product-h" className={s.h2}>
+            {landing.productTitle}
           </h2>
-          <p className={s.sectionLead}>{landing.agentsLead}</p>
-          <ul className={s.agents}>
-            {AGENT_PROFILES.map((a) => (
-              <li key={a.slug} className={s.agent}>
-                <AgentGlyph profile={a.profile} size={36} />
-                <div>
-                  <h3>{a.name}</h3>
-                  <p>{a.config.description}</p>
-                  <span className={s.tools}>{a.config.allowedTools.length} allowed tools · {a.guardrails.at(-1)}</span>
+          <figure className={s.product}>
+            {/* Real capture of the demo (scripts: e2e/capture-landing.mjs). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={asset("/landing/product-evidence.png")} alt={landing.productAlt} width={1440} height={900} loading="lazy" className={s.productShot} />
+            <figcaption className={s.productSteps}>
+              {landing.productSteps.map((st, i) => (
+                <div key={st.title} className={s.productStep}>
+                  <span className={s.num}>0{i + 1}</span>
+                  <h3>{st.title}</h3>
+                  <p>{st.body}</p>
                 </div>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </figcaption>
+          </figure>
         </section>
 
         <section id="control" className={s.section} aria-labelledby="control-h">

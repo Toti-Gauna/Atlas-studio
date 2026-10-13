@@ -7,16 +7,21 @@ export const landing = {
   howTitle: "From question to reviewed deliverable",
   pillars: [
     { title: "Cite or abstain", body: "Every answer quotes an authorized document version and page. Without evidence, Atlas says so and offers a person, with the conversation context preserved." },
-    { title: "Agents with real boundaries", body: "Six profiles and your own agents change instructions, sources, tools and output format. Prompts and documents can never widen permissions." },
+    { title: "Agents for the job", body: "Compliance, data, presentations, research and your own: each agent sets the sources, tools and output format a task may use." },
     { title: "Versioned deliverables", body: "Reports, tables and presentations are edited in a canvas, exported to Markdown, CSV, PDF and PPTX, and approved per exact version." },
   ],
-  agentsTitle: "Six starting profiles, plus your own",
-  agentsLead: "Each profile is a versioned configuration — not a mascot. Choosing one changes what the run is allowed to do.",
+  productTitle: "See it in the product",
+  productAlt: "Atlas Studio chat: a question about refund timing answered with a quote, and the evidence panel open on the cited page of the Refund & Cancellation Policy.",
+  productSteps: [
+    { title: "Ask", body: "Questions run against the documents your workspace allows." },
+    { title: "Check the source", body: "Every claim opens the exact version and page it came from." },
+    { title: "Ship the deliverable", body: "Turn the answer into a report, table or deck, then request review." },
+  ],
   controlTitle: "Control you can audit",
   control: [
-    { title: "Cost per model, agent and project", body: "Usage ledger by run and attempt, budgets reserved before every call, cache and reasoning counted once. Unknown costs are shown as unknown — never zero." },
-    { title: "Privacy before transfer", body: "Explainable detection of a limited set of sensitive patterns, redaction review and consent before any external provider call. A review aid, not a guarantee." },
-    { title: "Traceable runs", body: "Each run freezes the agent version, model, prices and document versions it used, and shows operational steps — never private reasoning." },
+    { title: "Cost per model, agent and project", body: "Usage by run, model, agent and project, with budgets reserved before every call. Unknown costs stay visible as unknown." },
+    { title: "Privacy before transfer", body: "Common sensitive patterns are flagged with the reason, and external transfers wait for a person’s decision." },
+    { title: "Traceable runs", body: "Each run records the agent version, model, prices and document versions it used." },
   ],
   statusTitle: "What is real in this demo",
   status: [

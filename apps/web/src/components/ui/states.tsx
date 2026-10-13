@@ -19,15 +19,28 @@ export function Skeleton({ lines = 3, height = 14, block }: { lines?: number; he
   );
 }
 
-export function LoadingBlock({ label = copy.states.loadingLabel, rows = 3 }: { label?: string; rows?: number }) {
+/** Loading placeholder shaped like what is coming: list rows, a card grid or a table. */
+export function LoadingBlock({ label = copy.states.loadingLabel, rows = 3, variant = "rows" }: { label?: string; rows?: number; variant?: "rows" | "cards" | "table" }) {
   return (
-    <div role="status" aria-live="polite" className={s.loading}>
+    <div role="status" aria-live="polite" className={variant === "cards" ? s.loadingCards : s.loading}>
       <span className="sr-only">{label}…</span>
-      {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className={s.loadingRow}>
-          <Skeleton block={44} />
-        </div>
-      ))}
+      {Array.from({ length: rows }, (_, i) =>
+        variant === "cards" ? (
+          <div key={i} className={s.loadingCard}>
+            <Skeleton lines={3} />
+          </div>
+        ) : variant === "table" ? (
+          <div key={i} className={s.loadingTableRow}>
+            <Skeleton block={12} />
+            <Skeleton block={12} />
+            <Skeleton block={12} />
+          </div>
+        ) : (
+          <div key={i} className={s.loadingRow}>
+            <Skeleton block={44} />
+          </div>
+        ),
+      )}
     </div>
   );
 }
@@ -49,7 +62,7 @@ export function EmptyState({ title = copy.states.emptyTitle, body, action, icon 
   return <StatePanel icon={icon ?? <FileQuestion size={22} />} title={title} body={body} action={action} />;
 }
 
-export function ErrorState({ error, onRetry, compact }: { error: unknown; onRetry?: () => void; compact?: boolean }) {
+export function ErrorState({ error, onRetry, compact, title }: { error: unknown; onRetry?: () => void; compact?: boolean; title?: string }) {
   const e = isApiError(error) ? error : null;
   if (e?.code === "FORBIDDEN" || e?.code === "TOOL_NOT_ALLOWED") return <StatePanel compact={compact} tone="warn" icon={<Lock size={22} />} title={copy.states.forbiddenTitle} body={e.message || copy.states.forbiddenBody} />;
   if (e?.code === "NETWORK") return <StatePanel compact={compact} tone="warn" icon={<CloudOff size={22} />} title={copy.states.offlineTitle} body={copy.states.offlineBody} action={onRetry ? <Button icon={<RefreshCw size={14} />} onClick={onRetry}>{copy.states.retry}</Button> : null} />;
@@ -59,11 +72,17 @@ export function ErrorState({ error, onRetry, compact }: { error: unknown; onRetr
       compact={compact}
       tone="danger"
       icon={<ServerCrash size={22} />}
-      title={copy.states.errorTitle}
+      title={title ?? copy.states.errorTitle}
       body={
         <>
-          {e?.message ?? copy.states.errorBody}
-          {e?.requestId ? <div className="mono" style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>request {e.requestId}</div> : null}
+          {copy.states.errorBody}
+          {e?.requestId || e?.message ? (
+            <details className={s.details}>
+              <summary>Details for support</summary>
+              {e?.message ? <div>{e.message}</div> : null}
+              {e?.requestId ? <div className="mono">Request {e.requestId}</div> : null}
+            </details>
+          ) : null}
         </>
       }
       action={onRetry ? <Button icon={<RefreshCw size={14} />} onClick={onRetry}>{copy.states.retry}</Button> : null}
