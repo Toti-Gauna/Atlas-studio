@@ -1,9 +1,9 @@
 "use client";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Brain, FolderPlus, Plus } from "lucide-react";
-import type { Project } from "@atlas/contracts";
+import { ArrowRight, Brain, FolderPlus, MessageSquarePlus, Plus } from "lucide-react";
+import type { ConversationSummary, Project } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
@@ -12,40 +12,52 @@ import { Page } from "@/components/shell/StudioShell";
 import { Badge, Button, EmptyState, PageHeader, QueryState } from "@/components/ui";
 import { projectsCopy as P } from "@/copy/projects";
 import { NewProjectModal } from "./NewProjectModal";
+import { ProjectDot, newChatHref } from "./projectBits";
 import s from "./projects.module.css";
 
-/** Project colors map to tokens only. */
-export const PROJECT_DOT: Record<Project["color"], string> = { teal: "var(--teal)", violet: "var(--violet)", amber: "var(--warn)", slate: "var(--text-3)" };
-
-function ProjectCard({ p }: { p: Project }) {
+function ProjectCard({ p, latest, canChat }: { p: Project; latest: ConversationSummary | undefined; canChat: boolean }) {
+  const lastActivity = latest && latest.updatedAt > p.updatedAt ? latest.updatedAt : p.updatedAt;
   return (
     <li className={s.card} data-card>
       <Link href={`/app/project/?id=${p.id}`} className={s.cardLink}>
         <span className={s.cardHead}>
-          <span className={s.dot} style={{ background: PROJECT_DOT[p.color] }} aria-hidden />
+          <ProjectDot color={p.color} />
           <span className={s.cardTitle}>{p.name}</span>
         </span>
         <span className={s.objective}>{p.objective || P.list.noObjective}</span>
       </Link>
       <dl className={s.counts}>
         <div>
-          <dt>Sources</dt>
+          <dt>{P.list.counts.sources}</dt>
           <dd className="tabular">{p.documentCount}</dd>
         </div>
         <div>
-          <dt>Chats</dt>
+          <dt>{P.list.counts.conversations}</dt>
           <dd className="tabular">{p.conversationCount}</dd>
         </div>
         <div>
-          <dt>Deliverables</dt>
+          <dt>{P.list.counts.deliverables}</dt>
           <dd className="tabular">{p.artifactCount}</dd>
         </div>
       </dl>
       <div className={s.cardFoot}>
-        <Badge tone={p.memoryEnabled ? "teal" : "neutral"} icon={<Brain size={12} aria-hidden />}>
-          {p.memoryEnabled ? P.list.memoryOn : P.list.memoryOff}
-        </Badge>
-        <span className={s.updated}>{relativeTime(p.updatedAt)}</span>
+        <span className={s.updated}>{P.list.lastActivity(relativeTime(lastActivity))}</span>
+        {!p.memoryEnabled ? (
+          <Badge icon={<Brain size={12} aria-hidden />}>{P.list.memoryOff}</Badge>
+        ) : null}
+        {canChat ? (
+          latest ? (
+            <Link href={`/app/chat/?c=${latest.id}`} className={s.continue} aria-label={P.list.continueLabel(latest.title)}>
+              {P.list.continue}
+              <ArrowRight size={14} aria-hidden />
+            </Link>
+          ) : (
+            <Link href={newChatHref(p)} className={s.continue}>
+              <MessageSquarePlus size={14} aria-hidden />
+              {P.list.start}
+            </Link>
+          )
+        ) : null}
       </div>
     </li>
   );
@@ -53,7 +65,15 @@ function ProjectCard({ p }: { p: Project }) {
 
 export function ProjectsView() {
   const canWrite = useCan("project.write");
+  const canChat = useCan("conversation.use");
   const projects = useQuery({ queryKey: ["projects"], queryFn: api.projects.list });
+  const conversations = useQuery({ queryKey: ["conversations", null], queryFn: () => api.conversations.list(), enabled: canChat });
+  const latestByProject = useMemo(() => {
+    const m = new Map<string, ConversationSummary>();
+    // The list comes newest first; keep the first per project.
+    for (const c of conversations.data ?? []) if (!m.has(c.projectId)) m.set(c.projectId, c);
+    return m;
+  }, [conversations.data]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLUListElement>(null);
   const reduced = useReducedMotion();
@@ -76,12 +96,12 @@ export function ProjectsView() {
       <QueryState
         query={projects}
         isEmpty={(d) => d.length === 0}
-        empty={<EmptyState icon={<FolderPlus size={22} />} title={P.list.emptyTitle} body={canWrite ? P.list.emptyBody : P.list.emptyReadOnly} action={newBtn} />}
+        empty={<EmptyState icon={<FolderPlus size={22} />} title={P.list.emptyTitle} body={canWrite ? P.list.emptyBody : P.list.emptyReadOnly} />}
       >
         {(list) => (
           <ul className={s.grid} ref={ref} aria-label={P.list.caption}>
             {list.map((p) => (
-              <ProjectCard key={p.id} p={p} />
+              <ProjectCard key={p.id} p={p} latest={latestByProject.get(p.id)} canChat={canChat} />
             ))}
           </ul>
         )}
@@ -90,3 +110,4 @@ export function ProjectsView() {
     </Page>
   );
 }
+

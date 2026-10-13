@@ -37,6 +37,8 @@ const STATUS = {
     closed: ["Closed", "neutral"],
   },
   review: {
+    draft: ["Draft", "neutral"],
+    in_review: ["In review", "info"],
     open: ["Waiting for review", "info"],
     approved: ["Approved", "teal"],
     changes_requested: ["Changes requested", "warn"],

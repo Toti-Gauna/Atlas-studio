@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   AGENT_PROFILES, DEFAULT_ROUTING_POLICY, MODEL_REGISTRY, aggregate, assertToolAllowed, can, canOnArtifact, chunkPages, cuitValid, extractiveAnswer,
-  ibanValid, luhnValid, profileCsv, redact, route, scanText, suggestClassification, toCsv, buildSuggestions, compareChecklist,
+  ibanValid, luhnValid, profileCsv, redact, route, scanText, suggestClassification, toCsv, buildSuggestions, withArticle, compareChecklist,
 } from "../src";
 import type { ChunkInput } from "../src";
 
@@ -141,5 +141,25 @@ describe("recommendations", () => {
       expect(x.reason.length).toBeGreaterThan(10);
       expect(x.basedOn.length).toBeGreaterThan(0);
     }
+  });
+  it("question titles read as English and reasons avoid engineering vocabulary", () => {
+    const s = buildSuggestions({
+      project: { id: "prj_1", name: "P", objective: "Audit" },
+      agent: { id: "agt_1", name: "Compliance Advisor", profile: "compliance" },
+      documents: [
+        { id: "doc_1", title: "Data Retention Policy", kind: "pdf", sensitiveFindingCount: 2 },
+        { id: "doc_2", title: "Retention Checklist", kind: "markdown", sensitiveFindingCount: 0 },
+      ],
+      lastUserMessage: null,
+      lastAnswerAbstained: false,
+      hasArtifacts: false,
+    });
+    expect(s.find((x) => x.kind === "question")?.title).toBe("What does the Data Retention Policy require?");
+    for (const x of s) expect(x.reason).not.toMatch(/rule-based|provider call|deterministic|artifact|abstain/i);
+  });
+  it("withArticle leaves file names and titles with an article alone", () => {
+    expect(withArticle("Data Retention Policy")).toBe("the Data Retention Policy");
+    expect(withArticle("The Carrier Handbook")).toBe("The Carrier Handbook");
+    expect(withArticle("shipments.csv")).toBe("shipments.csv");
   });
 });

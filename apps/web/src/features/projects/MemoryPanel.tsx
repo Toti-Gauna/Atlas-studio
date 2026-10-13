@@ -30,7 +30,15 @@ export function MemoryPanel({ project }: { project: Project }) {
     <div className={s.memoryGrid}>
       <section aria-labelledby="mem-project-h" className={s.memSection}>
         <Card>
-          <SectionHead id="mem-project-h" title={<span className={s.eyebrowRow}><Brain size={16} aria-hidden /> {M.title}</span>} aside={pending ? `${pending} awaiting approval` : undefined} />
+          <SectionHead
+            id="mem-project-h"
+            title={
+              <span className={s.iconTitle}>
+                <Brain size={16} aria-hidden /> {M.title}
+              </span>
+            }
+            aside={pending ? M.pending(pending) : undefined}
+          />
           <Switch label={M.toggle} description={M.explanation} checked={project.memoryEnabled} disabled={!canProject || toggle.isPending} onChange={(v) => toggle.mutate({ memoryEnabled: v })} />
           <div aria-live="polite" className={s.memNote}>
             {!project.memoryEnabled ? <Callout tone="neutral">{M.offNote}</Callout> : null}
@@ -45,8 +53,15 @@ export function MemoryPanel({ project }: { project: Project }) {
       </section>
 
       <section aria-labelledby="mem-pref-h" className={`${s.memSection} ${s.prefSection}`}>
-        <SectionHead id="mem-pref-h" title={<span className={s.eyebrowRow}><UserRound size={16} aria-hidden /> {M.preferencesTitle}</span>} />
-        <p className={s.footNote} style={{ marginTop: 0 }}>{M.preferencesExplanation}</p>
+        <SectionHead
+          id="mem-pref-h"
+          title={
+            <span className={s.iconTitle}>
+              <UserRound size={16} aria-hidden /> {M.preferencesTitle}
+            </span>
+          }
+        />
+        <p className={s.prefNote}>{M.preferencesExplanation}</p>
         <QueryState query={prefs} isEmpty={(d) => d.length === 0} empty={<EmptyState icon={<UserRound size={22} />} title={M.preferencesEmpty} body={M.preferencesEmptyBody} />}>
           {(list) => <MemoryList items={list} canWrite={canMemory} queryKey={prefKey} caption={M.preferencesCaption} />}
         </QueryState>

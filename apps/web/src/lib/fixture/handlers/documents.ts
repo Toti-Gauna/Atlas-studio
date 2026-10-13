@@ -71,7 +71,7 @@ on("POST", "/documents", (ctx) => {
     pages = [{ page: 1, text: (b.text ?? "").split("\n").slice(0, 16).join("\n") }];
   } else if (kind === "pdf") {
     status = "failed";
-    failureReason = "PDF text extraction runs in the API worker (pending backend). The preview does not parse PDFs and never simulates OCR.";
+    failureReason = "PDFs are stored but can’t be cited yet in this demo.";
   } else if (kind === "image") {
     status = "ready";
   } else {

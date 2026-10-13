@@ -1,11 +1,3 @@
-.subtle {
-  color: var(--text-3);
-  font-size: var(--fs-13);
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
 .nowrap {
   white-space: nowrap;
 }
@@ -19,19 +11,6 @@
   margin-top: var(--s-3);
   font-size: var(--fs-13);
   color: var(--text-3);
-}
-.back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--fs-13);
-  font-weight: 600;
-  color: var(--teal-ink);
-  text-decoration: none;
-  margin-bottom: var(--s-3);
-}
-.back:hover {
-  text-decoration: underline;
 }
 .tabBody {
   margin-top: var(--s-5);
@@ -49,6 +28,31 @@
   flex-direction: column;
   gap: 4px;
   min-width: 200px;
+}
+.titleLine {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+.kind {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.rowExceptions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.muted {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 .docLink {
   font-weight: 600;
@@ -68,6 +72,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  font-size: var(--fs-12);
   font-weight: 600;
   color: var(--warn);
   text-decoration: none;
@@ -124,16 +129,15 @@
   background: var(--surface);
   padding: var(--s-4);
 }
-.hitsHead {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--s-2);
-  margin-bottom: var(--s-3);
-}
 .hitsTitle {
   font-size: var(--fs-15);
   font-weight: 650;
+  margin-bottom: var(--s-3);
+}
+.hitMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-3);
 }
 .hitList {
   list-style: none;
@@ -164,10 +168,136 @@
   line-height: var(--lh-body);
 }
 
-/* Document detail */
-.sha {
-  font-size: var(--fs-12);
+/* Document detail: reading column + metadata side panel */
+.docLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--s-6);
+  align-items: start;
+}
+.docMain {
+  min-width: 0;
+}
+.aside {
+  position: sticky;
+  top: calc(var(--topbar-h) + var(--s-4));
+  min-width: 0;
+}
+.inlineList {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.inlineLink {
+  color: var(--teal-ink);
+  font-weight: 600;
+}
+.loadingGap {
+  margin-top: var(--s-5);
+}
+.calloutGap {
+  margin: var(--s-3) 0;
+}
+.techGap {
+  margin-top: var(--s-4);
+}
+.techList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.techRow {
+  display: grid;
+  grid-template-columns: minmax(90px, max-content) minmax(0, 1fr);
+  gap: var(--s-3);
+}
+.techRow dt {
   color: var(--text-3);
+}
+.techRow dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-12);
+}
+.stackTight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.csvTable td {
+  font-size: var(--fs-13);
+}
+.colType {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+
+/* "⋯" actions menu */
+.menuWrap {
+  position: relative;
+  display: inline-flex;
+}
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: var(--z-overlay);
+  min-width: 200px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-3);
+}
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  cursor: pointer;
+}
+.menuItem:hover,
+.menuItem:focus-visible {
+  background: var(--surface-2);
+}
+.menuItem:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.menuDanger {
+  color: var(--danger);
+}
+.menuSpinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--text-2);
+  animation: menuSpin 0.8s linear infinite;
+}
+@keyframes menuSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menuSpinner {
+    animation: none;
+  }
 }
 .pages {
   list-style: none;
@@ -242,5 +372,16 @@
 @media (max-width: 767px) {
   .filters {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .titleCell {
+    min-width: 0;
+  }
+}
+@media (max-width: 1099px) {
+  .docLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .aside {
+    position: static;
   }
 }
