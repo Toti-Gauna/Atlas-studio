@@ -15,9 +15,7 @@ export function VersionHistory({ workflow }: { workflow: WorkflowDetail }) {
         {versions.map((v) => (
           <li key={v.id} className={s.versionRow}>
             <div className={s.versionTop}>
-              <Badge mono tone={v.version === workflow.currentVersion ? "teal" : "neutral"}>
-                v{v.version}
-              </Badge>
+              <strong>{c.version(v.version)}</strong>
               {v.version === workflow.currentVersion ? <Badge tone="teal">{c.current}</Badge> : null}
               <span className={s.muted}>
                 {c.steps(v.steps.length)} ·{" "}

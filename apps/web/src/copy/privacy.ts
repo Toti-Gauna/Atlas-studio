@@ -1,16 +1,15 @@
-/** Privacy Center (R10) copy. Shared disclaimers live in copy/en.ts. */
+/** Privacy (R10) copy. */
 export const privacyCopy = {
-  eyebrow: "Operate · Privacy",
   title: "Privacy",
-  description: "Test detection, manage external-transfer consents and set the workspace policy.",
-  pendingInInbox: (n: number) => `${n} ${n === 1 ? "check is" : "checks are"} waiting for a decision.`,
-  openInbox: "Open in Inbox",
-  notDlp: "Detection is pattern-based (with checksum validation where possible). It is not a DLP guarantee — a person decides.",
+  description: "Test detection, manage consents for external providers and set the workspace policy.",
+  pendingInInbox: (n: number) => `${n} ${n === 1 ? "item" : "items"} of sensitive data ${n === 1 ? "is" : "are"} waiting for a decision.`,
+  openInbox: "Review in Inbox",
+  detection: "Detection is rule-based and can miss things, so a person always decides.",
   tabs: { reviews: "Review queue", scanner: "Scanner", consents: "Consents", policy: "Policy" },
   severity: { low: "Low", medium: "Medium", high: "High" } as Record<string, string>,
   classification: { public: "Public", internal: "Internal", confidential: "Confidential", restricted: "Restricted" } as Record<string, string>,
-  reviewStatus: { pending_review: "Pending review", redacted: "Redacted", approved_original: "Original approved", rejected: "Rejected" } as Record<string, string>,
   reviews: {
+    itemLabel: "Sensitive data to review",
     caption: "Findings",
     composer: "Text from the composer",
     findings: (n: number) => `${n} ${n === 1 ? "finding" : "findings"}`,
@@ -28,8 +27,9 @@ export const privacyCopy = {
     empty: "No reviews waiting",
     emptyBody: "New uploads with sensitive findings appear here before any external provider call.",
     pendingCount: (n: number) => `${n} pending`,
+    redactHint: "Replaces the findings with placeholders in a new version. The original stays in version history.",
+    redactedBody: (title: string) => `${title}: new version published. The original stays in version history.`,
     confirm: {
-      redact: { title: "Redact and publish a new version?", body: "Atlas creates a new published version with the findings replaced by placeholders. The original version stays in history but is no longer used for answers.", cta: "Redact" },
       approve_original: { title: "Approve the original?", body: "The original text stays published as is. It may be sent to an external provider only where policy and consent allow it.", cta: "Approve original" },
       reject: { title: "Reject this document?", body: "The document is kept out of retrieval and is never sent to a provider. You can upload a corrected version later.", cta: "Reject" },
       local: "Nothing has been sent to an external provider for this item — external calls wait for this decision.",

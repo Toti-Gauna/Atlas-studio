@@ -7,12 +7,13 @@ import { Button, TextArea } from "@/components/ui";
 import s from "./deliverables.module.css";
 
 /** Approve / request changes for the open request on the current version. */
-export function ReviewDecision({ request, pending, onDecide }: { request: ReviewRequest; pending: "approve" | "request_changes" | null; onDecide: (d: "approve" | "request_changes", note: string) => void }) {
+export function ReviewDecision({ request, pending, onDecide, asAdmin }: { request: ReviewRequest; pending: "approve" | "request_changes" | null; onDecide: (d: "approve" | "request_changes", note: string) => void; asAdmin?: boolean }) {
   const [note, setNote] = useState("");
   const [needNote, setNeedNote] = useState(false);
   return (
     <div className={s.decision}>
-      <h3 className={s.subhead}>{c.panel.decideTitle(request.version)}</h3>
+      <h3 className={s.subhead}>{asAdmin ? c.panel.decideAsAdminTitle(request.version) : c.panel.decideTitle(request.version)}</h3>
+      {asAdmin ? <p className={s.muted}>{c.panel.decideAsAdminNote(request.reviewerName)}</p> : null}
       <TextArea
         label={c.panel.note}
         hint={c.panel.noteHint}

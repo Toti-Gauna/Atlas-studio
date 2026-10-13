@@ -1,13 +1,13 @@
 "use client";
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, Plus, X } from "lucide-react";
-import type { PlanPreview, WorkflowDetail } from "@atlas/contracts";
+import { Eye, Play, Plus, X } from "lucide-react";
+import type { PlanPreview as Plan, WorkflowDetail } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
 import { Button, Callout, Card, ErrorState, IconButton, SectionHead, Select, Skeleton, TextField, useToast } from "@/components/ui";
-import { RECIPE_INPUTS, RECIPE_PROJECT, wfCopy } from "@/copy/workflows";
-import { PlanPreviewCard } from "./PlanPreviewCard";
+import { RECIPE_INPUTS, RECIPE_PROJECT, planCopy, wfCopy } from "@/copy/workflows";
+import { PlanPreview } from "./PlanPreview";
 import { newIdempotencyKey } from "./status";
 import s from "./workflows.module.css";
 
@@ -21,15 +21,21 @@ interface Row {
 
 const KEY_RE = /^[A-Za-z][A-Za-z0-9_]{0,39}$/;
 
+/**
+ * Run setup: the recipe's inputs and one "Review & run" button. The plan opens
+ * in the same panel and the Run button lives under it, so nothing runs before
+ * the plan has been seen. Extra free-form inputs are for workflow editors only.
+ */
 export function RunSetup({ workflow, initialProjectId, onStarted }: { workflow: WorkflowDetail; initialProjectId: string | null; onStarted: (runId: string) => void }) {
   const qc = useQueryClient();
   const toast = useToast();
   const canRun = useCan("workflow.run");
+  const canEdit = useCan("workflow.write");
   const projects = useQuery({ queryKey: ["projects"], queryFn: api.projects.list });
   const [projectId, setProjectId] = useState<string | null>(initialProjectId ?? RECIPE_PROJECT[workflow.recipe] ?? null);
   const [rows, setRows] = useState<Row[]>(() => RECIPE_INPUTS[workflow.recipe].map((r) => ({ key: r.key, value: r.value, label: r.label, hint: r.hint, fixed: true })));
-  const [preview, setPreview] = useState<{ plan: PlanPreview; version: number } | null>(null);
-  /** Generated once per preview → run click session; reused if the user retries after an error. */
+  const [preview, setPreview] = useState<{ plan: Plan; version: number } | null>(null);
+  /** Generated once per review → run click session; reused if the user retries after an error. */
   const idemKey = useRef<string | null>(null);
   const c = wfCopy.setup;
 
@@ -72,90 +78,108 @@ export function RunSetup({ workflow, initialProjectId, onStarted }: { workflow: 
       void qc.invalidateQueries({ queryKey: ["demo-scenarios"] });
       onStarted(run.id);
     },
-    onError: (e) => toast({ tone: "error", title: "Run not started", body: (e as Error).message }),
+    onError: (e) => toast({ tone: "error", title: c.runFailed, body: (e as Error).message }),
   });
+  const blocked = Boolean(preview?.plan.routing.blocked);
 
   return (
-    <div className={s.stack}>
-      <Card>
-        <SectionHead title={c.title} aside={`${c.aside} (v${workflow.currentVersion})`} />
-        <div className={s.formGrid}>
-          {projects.isPending ? (
-            <Skeleton lines={1} height={38} />
-          ) : projects.isError ? (
-            <ErrorState compact error={projects.error} onRetry={() => void projects.refetch()} />
-          ) : (
-            <Select
-              label={c.project}
-              hint={c.projectHint}
-              value={effectiveProject ?? ""}
-              onChange={(e) => {
-                invalidatePreview();
-                setProjectId(e.target.value);
-              }}
-              options={projects.data.map((p) => ({ value: p.id, label: p.name }))}
-            />
-          )}
-          {rows.map((r, i) =>
-            r.fixed ? (
-              <TextField key={`f-${r.key}`} label={r.label ?? r.key} hint={r.hint} error={rowErrors[i]} value={r.value} maxLength={2000} onChange={(e) => setRow(i, { value: e.target.value })} />
-            ) : (
-              <div key={`x-${i}`} className={s.kvRow}>
-                <TextField label={c.inputKey} value={r.key} error={rowErrors[i]} onChange={(e) => setRow(i, { key: e.target.value })} />
-                <TextField label={c.inputValue} value={r.value} maxLength={2000} onChange={(e) => setRow(i, { value: e.target.value })} />
-                <IconButton
-                  label={c.removeInput(r.key || String(i + 1))}
-                  className={s.kvRemove}
-                  onClick={() => {
-                    invalidatePreview();
-                    setRows((rs) => rs.filter((_, j) => j !== i));
-                  }}
-                >
-                  <X size={16} />
-                </IconButton>
-              </div>
-            ),
-          )}
-        </div>
-        <div className={s.formFoot}>
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Plus size={14} />}
-            onClick={() => {
+    <Card className={s.setup}>
+      <SectionHead title={c.title} />
+      <div className={s.formGrid}>
+        {projects.isPending ? (
+          <Skeleton lines={1} height={38} />
+        ) : projects.isError ? (
+          <ErrorState compact error={projects.error} onRetry={() => void projects.refetch()} />
+        ) : (
+          <Select
+            label={c.project}
+            hint={c.projectHint}
+            value={effectiveProject ?? ""}
+            onChange={(e) => {
               invalidatePreview();
-              setRows((rs) => [...rs, { key: "", value: "", fixed: false }]);
+              setProjectId(e.target.value);
             }}
-          >
-            {c.addInput}
-          </Button>
+            options={projects.data.map((p) => ({ value: p.id, label: p.name }))}
+          />
+        )}
+        {rows.map((r, i) =>
+          r.fixed ? (
+            <TextField key={`f-${r.key}`} label={r.label ?? r.key} hint={r.hint} error={rowErrors[i]} value={r.value} maxLength={2000} onChange={(e) => setRow(i, { value: e.target.value })} />
+          ) : (
+            <div key={`x-${i}`} className={s.kvRow}>
+              <TextField label={c.inputKey} value={r.key} error={rowErrors[i]} onChange={(e) => setRow(i, { key: e.target.value })} />
+              <TextField label={c.inputValue} value={r.value} maxLength={2000} onChange={(e) => setRow(i, { value: e.target.value })} />
+              <IconButton
+                label={c.removeInput(r.key || String(i + 1))}
+                className={s.kvRemove}
+                onClick={() => {
+                  invalidatePreview();
+                  setRows((rs) => rs.filter((_, j) => j !== i));
+                }}
+              >
+                <X size={16} />
+              </IconButton>
+            </div>
+          ),
+        )}
+      </div>
+
+      {!preview ? (
+        <div className={s.formFoot}>
+          {canEdit ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Plus size={14} />}
+              onClick={() => {
+                invalidatePreview();
+                setRows((rs) => [...rs, { key: "", value: "", fixed: false }]);
+              }}
+            >
+              {c.addInput}
+            </Button>
+          ) : null}
           <div className={s.formFootRight}>
-            <span className={s.muted}>{c.previewHint}</span>
-            <Button variant={preview ? "secondary" : "primary"} icon={<Eye size={14} />} disabled={!valid} loading={previewM.isPending} onClick={() => previewM.mutate()}>
-              {c.previewBtn}
+            <span className={s.muted}>{c.reviewHint}</span>
+            <Button variant="primary" icon={<Eye size={14} />} disabled={!valid} loading={previewM.isPending} onClick={() => previewM.mutate()}>
+              {c.review}
             </Button>
           </div>
         </div>
-      </Card>
+      ) : null}
 
       <div aria-live="polite">
         {previewM.isError ? <ErrorState compact error={previewM.error} onRetry={() => previewM.mutate()} /> : null}
         {preview ? (
-          <PlanPreviewCard
-            plan={preview.plan}
-            version={preview.version}
-            canRun={canRun}
-            running={runM.isPending}
-            onRun={() => runM.mutate()}
-            onDiscard={() => {
-              invalidatePreview();
-              previewM.reset();
-            }}
-          />
+          <section className={s.planPanel} aria-label={planCopy.titleVersion(preview.version)}>
+            <SectionHead title={planCopy.titleVersion(preview.version)} aside={planCopy.nothingRuns} />
+            <PlanPreview
+              plan={preview.plan}
+              footer={
+                <div className={s.previewFoot}>
+                  <span className={s.muted}>{canRun ? c.runHint : c.noRunRole}</span>
+                  <div className={s.formFootRight}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        invalidatePreview();
+                        previewM.reset();
+                      }}
+                    >
+                      {c.editInputs}
+                    </Button>
+                    <Button variant={canRun && !blocked ? "primary" : "secondary"} icon={<Play size={14} />} disabled={!canRun || blocked} loading={runM.isPending} onClick={() => runM.mutate()}>
+                      {c.run}
+                    </Button>
+                  </div>
+                </div>
+              }
+            />
+          </section>
         ) : previewM.isSuccess ? (
           <Callout tone="info">{c.stale}</Callout>
         ) : null}
       </div>
-    </div>
+    </Card>
   );
 }

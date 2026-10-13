@@ -19,11 +19,11 @@
   min-height: 34px;
   padding: 3px var(--s-4);
   background: var(--ink);
-  color: #cbd5e1;
+  color: var(--on-ink-2);
   font-size: var(--fs-12);
 }
 :global([data-theme="dark"]) .banner {
-  background: #060a13;
+  background: var(--ink-deep);
   border-bottom: 1px solid var(--line);
 }
 .bannerTag {
@@ -60,7 +60,7 @@
   border: 0;
   border-radius: var(--r-1);
   background: transparent;
-  color: #e2e8f0;
+  color: var(--on-ink-2);
   font-size: var(--fs-12);
   font-weight: 600;
   text-decoration: none;
@@ -573,6 +573,19 @@
 }
 .paletteGroup {
   padding: 10px 12px 4px;
+  font-size: var(--fs-12);
+  font-weight: 650;
+  color: var(--text-3);
+}
+.paletteSearch {
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  color: var(--text-3);
+}
+.paletteEmpty {
+  padding: 16px;
+  color: var(--text-3);
 }
 .paletteItem {
   display: flex;

@@ -203,35 +203,33 @@
   font-size: var(--fs-12);
   color: var(--text-3);
 }
-.agents {
-  list-style: none;
-  padding: 0;
+.product {
   margin: var(--s-6) 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-3);
 }
-.agent {
-  display: flex;
-  gap: var(--s-3);
-  padding: var(--s-4);
+.productShot {
+  display: block;
+  width: 100%;
+  height: auto;
   border: 1px solid var(--line);
-  border-radius: var(--r-3);
+  border-radius: var(--r-4);
+  box-shadow: var(--shadow-3);
   background: var(--surface);
 }
-.agent h3 {
-  font-size: var(--fs-15);
+.productSteps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-6);
+  margin-top: var(--s-6);
 }
-.agent p {
-  font-size: var(--fs-13);
+.productStep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
   color: var(--text-2);
-  margin-top: 4px;
 }
-.tools {
-  display: block;
-  margin-top: 8px;
-  font-size: var(--fs-12);
-  color: var(--text-3);
+.productStep h3 {
+  font-size: var(--fs-18);
+  color: var(--text);
 }
 .status {
   margin-top: var(--s-5);
@@ -274,7 +272,7 @@
     padding-top: var(--s-5);
   }
   .pillars,
-  .agents {
+  .productSteps {
     grid-template-columns: minmax(0, 1fr);
   }
   .navLinks {

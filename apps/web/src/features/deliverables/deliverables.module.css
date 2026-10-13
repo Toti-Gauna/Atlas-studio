@@ -7,6 +7,7 @@
 }
 .count {
   justify-self: end;
+  margin: 0;
   font-size: var(--fs-13);
   color: var(--text-3);
   padding-bottom: 8px;
@@ -37,13 +38,6 @@
   display: inline-flex;
   color: var(--violet-ink);
   flex: none;
-}
-.inlineTag {
-  margin-left: 8px;
-}
-
-.backRow {
-  margin-bottom: var(--s-3);
 }
 .detailGrid {
   display: grid;
@@ -114,8 +108,49 @@
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
-  padding-top: var(--s-3);
-  border-top: 1px solid var(--line);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--line);
+}
+.tabBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding-top: var(--s-4);
+}
+.sideCard {
+  min-width: 0;
+}
+.historyBlock {
+  display: flex;
+  flex-direction: column;
+}
+.fold summary {
+  cursor: pointer;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+  padding: 4px 0;
+}
+.fold[open] summary {
+  margin-bottom: var(--s-2);
+}
+.popForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.popTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-15);
+}
+.headerNote {
+  align-self: center;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.calloutAction {
+  margin-top: 8px;
 }
 .actions {
   display: flex;

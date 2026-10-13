@@ -1,6 +1,7 @@
 "use client";
 import { useRef, type KeyboardEvent, type ReactNode } from "react";
-import { AlertTriangle, BarChart3, BookOpenCheck, Briefcase, Code2, FileText, Info, Layers, PenLine, Presentation, ShieldCheck, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, ArrowLeft, BarChart3, BookOpenCheck, Briefcase, Code2, FileText, Info, Layers, PenLine, Presentation, ShieldCheck, Sparkles } from "lucide-react";
 import type { Citation, SourceRef } from "@atlas/contracts";
 import { cx } from "./controls";
 import s from "./surfaces.module.css";
@@ -13,14 +14,25 @@ export function Card({ children, className, flush, interactive, as: As = "sectio
   );
 }
 
-export function PageHeader({ eyebrow, title, description, actions, meta }: { eyebrow?: ReactNode; title: ReactNode; description?: ReactNode; actions?: ReactNode; meta?: ReactNode }) {
+/**
+ * Page header: optional back link (detail pages), title, one line of task-oriented
+ * description, a few exception badges (meta) and the page's actions.
+ * `eyebrow` is plain context text (e.g. "Ticket #12"), never a decorative label.
+ */
+export function PageHeader({ back, eyebrow, title, description, actions, meta }: { back?: { href: string; label: string }; eyebrow?: ReactNode; title: ReactNode; description?: ReactNode; actions?: ReactNode; meta?: ReactNode }) {
   return (
     <header className={s.pageHeader}>
-      <div style={{ minWidth: 0 }}>
-        {eyebrow ? <div className="eyebrow" style={{ marginBottom: 8 }}>{eyebrow}</div> : null}
+      <div className={s.pageHeadMain}>
+        {back ? (
+          <Link href={back.href} className={s.pageBack}>
+            <ArrowLeft size={14} aria-hidden />
+            {back.label}
+          </Link>
+        ) : null}
+        {eyebrow ? <div className={s.pageKicker}>{eyebrow}</div> : null}
         <h1 className={s.pageTitle}>{title}</h1>
         {description ? <p className={s.pageDesc}>{description}</p> : null}
-        {meta ? <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>{meta}</div> : null}
+        {meta ? <div className={s.pageMeta}>{meta}</div> : null}
       </div>
       {actions ? <div className={s.pageActions}>{actions}</div> : null}
     </header>
@@ -48,9 +60,13 @@ export function Stat({ value, label, note }: { value: ReactNode; label: ReactNod
   );
 }
 
-export function Table({ children, caption, className }: { children: ReactNode; caption?: string; className?: string }) {
+/**
+ * `stack`: below 768px each row becomes a card. Give every body cell a
+ * `data-label` (the column name) so the stacked card keeps its labels.
+ */
+export function Table({ children, caption, className, stack }: { children: ReactNode; caption?: string; className?: string; stack?: boolean }) {
   return (
-    <div className={cx(s.tableWrap, className)} role="region" aria-label={caption} tabIndex={0}>
+    <div className={cx(s.tableWrap, stack && s.tableStack, className)} role="region" aria-label={caption} tabIndex={0}>
       <table className={s.table}>
         {caption ? <caption className="sr-only">{caption}</caption> : null}
         {children}
@@ -204,3 +220,7 @@ export function DescList({ items }: { items: Array<[ReactNode, ReactNode]> }) {
     </dl>
   );
 }
+
+/** Project identity color (categorical palette; not a status color). */
+const PROJECT_COLOR: Record<string, string> = { teal: "var(--cat-1)", violet: "var(--cat-2)", amber: "var(--cat-3)", slate: "var(--cat-4)" };
+export const projectColor = (c: string) => PROJECT_COLOR[c] ?? "var(--cat-4)";

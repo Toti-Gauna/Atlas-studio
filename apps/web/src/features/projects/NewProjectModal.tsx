@@ -6,6 +6,7 @@ import { api, isApiError } from "@/lib/api";
 import { Button, Callout, Modal, Select, TextArea, TextField, useToast } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { projectsCopy as P } from "@/copy/projects";
+import s from "./projects.module.css";
 
 export function NewProjectModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const C = P.create;
@@ -59,7 +60,7 @@ export function NewProjectModal({ open, onClose }: { open: boolean; onClose: () 
         </>
       }
     >
-      <form id="new-project-form" onSubmit={submit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <form id="new-project-form" onSubmit={submit} noValidate className={s.form}>
         <TextField label={C.name} value={name} maxLength={80} required placeholder={C.namePlaceholder} error={nameError} onChange={(e) => setName(e.target.value)} autoFocus />
         <TextArea label={C.objective} value={objective} maxLength={400} rows={3} hint={`${C.objectiveHint} (${objective.length}/400)`} onChange={(e) => setObjective(e.target.value)} />
         <Select label={C.agent} value={agentId} onChange={(e) => setAgentId(e.target.value)} options={agentOptions} hint={agents.isError ? (agents.error instanceof Error ? agents.error.message : undefined) : undefined} />

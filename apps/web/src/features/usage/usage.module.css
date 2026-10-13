@@ -1,28 +1,62 @@
+.disclaimer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 var(--s-5);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-3);
   align-items: center;
-  margin-bottom: var(--s-3);
 }
 .toolLabel {
   font-size: var(--fs-13);
   font-weight: 600;
   color: var(--text-2);
 }
-.toolLabel:not(:first-child) {
-  margin-left: var(--s-3);
+.filtersToggle {
+  display: none;
 }
 .filters {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--s-3);
   align-items: end;
-  margin-bottom: var(--s-5);
 }
 .clear {
   justify-self: start;
   margin-bottom: 4px;
+}
+@media (max-width: 767px) {
+  .filtersToggle {
+    display: inline-flex;
+  }
+  .filtersWrap:not(.filtersOpen) {
+    display: none;
+  }
+  .filtersWrap {
+    padding: var(--s-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    background: var(--surface);
+  }
+  .filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .stack {
   display: flex;
@@ -30,12 +64,74 @@
   gap: var(--s-5);
   transition: opacity var(--d-fast) var(--ease-out);
 }
-.section {
-  margin-top: var(--s-7);
+.stale {
+  opacity: 0.6;
 }
 .muted {
   color: var(--text-3);
   font-size: var(--fs-13);
+}
+.mutedBlock {
+  margin: var(--s-3) 0 0;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.warnNote {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  padding-left: 10px;
+  border-left: 3px solid var(--warn);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.monoSmall {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  overflow-wrap: anywhere;
+}
+.groupName {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dayCell {
+  font-weight: 500;
+}
+.groupBar {
+  max-width: 240px;
+  margin-bottom: var(--s-3);
+}
+.kpiBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.technical {
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+}
+.technical > summary {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px var(--s-3);
+  padding: var(--s-4) var(--s-5);
+}
+.technical[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+.technicalTitle {
+  font-weight: 650;
+}
+.technicalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  padding: var(--s-4);
+  min-width: 0;
 }
 .kpis {
   display: grid;
@@ -49,13 +145,13 @@
   gap: var(--s-3);
   margin-bottom: var(--s-3);
 }
+.cardHead .cardTitle {
+  margin: 0;
+}
 .cardTitle {
   font-size: var(--fs-16);
   font-weight: 650;
   margin: 0 0 var(--s-3);
-}
-.cardHead .cardTitle {
-  margin: 0;
 }
 .tokenGrid {
   display: grid;
@@ -177,38 +273,46 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--s-3);
 }
 .budget {
   display: flex;
   flex-direction: column;
-  gap: var(--s-3);
+  gap: var(--s-2);
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  min-width: 0;
+}
+.budgetHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-2);
+}
+.budgetName {
+  min-width: 0;
 }
 .budgetTitle {
-  font-size: var(--fs-16);
+  font-size: var(--fs-15);
   font-weight: 650;
-  margin: 2px 0 0;
-}
-.budgetMeta {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-2);
   margin: 0;
-  font-size: var(--fs-13);
 }
-.budgetMeta dt {
-  color: var(--text-3);
-}
-.budgetMeta dd {
+.budgetAmount {
   margin: 0;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: var(--fs-22);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.budgetAmount .muted {
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+.budget p.muted {
+  margin: 0;
 }
 .form {
   display: flex;

@@ -11,7 +11,9 @@ import { authorizedChunks, currentAgentVersion, routeFor, taskForProfile } from 
 import { createArtifact } from "./artifacts";
 import { startRun } from "./runs";
 
-export function startWorkflow(db: Db, workflowId: string, version: number, projectId: string, inputs: Record<string, string>, idempotencyKey: string): WorkflowRun {
+const nameOf = (db: Db, userId: string) => db.users.find((u) => u.id === userId)?.displayName ?? null;
+
+export function startWorkflow(db: Db, workflowId: string, version: number, projectId: string, inputs: Record<string, string>, idempotencyKey: string, userId?: string): WorkflowRun {
   const existing = db.workflowRuns.find((r) => r.workflowId === workflowId && r.checkpoints[0]?.idempotencyKey.startsWith(`${idempotencyKey}:`));
   if (existing) return existing; // idempotent start
   const wf = db.workflows.find((w) => w.summary.id === workflowId)!;
@@ -30,17 +32,26 @@ export function startWorkflow(db: Db, workflowId: string, version: number, proje
     costStatus: "no_provider_charge",
     startedAt: iso(Date.now()),
     updatedAt: iso(Date.now()),
+    startedByName: userId ? nameOf(db, userId) : null,
+    pausedByName: null,
+    pausedAt: null,
   };
   db.workflowRuns.unshift(run);
   wf.summary.lastRunStatus = run.status;
   return run;
 }
 
-const pauseRequested = new Set<string>();
+/** Pause requests remember who asked, so the paused run can say so. */
+const pauseRequested = new Map<string, string | null>();
 
-export function requestPause(db: Db, run: WorkflowRun): WorkflowRun {
-  if (run.status === "running") pauseRequested.add(run.id);
-  if (run.status === "awaiting_confirmation") run.status = "paused";
+export function requestPause(db: Db, run: WorkflowRun, userId?: string): WorkflowRun {
+  const who = userId ? nameOf(db, userId) : null;
+  if (run.status === "running") pauseRequested.set(run.id, who);
+  if (run.status === "awaiting_confirmation") {
+    run.status = "paused";
+    run.pausedByName = who;
+    run.pausedAt = iso(Date.now());
+  }
   return run;
 }
 
@@ -187,6 +198,8 @@ export function tick(db: Db, run: WorkflowRun, userId: string): WorkflowRun {
   run.currentStepKey = next?.stepKey ?? null;
   if (!next) run.status = "succeeded";
   else if (pauseRequested.has(run.id)) {
+    run.pausedByName = pauseRequested.get(run.id) ?? null;
+    run.pausedAt = iso(Date.now());
     pauseRequested.delete(run.id);
     run.status = "paused";
   }

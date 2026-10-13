@@ -1,17 +1,29 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { useMutation, useQueryClient, type QueryKey } from "@tanstack/react-query";
+import Link from "next/link";
+import { useMutation, useQuery, useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { Check, Pencil, Power, PowerOff, Trash2 } from "lucide-react";
 import type { MemoryItem } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { Badge, Button, Modal, TextArea, useToast, type Tone } from "@/components/ui";
+import { Button, Modal, StatusBadge, TextArea, useToast } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { projectsCopy as P } from "@/copy/projects";
 import s from "./projects.module.css";
 
 const M = P.memory;
-const STATUS_TONE: Record<MemoryItem["status"], Tone> = { approved: "teal", proposed: "info", disabled: "neutral" };
+
+/** Where an agent-suggested memory came from: a link to its conversation, never the raw run id. */
+function SourceConversationLink({ runId }: { runId: string }) {
+  const run = useQuery({ queryKey: ["run", runId], queryFn: () => api.runs.get(runId), staleTime: 5 * 60_000 });
+  const conversationId = run.data?.conversationId;
+  if (!conversationId) return null;
+  return (
+    <Link href={`/app/chat/?c=${conversationId}`} className={s.memLink}>
+      {M.viewSource}
+    </Link>
+  );
+}
 
 function useMemoryMutations(queryKey: QueryKey) {
   const qc = useQueryClient();
@@ -45,12 +57,11 @@ function MemoryRow({ item, canWrite, queryKey }: { item: MemoryItem; canWrite: b
   return (
     <li className={s.memItem} data-status={item.status}>
       <div className={s.memBadges}>
-        <Badge tone={STATUS_TONE[item.status]} dot>
-          {M.status[item.status]}
-        </Badge>
-        <Badge mono>{M.source[item.source]}</Badge>
-        {item.sourceRunId ? <span className={`mono ${s.memMeta}`}>{M.fromRun} {item.sourceRunId}</span> : null}
-        <span className={s.memMeta}>{formatDateTime(item.updatedAt)}</span>
+        <StatusBadge kind="memory" status={item.status} />
+        <span className={s.memMeta}>
+          {M.source[item.source]} · {formatDateTime(item.updatedAt)}
+        </span>
+        {item.sourceRunId ? <SourceConversationLink runId={item.sourceRunId} /> : null}
       </div>
       {editing ? (
         <form onSubmit={saveEdit} className={s.inlineForm}>
@@ -59,7 +70,13 @@ function MemoryRow({ item, canWrite, queryKey }: { item: MemoryItem; canWrite: b
             <Button type="submit" size="sm" variant="primary" loading={update.isPending} disabled={!text.trim()}>
               {M.save}
             </Button>
-            <Button size="sm" onClick={() => { setText(item.content); setEditing(false); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setText(item.content);
+                setEditing(false);
+              }}
+            >
               {copy.actions.cancel}
             </Button>
           </div>

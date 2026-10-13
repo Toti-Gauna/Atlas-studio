@@ -1,25 +1,24 @@
 import type { ArtifactDetail } from "@atlas/contracts";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { deliverablesCopy as c } from "@/copy/deliverables";
-import { Badge, Card, SectionHead } from "@/components/ui";
-import { REVIEW_LABEL, REVIEW_TONE } from "@/features/artifacts/ArtifactWorkspace";
+import { ReviewStateBadge } from "@/features/artifacts/ArtifactWorkspace";
 import { cleanNote } from "./queries";
 import s from "./deliverables.module.css";
 
 export function VersionHistory({ detail }: { detail: ArtifactDetail }) {
   const versions = [...detail.versions].sort((a, b) => b.version - a.version);
   return (
-    <Card as="section" aria-labelledby="versions-h">
-      <SectionHead id="versions-h" title={c.versions.title} aside={String(versions.length)} />
+    <section aria-labelledby="versions-h" className={s.historyBlock}>
+      <h3 id="versions-h" className={s.subhead}>{c.versions.title}</h3>
       <ol className={s.versionList} aria-label={c.versions.caption}>
         {versions.map((v) => (
           <li key={v.id} className={s.versionItem}>
             <div className={s.reviewTop}>
-              <Badge mono tone={v.version === detail.currentVersion ? "teal" : "neutral"}>
+              <strong>
                 v{v.version}
                 {v.version === detail.currentVersion ? ` · ${c.versions.current}` : ""}
-              </Badge>
-              <Badge tone={REVIEW_TONE[v.reviewState]}>{REVIEW_LABEL[v.reviewState]}</Badge>
+              </strong>
+              <ReviewStateBadge state={v.reviewState} />
             </div>
             <p className={s.commentBody}>{cleanNote(v.changeNote)}</p>
             <div className={s.meta}>
@@ -34,6 +33,6 @@ export function VersionHistory({ detail }: { detail: ArtifactDetail }) {
           </li>
         ))}
       </ol>
-    </Card>
+    </section>
   );
 }

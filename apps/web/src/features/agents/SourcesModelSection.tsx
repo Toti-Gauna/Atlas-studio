@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Badge, Card, ErrorState, ModeBadge, Segmented, Select, Skeleton, Switch } from "@/components/ui";
 import { agentsCopy as c } from "@/copy/agents";
+import { privacyCopy } from "@/copy/privacy";
 import type { SectionProps } from "./BehaviorSection";
 import s from "./agents.module.css";
 
@@ -48,7 +49,7 @@ export function SourcesSection({ draft, setConfig }: SectionProps) {
                       <span className={s.checkMain}>
                         <span className={s.checkTitle}>{d.title}</span>
                         <span className={s.checkMeta}>
-                          {d.kind} · {d.classification}
+                          {d.kind.toUpperCase()} · {privacyCopy.classification[d.classification] ?? d.classification}
                           {d.publishedVersion ? ` · v${d.publishedVersion}` : ""}
                         </span>
                       </span>
@@ -83,14 +84,13 @@ export function ModelSection({ draft, setConfig }: SectionProps) {
             <Select
               label={c.fields.model}
               value={cfg.modelKey}
-              options={models.data.map((m) => ({ value: m.key, label: `${m.displayName}${m.availability.mode === "pending" ? " — pending" : ""}` }))}
+              options={models.data.map((m) => ({ value: m.key, label: `${m.displayName}${m.availability.mode === "pending" ? c.fields.pendingSuffix : ""}` }))}
               onChange={(e) => setConfig({ modelKey: e.target.value })}
             />
             {selected ? (
               <div className={s.badges} aria-live="polite">
                 <ModeBadge mode={selected.availability.mode} />
                 {selected.availability.mode === "pending" ? <Badge tone="warn">{c.fields.pendingModel}</Badge> : null}
-                {selected.modelId ? <Badge mono>{selected.modelId}</Badge> : null}
               </div>
             ) : null}
             {selected?.availability.reason ? <p className={s.hint}>{selected.availability.reason}</p> : null}

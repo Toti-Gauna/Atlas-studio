@@ -54,8 +54,8 @@ export const copy = {
   states: {
     loadingLabel: "Loading",
     emptyTitle: "Nothing here yet",
-    errorTitle: "Something went wrong",
-    errorBody: "The request failed. Your input is kept — try again.",
+    errorTitle: "This didn’t load",
+    errorBody: "Nothing you entered was lost. Try again in a moment.",
     retry: "Try again",
     forbiddenTitle: "Not available for your role",
     forbiddenBody: "The server denied this request for your current role. Switch role or ask an admin.",
@@ -87,7 +87,7 @@ export const copy = {
   },
   disclaimers: {
     reasoning: "Atlas shows operational steps and summarized tool results — never private reasoning.",
-    finops: "Costs of Atlas API calls only. Not Claude Max, ChatGPT or development costs. Unknown costs are never counted as zero.",
+    finops: "Only Atlas’s own model calls are counted. Unknown costs are shown separately, never as zero.",
     privacy: "Detection is rule-based and limited. It assists review; it is not a guarantee.",
     compliance: "Checklist comparison, not a legal opinion or certification.",
     comparison: "No winner is declared without a rubric-based evaluation.",

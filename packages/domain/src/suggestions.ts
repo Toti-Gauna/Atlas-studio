@@ -15,6 +15,12 @@ export interface SuggestionContext {
 }
 
 let seq = 0;
+/** "Data Retention Policy" → "the Data Retention Policy"; file names and titles that already start with an article stay as they are. */
+export function withArticle(title: string): string {
+  if (/^(the|a|an|our|your)\s/i.test(title) || /\.[a-z0-9]{2,5}$/i.test(title)) return title;
+  return `the ${title}`;
+}
+
 const sid = (k: string) => `sug_${k}_${(++seq).toString(36)}`;
 
 export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
@@ -31,8 +37,8 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
       kind: "next_step",
       title: "Ask a person to answer this",
       prompt: `Hand off: ${ctx.lastUserMessage.text}`,
-      reason: "The last answer abstained because no authorized document supported it.",
-      basedOn: [{ type: "conversation", id: ctx.lastUserMessage.conversationId, label: "Last question (abstained)" }],
+      reason: "Your documents didn’t support an answer to the last question, so a colleague can pick it up.",
+      basedOn: [{ type: "conversation", id: ctx.lastUserMessage.conversationId, label: "your last question" }],
       agentId: ctx.agent?.id ?? null,
       workMode: "answer",
       generatedBy: "rules",
@@ -48,7 +54,7 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
         kind: "deliverable",
         title: `Gap report: ${policy.title}`,
         prompt: `Review "${policy.title}" against "${checklist.title}". Scope: all teams. Jurisdiction: as stated in the policy. Produce a gap report with cited evidence.`,
-        reason: "A policy and a checklist are both in this project and the Compliance Advisor is selected.",
+        reason: "This project has both a policy and a checklist, so you can see where they don’t match.",
         basedOn: [...agentRef, { type: "document", id: policy.id, label: policy.title }, { type: "document", id: checklist.id, label: checklist.title }],
         agentId: ctx.agent.id,
         workMode: "draft_artifact",
@@ -61,9 +67,9 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
     out.push({
       id: sid("csv"),
       kind: ctx.agent?.profile === "data" ? "deliverable" : "next_step",
-      title: `Profile ${csv.title}`,
+      title: `Summarize ${csv.title}`,
       prompt: `Validate ${csv.title}, compute descriptive statistics and summarize the largest groups.`,
-      reason: "A CSV is attached to this project; statistics are computed by deterministic tools.",
+      reason: "This project has a spreadsheet: totals and averages are calculated exactly from the file.",
       basedOn: [{ type: "document", id: csv.id, label: csv.title }, ...agentRef],
       agentId: ctx.agent?.profile === "data" ? ctx.agent.id : null,
       workMode: "plan_then_run",
@@ -77,7 +83,7 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
       kind: "deliverable",
       title: "Draft a 6-slide update",
       prompt: `Audience: leadership. Goal: ${ctx.project.objective || "summarize progress"}. Slides: 6. Use project sources.`,
-      reason: "Presentation Creator is selected and the project has an objective to build the brief from.",
+      reason: "The project objective is enough to outline an update for leadership.",
       basedOn: [...objectiveRef, ...agentRef],
       agentId: ctx.agent.id,
       workMode: "draft_artifact",
@@ -89,9 +95,9 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
     out.push({
       id: sid("privacy"),
       kind: "next_step",
-      title: `Review ${sensitive.length} document${sensitive.length > 1 ? "s" : ""} with sensitive patterns`,
+      title: `Review ${sensitive.length} document${sensitive.length > 1 ? "s" : ""} with sensitive data`,
       prompt: "Open the Privacy Center review queue.",
-      reason: "Rule-based detection flagged patterns that need review before any external provider call.",
+      reason: "Some documents may contain personal or payment details. Decide what to hide before they’re sent to an outside AI model.",
       basedOn: sensitive.map((d) => ({ type: "document" as const, id: d.id, label: d.title })),
       agentId: null,
       workMode: "answer",
@@ -105,8 +111,8 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
       kind: "deliverable",
       title: "Turn this answer into a report",
       prompt: `Create a short report from the cited answer to: ${ctx.lastUserMessage.text}`,
-      reason: "The last answer had citations and this project has no artifact yet.",
-      basedOn: [{ type: "conversation", id: ctx.lastUserMessage.conversationId, label: "Last cited answer" }],
+      reason: "Your last answer is backed by sources and this project has no deliverable yet.",
+      basedOn: [{ type: "conversation", id: ctx.lastUserMessage.conversationId, label: "your last answer" }],
       agentId: ctx.agent?.id ?? null,
       workMode: "draft_artifact",
       generatedBy: "rules",
@@ -119,9 +125,9 @@ export function buildSuggestions(ctx: SuggestionContext): Suggestion[] {
       out.push({
         id: sid("ask"),
         kind: "question",
-        title: `What does ${doc.title} require?`,
+        title: `What does ${withArticle(doc.title)} require?`,
         prompt: `Summarize the main requirements in ${doc.title} with citations.`,
-        reason: "Project has documents but no conversation yet.",
+        reason: "A good first question: this project has documents but no conversations yet.",
         basedOn: [{ type: "document", id: doc.id, label: doc.title }, ...objectiveRef],
         agentId: ctx.agent?.id ?? null,
         workMode: "answer",

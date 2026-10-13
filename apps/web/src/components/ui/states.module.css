@@ -15,6 +15,33 @@
 .loadingRow {
   opacity: 0.85;
 }
+.loadingCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--s-4);
+}
+.loadingCard {
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  padding: var(--s-5);
+}
+.loadingTableRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--s-4);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.details {
+  margin-top: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  text-align: left;
+}
+.details summary {
+  cursor: pointer;
+}
 .panel {
   display: flex;
   flex-direction: column;

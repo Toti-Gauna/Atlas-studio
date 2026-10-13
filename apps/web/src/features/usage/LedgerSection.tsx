@@ -7,15 +7,12 @@ import type { LedgerEntry } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { formatDateTime, modelName, money, ms, tokens } from "@/lib/format";
 import { usageCopy as c } from "@/copy/usage";
-import { Badge, EmptyState, IconButton, QueryState, SectionHead, Table, numCell, type Tone } from "@/components/ui";
+import { Badge, EmptyState, IconButton, QueryState, SectionHead, StatusBadge, Table, numCell } from "@/components/ui";
 import s from "./usage.module.css";
 
-const COST_TONE: Record<LedgerEntry["costStatus"], Tone> = { no_provider_charge: "teal", calculated: "neutral", estimated: "info", unknown: "warn", reconciled: "teal" };
-const STATUS_TONE: Record<LedgerEntry["status"], Tone> = { succeeded: "teal", failed: "danger", cancelled: "warn" };
-
 function costCell(e: LedgerEntry) {
-  if (e.costStatus === "no_provider_charge") return "$0 · local";
-  if (e.costStatus === "unknown" || e.costNanoUsd === null) return "Unknown (not zero)";
+  if (e.costStatus === "no_provider_charge") return c.ledger.costLocal;
+  if (e.costStatus === "unknown" || e.costNanoUsd === null) return c.ledger.costUnknown;
   return money(e.costNanoUsd);
 }
 
@@ -23,7 +20,7 @@ function Breakdown({ entry }: { entry: LedgerEntry }) {
   if (!entry.breakdown.length) return <p className={s.muted}>{c.ledger.noBreakdown}</p>;
   return (
     <table className={s.subTable}>
-      <caption className="sr-only">{`${c.ledger.breakdown} · attempt ${entry.attemptNumber}`}</caption>
+      <caption className="sr-only">{c.ledger.breakdownCaption(entry.attemptNumber)}</caption>
       <thead>
         <tr>
           <th scope="col">{c.ledger.category}</th>
@@ -38,8 +35,8 @@ function Breakdown({ entry }: { entry: LedgerEntry }) {
           <tr key={i}>
             <td>{c.categories[b.category] ?? b.category}</td>
             <td className={numCell}>{tokens(b.quantity)}</td>
-            <td className={numCell}>{b.unitPriceUsdPerMTok === null ? "Unknown" : `$${b.unitPriceUsdPerMTok}`}</td>
-            <td className={numCell}>{b.nanoUsd === null ? "Unknown (not zero)" : money(b.nanoUsd)}</td>
+            <td className={numCell}>{b.unitPriceUsdPerMTok === null ? c.ledger.unitUnknown : `$${b.unitPriceUsdPerMTok}`}</td>
+            <td className={numCell}>{b.nanoUsd === null ? c.ledger.costUnknown : money(b.nanoUsd)}</td>
             <td>{b.note ?? "—"}</td>
           </tr>
         ))}
@@ -61,11 +58,12 @@ export function LedgerSection({ range, modelKey }: { range: "7d" | "30d"; modelK
     });
 
   return (
-    <section aria-labelledby="ledger-h" className={s.section}>
-      <SectionHead id="ledger-h" title={c.ledger.title} aside={q.data?.items.length === 100 ? c.ledger.truncated(100) : undefined} />
+    <section aria-labelledby="ledger-h">
+      <SectionHead id="ledger-h" title={c.ledger.title} aside={c.filters.modelOnly} />
+      {q.data?.items.length === 100 ? <p className={s.muted}>{c.ledger.truncated(100)}</p> : null}
       <QueryState query={q} isEmpty={(d) => d.items.length === 0} empty={<EmptyState title={c.ledger.empty} />}>
         {(page) => (
-          <Table caption={c.ledger.caption}>
+          <Table stack caption={c.ledger.caption}>
             <thead>
               <tr>
                 <th scope="col"><span className="sr-only">{c.ledger.breakdown}</span></th>
@@ -88,28 +86,28 @@ export function LedgerSection({ range, modelKey }: { range: "7d" | "30d"; modelK
                 return (
                   <Fragment key={e.id}>
                     <tr>
-                      <td>
+                      <td data-label={c.ledger.breakdown}>
                         <IconButton size="sm" label={expanded ? c.ledger.hideBreakdown(e.attemptNumber) : c.ledger.showBreakdown(e.attemptNumber)} aria-expanded={expanded} aria-controls={expanded ? `bd-${e.id}` : undefined} onClick={() => toggle(e.id)}>
                           {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         </IconButton>
                       </td>
-                      <td style={{ whiteSpace: "nowrap" }}>{formatDateTime(e.occurredAt)}</td>
-                      <td>
-                        <Link href={`/app/runs/?id=${e.runId}`} className="mono">
+                      <td className={s.nowrap} data-label={c.ledger.time}>{formatDateTime(e.occurredAt)}</td>
+                      <td data-label={c.ledger.run}>
+                        <Link href={`/app/runs/?id=${e.runId}`} className={s.monoSmall}>
                           {e.runId}
                         </Link>
                       </td>
-                      <td className={numCell}>#{e.attemptNumber}</td>
-                      <td className="mono" style={{ fontSize: 12 }}>{e.providerRequestId ?? "—"}</td>
-                      <td style={{ whiteSpace: "nowrap" }}>{modelName(e.modelKey)}</td>
-                      <td><Badge tone={STATUS_TONE[e.status]}>{c.runStatus[e.status]}</Badge></td>
-                      <td className={numCell}>
+                      <td className={numCell} data-label={c.ledger.attempt}>#{e.attemptNumber}</td>
+                      <td className={s.monoSmall} data-label={c.ledger.requestId}>{e.providerRequestId ?? "—"}</td>
+                      <td className={s.nowrap} data-label={c.ledger.model}>{modelName(e.modelKey)}</td>
+                      <td data-label={c.ledger.status}><StatusBadge kind="run" status={e.status} /></td>
+                      <td className={numCell} data-label={c.ledger.usage}>
                         {tokens(u.inputUncachedTokens)} / {tokens(u.outputTokens)} / {tokens(u.cacheReadTokens)} / {u.cacheWrite5mTokens === null && u.cacheWrite1hTokens === null ? "—" : tokens((u.cacheWrite5mTokens ?? 0) + (u.cacheWrite1hTokens ?? 0))}
-                        {u.thinkingTokensReported ? <div className={s.muted}>thinking {tokens(u.thinkingTokensReported)} (in output)</div> : null}
+                        {u.thinkingTokensReported ? <div className={s.muted}>{c.ledger.thinking(tokens(u.thinkingTokensReported))}</div> : null}
                       </td>
-                      <td><Badge tone={COST_TONE[e.costStatus]}>{c.costStatus[e.costStatus]}</Badge></td>
-                      <td className={numCell}>{costCell(e)}</td>
-                      <td className={numCell}>{ms(e.latencyMs)}</td>
+                      <td data-label={c.ledger.costStatus}>{e.costStatus === "unknown" ? <Badge tone="warn">{c.costStatus.unknown}</Badge> : c.costStatus[e.costStatus]}</td>
+                      <td className={numCell} data-label={c.ledger.cost}>{costCell(e)}</td>
+                      <td className={numCell} data-label={c.ledger.latency}>{ms(e.latencyMs)}</td>
                     </tr>
                     {expanded ? (
                       <tr id={`bd-${e.id}`}>

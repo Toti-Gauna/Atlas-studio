@@ -43,7 +43,7 @@ export function ScannerTab() {
     <div className={s.scanner}>
       <Card>
         <h2 className={s.h2}>{c.scanner.title}</h2>
-        <p className={s.muted} style={{ marginBottom: 12 }}>{c.scanner.body}</p>
+        <p className={`${s.muted} ${s.introText}`}>{c.scanner.body}</p>
         <form
           className={s.stack}
           onSubmit={(e) => {
@@ -76,9 +76,9 @@ export function ScannerTab() {
             <Card>
               <div className={s.reviewHead}>
                 <h2 className={s.h2}>{scan.data.findings.length ? c.scanner.found(scan.data.findings.length) : c.scanner.none}</h2>
-                <Badge tone="violet">
+                <span className={s.suggestion}>
                   {c.scanner.suggested}: {c.classification[scan.data.suggestedClassification]}
-                </Badge>
+                </span>
               </div>
               {scan.data.findings.length ? (
                 <ul className={s.findings}>

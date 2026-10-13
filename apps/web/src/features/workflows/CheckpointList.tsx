@@ -4,8 +4,8 @@ import { CheckCircle2, Circle, CircleDashed, CircleDot, CircleSlash, FileText, L
 import type { WorkflowCheckpoint, WorkflowRun, WorkflowStepDef } from "@atlas/contracts";
 import { gsap, MOTION, useGSAP, useReducedMotion } from "@/lib/motion";
 import { usePanel } from "@/lib/state/panel";
-import { Badge, Button, LinkButton } from "@/components/ui";
-import { CHECKPOINT_LABEL, wfCopy } from "@/copy/workflows";
+import { Button, LinkButton, StatusBadge } from "@/components/ui";
+import { wfCopy } from "@/copy/workflows";
 import s from "./workflows.module.css";
 
 const ICON: Record<WorkflowCheckpoint["status"], typeof Circle> = {
@@ -37,7 +37,7 @@ export function CheckpointList({ run, steps }: { run: WorkflowRun; steps: Workfl
   );
 
   return (
-    <ol className={s.stepper} ref={ref} aria-label="Checkpoints">
+    <ol className={s.stepper} ref={ref} aria-label={c.stepsLabel}>
       {run.checkpoints.map((cp, i) => {
         const def = steps.find((st) => st.key === cp.stepKey);
         const Icon = ICON[cp.status];
@@ -50,20 +50,13 @@ export function CheckpointList({ run, steps }: { run: WorkflowRun; steps: Workfl
             <div className={s.cpBody}>
               <div className={s.cpHead}>
                 <span className={s.cpTitle}>
-                  <span className="sr-only">Step {i + 1}: </span>
+                  <span className="sr-only">{c.stepN(i + 1)}</span>
                   {def?.title ?? cp.stepKey}
                 </span>
-                <Badge tone={cp.status === "succeeded" ? "teal" : cp.status === "failed" ? "danger" : cp.status === "awaiting_confirmation" ? "warn" : cp.status === "running" ? "info" : "neutral"}>{CHECKPOINT_LABEL[cp.status]}</Badge>
-                {def?.tool ? <span className={`mono ${s.cpTool}`}>{def.tool}</span> : null}
+                {cp.status !== "pending" ? <StatusBadge kind="run" status={cp.status} /> : null}
+                {cp.attempt > 1 ? <span className={s.muted}>{c.tries(cp.attempt)}</span> : null}
               </div>
               {cp.outputSummary ? <p className={s.cpSummary}>{cp.outputSummary}</p> : null}
-              <div className={s.cpMeta}>
-                <span className="tabular">{c.attempt(cp.attempt)}</span>
-                <span className={s.cpKey} title={c.idem}>
-                  <span className="sr-only">{c.idem}: </span>
-                  <span className="mono">{cp.idempotencyKey}</span>
-                </span>
-              </div>
               {cp.artifactId || cp.runId ? (
                 <div className={s.cpActions}>
                   {cp.artifactId ? (

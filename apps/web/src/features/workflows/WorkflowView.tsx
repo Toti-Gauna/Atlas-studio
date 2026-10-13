@@ -1,14 +1,13 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Workflow } from "lucide-react";
+import { Workflow } from "lucide-react";
 import type { WorkflowDetail } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { AgentGlyph, Badge, Button, EmptyState, LinkButton, LoadingBlock, PageHeader, QueryState, TabPanel, Tabs } from "@/components/ui";
+import { AgentGlyph, Button, EmptyState, LinkButton, LoadingBlock, PageHeader, QueryState, TabPanel, Tabs } from "@/components/ui";
 import { wfCopy } from "@/copy/workflows";
 import { RunSetup } from "./RunSetup";
 import { RunMonitor } from "./RunMonitor";
@@ -56,27 +55,24 @@ function WorkflowScreen({ w, runId, projectParam }: { w: WorkflowDetail; runId: 
 
   return (
     <>
-      <Link href="/app/workflows/" className={s.back}>
-        <ArrowLeft size={14} aria-hidden /> {c.back}
-      </Link>
       <PageHeader
-        eyebrow={wfCopy.recipe[w.recipe]}
+        back={{ href: "/app/workflows/", label: c.back }}
         title={w.name}
         description={w.description}
         meta={
-          <>
-            <Badge tone="neutral" mono>
-              v{w.currentVersion}
-            </Badge>
-            <Badge tone="neutral">{w.stepCount} steps</Badge>
-            <span className={s.agentChip}>
-              <AgentGlyph profile={agent?.profile ?? "custom"} size={22} />
-              <span>
-                <span className="sr-only">{c.agent}: </span>
-                {agent?.name ?? w.agentId}
-              </span>
-            </span>
-          </>
+          <span className={s.agentChip}>
+            {agent ? (
+              <>
+                <AgentGlyph profile={agent.profile} size={22} />
+                <span>
+                  <span className="sr-only">{c.agent}: </span>
+                  {agent.name}
+                </span>
+                <span aria-hidden>·</span>
+              </>
+            ) : null}
+            <span>{c.stepCount(w.stepCount)}</span>
+          </span>
         }
       />
       <div className={s.detailGrid}>
@@ -118,7 +114,7 @@ function WorkflowScreen({ w, runId, projectParam }: { w: WorkflowDetail; runId: 
           ) : null}
         </div>
         <aside className={s.sideCol} aria-labelledby="wf-runs-h">
-          <RunsList workflowId={w.id} selectedRunId={runId} onSelect={selectRun} />
+          <RunsList workflowId={w.id} recipe={w.recipe} selectedRunId={runId} onSelect={selectRun} />
         </aside>
       </div>
     </>

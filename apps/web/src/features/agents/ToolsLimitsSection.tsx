@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import type { AgentLimits } from "@atlas/contracts";
 import { api } from "@/lib/api";
-import { Badge, Card, ErrorState, Skeleton, TextField } from "@/components/ui";
+import { Card, ErrorState, Skeleton, TextField } from "@/components/ui";
 import { agentsCopy as c } from "@/copy/agents";
 import type { SectionProps } from "./BehaviorSection";
 import { LIMIT_RANGES } from "./draft";
@@ -39,11 +39,9 @@ export function ToolsSection({ draft, setConfig }: SectionProps) {
                       {t.name}
                       {t.effect === "requires_confirmation" ? <span className={s.confirmNote}> · {c.fields.needsConfirmation}</span> : null}
                     </span>
-                    <span className={s.checkMeta}>{t.description}</span>
-                    <span className={s.badges}>
-                      <Badge tone={t.effect === "requires_confirmation" ? "warn" : t.effect === "internal_write" ? "info" : "neutral"}>{c.effect[t.effect]}</Badge>
-                      {t.deterministic ? <Badge tone="teal">{c.fields.deterministic}</Badge> : <Badge>{c.fields.callsModel}</Badge>}
-                      <Badge mono>{t.id}</Badge>
+                    <span className={s.checkMeta}>
+                      {t.description}
+                      {t.deterministic ? null : ` ${c.fields.callsModel}.`}
                     </span>
                   </span>
                 </label>

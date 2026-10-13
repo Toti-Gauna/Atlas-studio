@@ -29,8 +29,46 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: var(--s-4);
+}
+.modelCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.priceLine {
+  margin: 0;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.verify {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--s-2);
+}
+.disclosure > summary {
+  cursor: pointer;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.disclosureBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.noteTop {
+  margin-top: var(--s-3);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.tzZone {
+  color: var(--text-3);
 }
 .providerCard {
   display: flex;

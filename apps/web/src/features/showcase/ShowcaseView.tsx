@@ -1,16 +1,15 @@
 "use client";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Compass, ExternalLink, FileText, ShieldCheck } from "lucide-react";
+import { ArrowRight, Compass, ExternalLink, FileText } from "lucide-react";
 import type { ShowcaseScenario } from "@atlas/contracts";
 import { api } from "@/lib/api";
-import { DATA_MODE } from "@/lib/config";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { Badge, Callout, Card, EmptyState, LinkButton, LoadingBlock, ModeBadge, PageHeader, QueryState } from "@/components/ui";
+import { Card, EmptyState, LinkButton, LoadingBlock, PageHeader, QueryState, StatusBadge } from "@/components/ui";
 import { showcaseCopy as c } from "@/copy/showcase";
-import { runStatusLabel, runStatusTone, workflowHref } from "@/features/workflows/status";
+import { workflowHref } from "@/features/workflows/status";
 import { tourSteps } from "./tourSteps";
 import s from "./showcase.module.css";
 
@@ -19,10 +18,7 @@ export function ShowcaseView() {
   return (
     <Page wide>
       <PageHeader title={c.title} description={c.description} />
-      <Callout tone="teal" icon={<ShieldCheck size={16} aria-hidden />}>
-        <strong>{c.honesty}</strong> {DATA_MODE === "fixture" ? c.honestyPreview : c.honestyApi}
-      </Callout>
-      <div className={s.gap} />
+      <p className={s.honesty}>{c.honesty}</p>
       <QueryState
         query={scenarios}
         isEmpty={(d) => d.length === 0}
@@ -54,16 +50,11 @@ function TourCard({ sc, n }: { sc: ShowcaseScenario; n: number }) {
         <span className={s.num} aria-hidden>
           {String(n).padStart(2, "0")}
         </span>
-        <ModeBadge mode={sc.integration.mode} />
       </div>
       <h2 id={headingId} className={s.title}>
         {sc.title}
       </h2>
       <p className={s.summary}>{sc.summary}</p>
-      <p className={s.note}>
-        <span className="sr-only">{c.integration}: </span>
-        {sc.integration.note}
-      </p>
 
       <ol className={s.steps} aria-label={c.stepsLabel(sc.title)}>
         {steps.map((st, i) => (
@@ -84,12 +75,8 @@ function TourCard({ sc, n }: { sc: ShowcaseScenario; n: number }) {
 
       <section className={s.lastRun} aria-label={c.lastRun}>
         <div className={s.lastRunHead}>
-          <span className="eyebrow">{c.lastRun}</span>
-          {sc.lastRun ? (
-            <Badge tone={runStatusTone(sc.lastRun.status)} dot>
-              {runStatusLabel(sc.lastRun.status)}
-            </Badge>
-          ) : null}
+          <span className={s.lastRunLabel}>{c.lastRun}</span>
+          {sc.lastRun ? <StatusBadge kind="run" status={sc.lastRun.status} /> : null}
         </div>
         {sc.lastRun ? (
           <>

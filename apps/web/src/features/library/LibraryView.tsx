@@ -1,17 +1,16 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FolderOpen, Upload } from "lucide-react";
+import { FolderOpen, FolderPlus, Upload } from "lucide-react";
 import type { DocumentSummary, IngestionStatus } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { useCan } from "@/lib/state/session";
 import { Page } from "@/components/shell/StudioShell";
-import { Button, Callout, EmptyState, PageHeader, QueryState, Select } from "@/components/ui";
+import { Button, Callout, EmptyState, LinkButton, PageHeader, QueryState, Select, StatusBadge, statusLabel } from "@/components/ui";
 import { libraryCopy as L } from "@/copy/library";
 import { DocumentsTable, FailureReason } from "./DocumentsTable";
 import { SearchPanel } from "./SearchPanel";
 import { UploadModal } from "./UploadModal";
-import { StatusBadge } from "./docBadges";
 import s from "./library.module.css";
 
 const STATUSES: IngestionStatus[] = ["queued", "parsing", "indexing", "ready", "failed"];
@@ -36,24 +35,25 @@ export function LibraryView() {
     setProjectFilter("");
     setStatusFilter("");
   };
+  // Every document belongs to a project: with none, the way forward is creating one (E22).
+  const noProjects = projects.isSuccess && projects.data.length === 0;
+  const headerAction = !canUpload ? null : noProjects ? (
+    <LinkButton href="/app/projects/" variant="primary" icon={<FolderPlus size={14} aria-hidden />}>
+      {L.list.noProjectsTitle}
+    </LinkButton>
+  ) : (
+    <Button variant="primary" icon={<Upload size={14} />} onClick={() => setUploadOpen(true)} disabled={!projects.data?.length}>
+      {L.list.upload}
+    </Button>
+  );
 
   return (
     <Page wide>
-      <PageHeader
-        title={L.list.title}
-        description={L.list.description}
-        actions={
-          canUpload ? (
-            <Button variant="primary" icon={<Upload size={14} />} onClick={() => setUploadOpen(true)} disabled={!projects.data?.length}>
-              {L.list.upload}
-            </Button>
-          ) : null
-        }
-      />
+      <PageHeader title={L.list.title} description={L.list.description} actions={headerAction} />
 
       <SearchPanel projectId={projectFilter || undefined} />
 
-      <div className={s.filters} role="group" aria-label="Filters">
+      <div className={s.filters} role="group" aria-label={L.list.filtersLabel}>
         <Select
           label={L.list.filterProject}
           value={projectFilter}
@@ -64,7 +64,7 @@ export function LibraryView() {
           label={L.list.filterStatus}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as "" | IngestionStatus)}
-          options={[{ value: "", label: L.list.allStatuses }, ...STATUSES.map((st) => ({ value: st, label: L.status[st] }))]}
+          options={[{ value: "", label: L.list.allStatuses }, ...STATUSES.map((st) => ({ value: st, label: statusLabel("document", st) }))]}
         />
       </div>
 
@@ -74,7 +74,7 @@ export function LibraryView() {
             <Callout tone={uploadedNow.latestStatus === "failed" ? "warn" : "teal"}>
               <span className={s.uploadNoticeRow}>
                 <strong>{uploadedNow.title}</strong>
-                <StatusBadge status={uploadedNow.latestStatus} />
+                <StatusBadge kind="document" status={uploadedNow.latestStatus} />
               </span>
               {uploadedNow.latestStatus === "failed" ? <FailureReason id={uploadedNow.id} /> : uploadedNow.kind === "image" ? L.upload.imageNote : null}
             </Callout>
@@ -86,12 +86,7 @@ export function LibraryView() {
         query={docs}
         isEmpty={(d) => d.length === 0}
         empty={
-          <EmptyState
-            title={L.list.emptyTitle}
-            body={L.list.emptyBody}
-            icon={<FolderOpen size={22} />}
-            action={canUpload ? <Button variant="primary" icon={<Upload size={14} />} onClick={() => setUploadOpen(true)} disabled={!projects.data?.length}>{L.list.upload}</Button> : null}
-          />
+          <EmptyState title={L.list.emptyTitle} body={noProjects && canUpload ? L.list.noProjectsBody : L.list.emptyBody} icon={<FolderOpen size={22} />} />
         }
       >
         {() =>

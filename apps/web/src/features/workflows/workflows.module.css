@@ -98,18 +98,6 @@
 }
 
 /* Detail */
-.back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--fs-13);
-  color: var(--text-2);
-  text-decoration: none;
-  margin-bottom: var(--s-3);
-}
-.back:hover {
-  color: var(--text);
-}
 .agentChip {
   display: inline-flex;
   align-items: center;
@@ -180,25 +168,18 @@
   margin-left: auto;
 }
 
-/* Plan preview */
-.previewCard {
+/* Run setup + plan (same panel) */
+.setup {
   display: flex;
   flex-direction: column;
   gap: var(--s-4);
-  border-color: var(--teal-line);
 }
-.planSteps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
+.setup .formFoot {
+  margin-top: 0;
 }
-.planSteps li {
-  display: flex;
-  gap: var(--s-3);
-  align-items: flex-start;
+.planPanel {
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
 }
 .planIdx {
   flex: none;
@@ -213,13 +194,6 @@
   border: 1px solid var(--line);
   color: var(--text-2);
 }
-.planBody {
-  min-width: 0;
-}
-.planTitle {
-  font-weight: 600;
-  font-size: var(--fs-14);
-}
 .planMeta {
   display: flex;
   flex-wrap: wrap;
@@ -227,10 +201,6 @@
   gap: 6px;
   margin-top: 4px;
   min-width: 0;
-}
-.plainList {
-  margin: 4px 0 0;
-  padding-left: 18px;
 }
 .previewFoot {
   display: flex;
@@ -387,6 +357,52 @@
 }
 
 /* Runs list */
+.runRowNeeds {
+  border-color: var(--warn);
+  background: var(--warn-soft);
+}
+.runName {
+  font-weight: 600;
+  font-size: var(--fs-14);
+  overflow-wrap: anywhere;
+}
+.runsFoot {
+  margin: var(--s-3) 0 0;
+  font-size: var(--fs-13);
+}
+.techList {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+/* Library: runs waiting on a person */
+.needs {
+  margin-bottom: var(--s-5);
+}
+.needsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.needsItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  padding: 10px 14px;
+  border: 1px solid var(--warn);
+  border-radius: var(--r-2);
+  background: var(--warn-soft);
+}
+.needsMain {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.needsName {
+  font-weight: 600;
+}
 .runList {
   list-style: none;
   margin: 0;
@@ -422,14 +438,10 @@
 }
 .runRowTop {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: center;
   gap: 6px;
-}
-.runId {
-  font-size: var(--fs-12);
-  color: var(--text-2);
-  overflow-wrap: anywhere;
 }
 
 /* Steps editor */

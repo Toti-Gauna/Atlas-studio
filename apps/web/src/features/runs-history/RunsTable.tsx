@@ -1,23 +1,48 @@
 import type { RunSummary } from "@atlas/contracts";
-import { formatDateTime, modelName, ms, relativeTime } from "@/lib/format";
-import { runHistoryCopy as c } from "@/copy/deliverables";
-import { Badge, DemoTag, Table, numCell } from "@/components/ui";
-import { RUN_TONE, costLabel } from "@/features/runs/RunTrace";
+import { formatDateTime, modelName, money, relativeTime } from "@/lib/format";
+import { activityCopy as c } from "@/copy/activity";
+import { StatusBadge, Table, numCell } from "@/components/ui";
 import s from "./runs-history.module.css";
 
-export function RunsTable({ rows, selectedId, onSelect, projectName }: { rows: RunSummary[]; selectedId: string | null; onSelect: (id: string) => void; projectName: Map<string, string> }) {
+/** Compact cost: "—" for local runs (no provider charge), never zero for unknown costs. */
+function CostCell({ r }: { r: RunSummary }) {
+  const demo = r.label === "DEMO" ? (
+    <span className={s.demoCell} title={c.demoCellTitle}>
+      {" "}
+      · {c.demoCell}
+    </span>
+  ) : null;
+  if (r.costStatus === "no_provider_charge") {
+    return (
+      <span title={c.costLocal}>
+        <span aria-hidden>—</span>
+        <span className="sr-only">{c.costLocal}</span>
+        {demo}
+      </span>
+    );
+  }
+  if (r.costStatus === "unknown" || r.costNanoUsd === null) return <span className={s.unknown}>{c.costUnknown}{demo}</span>;
+  const v = money(r.costNanoUsd);
   return (
-    <Table caption={c.caption}>
+    <span>
+      {r.costStatus === "estimated" ? c.costEstimated(v) : v}
+      {demo}
+    </span>
+  );
+}
+
+export function RunsTable({ rows, selectedId, onSelect, projectName }: { rows: RunSummary[]; selectedId: string | null; onSelect: (id: string) => void; projectName: Map<string, string> }) {
+  const k = c.cols;
+  return (
+    <Table stack caption={c.caption}>
       <thead>
         <tr>
-          <th scope="col">Objective</th>
-          <th scope="col">Status</th>
-          <th scope="col">Agent</th>
-          <th scope="col">Model</th>
-          <th scope="col">Mode</th>
-          <th scope="col">Started</th>
-          <th scope="col" className={numCell}>Latency</th>
-          <th scope="col" className={numCell}>Cost</th>
+          <th scope="col">{k.objective}</th>
+          <th scope="col">{k.status}</th>
+          <th scope="col">{k.agent}</th>
+          <th scope="col">{k.model}</th>
+          <th scope="col">{k.started}</th>
+          <th scope="col" className={numCell}>{k.cost}</th>
         </tr>
       </thead>
       <tbody>
@@ -29,24 +54,21 @@ export function RunsTable({ rows, selectedId, onSelect, projectName }: { rows: R
                 <button type="button" className={s.rowButton} aria-current={active ? "true" : undefined} onClick={() => onSelect(r.id)}>
                   {r.objective}
                 </button>
-                <div className={s.sub}>
-                  {projectName.get(r.projectId) ?? r.projectId}
-                  {r.label === "DEMO" ? <DemoTag /> : null}
-                </div>
+                <div className={s.sub}>{projectName.get(r.projectId) ?? r.projectId}</div>
               </td>
-              <td>
-                <Badge tone={RUN_TONE[r.status]}>{r.status.replace(/_/g, " ")}</Badge>
+              <td data-label={k.status}>
+                <StatusBadge kind="run" status={r.status} />
               </td>
-              <td>{r.agentName}</td>
-              <td>{modelName(r.modelKey)}</td>
-              <td>
-                <Badge tone={r.mode === "local" ? "teal" : "info"}>{r.mode === "local" ? c.local : c.connected}</Badge>
+              <td data-label={k.agent}>{r.agentName}</td>
+              <td data-label={k.model}>{modelName(r.modelKey)}</td>
+              <td className={s.nowrap} data-label={k.started}>
+                <time dateTime={r.startedAt} title={formatDateTime(r.startedAt)}>
+                  {relativeTime(r.startedAt)}
+                </time>
               </td>
-              <td className={s.nowrap}>
-                <time dateTime={r.startedAt} title={formatDateTime(r.startedAt)}>{relativeTime(r.startedAt)}</time>
+              <td className={numCell} data-label={k.cost}>
+                <CostCell r={r} />
               </td>
-              <td className={numCell}>{ms(r.latencyMs)}</td>
-              <td className={numCell}>{costLabel(r.costStatus, r.costNanoUsd)}</td>
             </tr>
           );
         })}

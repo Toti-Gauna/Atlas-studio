@@ -1,16 +1,16 @@
 "use client";
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Pause, RotateCcw, UserCheck } from "lucide-react";
+import { CheckCircle2, Pause, PauseCircle, RotateCcw, UserCheck } from "lucide-react";
 import type { WorkflowDetail, WorkflowRun } from "@atlas/contracts";
 import { api } from "@/lib/api";
-import { formatDateTime, relativeTime } from "@/lib/format";
+import { formatDateTime, money, relativeTime } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
-import { Badge, Button, Callout, Card, DescList, LoadingBlock, QueryState, SectionHead, useToast } from "@/components/ui";
-import { costLabel } from "@/features/runs/RunTrace";
-import { RUN_STATUS_LABEL, wfCopy } from "@/copy/workflows";
+import { Button, Callout, Card, DescList, LoadingBlock, QueryState, SectionHead, StatusBadge, TechDetails, statusLabel, useToast } from "@/components/ui";
+import { inputLabel, wfCopy } from "@/copy/workflows";
 import { CheckpointList } from "./CheckpointList";
-import { WF_RUN_TONE } from "./status";
+import { runName } from "./status";
 import s from "./workflows.module.css";
 
 /** Server-driven: polling only while "running"; every GET lets the preview worker process one real step. */
@@ -43,6 +43,12 @@ export function RunMonitor({ runId, workflow }: { runId: string; workflow: Workf
   );
 }
 
+function costText(run: WorkflowRun) {
+  if (run.costStatus === "no_provider_charge") return wfCopy.run.costLocal;
+  if (run.costStatus === "unknown" || run.costNanoUsd === null) return wfCopy.run.costUnknown;
+  return money(run.costNanoUsd);
+}
+
 function RunBody({ run, workflow }: { run: WorkflowRun; workflow: WorkflowDetail }) {
   const qc = useQueryClient();
   const toast = useToast();
@@ -51,6 +57,7 @@ function RunBody({ run, workflow }: { run: WorkflowRun; workflow: WorkflowDetail
   const projects = useQuery({ queryKey: ["projects"], queryFn: api.projects.list, enabled: canProjects });
   const c = wfCopy.run;
   const steps = workflow.versions.find((v) => v.version === run.workflowVersion)?.steps ?? workflow.current.steps;
+  const titleOf = (key: string | null) => (key ? (steps.find((st) => st.key === key)?.title ?? key) : null);
 
   const apply = (r: WorkflowRun) => qc.setQueryData(["workflow-run", r.id], r);
   const onError = (title: string) => (e: unknown) => toast({ tone: "error", title, body: (e as Error).message });
@@ -60,41 +67,53 @@ function RunBody({ run, workflow }: { run: WorkflowRun; workflow: WorkflowDetail
       apply(r);
       if (r.status === "running") toast({ tone: "info", title: c.pauseToast, body: c.pauseToastBody });
     },
-    onError: onError("Pause failed"),
+    onError: onError(c.pauseFailed),
   });
-  const resume = useMutation({ mutationFn: () => api.workflowRuns.resume(run.id), onSuccess: apply, onError: onError("Resume failed") });
-  const confirm = useMutation({ mutationFn: () => api.workflowRuns.confirm(run.id), onSuccess: apply, onError: onError("Confirmation failed") });
+  const resume = useMutation({ mutationFn: () => api.workflowRuns.resume(run.id), onSuccess: apply, onError: onError(c.resumeFailed) });
+  const confirm = useMutation({ mutationFn: () => api.workflowRuns.confirm(run.id), onSuccess: apply, onError: onError(c.confirmFailed) });
 
-  const inputItems: Array<[string, string]> = Object.entries(run.inputs).map(([k, v]) => [k, v || "—"]);
+  const inputItems: Array<[string, string]> = Object.entries(run.inputs).map(([k, v]) => [inputLabel(workflow.recipe, k), v || "—"]);
   const projectName = projects.data?.find((p) => p.id === run.projectId)?.name ?? run.projectId;
-  const currentTitle = steps.find((st) => st.key === run.currentStepKey)?.title ?? run.currentStepKey;
+  const currentTitle = titleOf(run.currentStepKey);
+  const lastDone = [...run.checkpoints].reverse().find((x) => x.status === "succeeded");
+  const resumeButton =
+    canRun && (run.status === "paused" || run.status === "failed") ? (
+      <div className={s.calloutActions}>
+        <Button variant="primary" icon={<RotateCcw size={14} />} loading={resume.isPending} onClick={() => resume.mutate()}>
+          {c.resume}
+        </Button>
+      </div>
+    ) : null;
 
   return (
     <Card className={s.monitor}>
-      <SectionHead title={c.title} aside={<span className="mono">{run.id}</span>} />
+      <SectionHead title={runName(run, workflow.recipe)} />
       <div className={s.monitorHead}>
         <div aria-live="polite" role="status" className={s.monitorStatus}>
-          <Badge tone={WF_RUN_TONE[run.status]} dot>
-            {RUN_STATUS_LABEL[run.status]}
-          </Badge>
-          <span className="sr-only">{c.live(run.status, currentTitle)}</span>
+          <StatusBadge kind="run" status={run.status} />
+          <span className="sr-only">{c.live(statusLabel("run", run.status), currentTitle)}</span>
           {currentTitle && run.status !== "succeeded" ? <span className={s.muted}>· {currentTitle}</span> : null}
         </div>
-        <div className={s.formFootRight}>
-          {canRun && run.status === "running" ? (
-            <Button icon={<Pause size={14} />} loading={pause.isPending} onClick={() => pause.mutate()}>
-              {c.pause}
-            </Button>
-          ) : null}
-          {canRun && (run.status === "paused" || run.status === "failed") ? (
-            <Button variant="primary" icon={<RotateCcw size={14} />} loading={resume.isPending} onClick={() => resume.mutate()}>
-              {c.resume}
-            </Button>
-          ) : null}
-        </div>
+        {canRun && run.status === "running" ? (
+          <Button icon={<Pause size={14} />} loading={pause.isPending} onClick={() => pause.mutate()}>
+            {c.pause}
+          </Button>
+        ) : null}
       </div>
 
-      {run.status === "paused" || run.status === "failed" ? <Callout tone={run.status === "failed" ? "danger" : "info"}>{run.status === "failed" ? `${c.failed} ` : null}{c.resumeNote}</Callout> : null}
+      {run.status === "paused" ? (
+        <Callout tone="warn" icon={<PauseCircle size={16} aria-hidden />}>
+          <strong>{c.pausedWhy(titleOf(lastDone?.stepKey ?? null), relativeTime(run.pausedAt ?? run.updatedAt), run.pausedByName)}</strong>
+          {currentTitle ? <> {c.nextStep(currentTitle)}</> : null} {c.resumeNote}
+          {resumeButton}
+        </Callout>
+      ) : null}
+      {run.status === "failed" ? (
+        <Callout tone="danger">
+          {c.failed} {c.resumeNote}
+          {resumeButton}
+        </Callout>
+      ) : null}
       {run.status === "succeeded" ? <Callout tone="teal" icon={<CheckCircle2 size={16} aria-hidden />}>{c.succeeded}</Callout> : null}
       {run.status === "awaiting_confirmation" ? (
         <Callout tone="warn" icon={<UserCheck size={16} aria-hidden />}>
@@ -120,15 +139,29 @@ function RunBody({ run, workflow }: { run: WorkflowRun; workflow: WorkflowDetail
 
       <DescList
         items={[
-          [wfCopy.detail.version, `v${run.workflowVersion}`],
-          [c.project, projectName],
+          [c.project, canProjects ? <Link key="p" href={`/app/project/?id=${run.projectId}`}>{projectName}</Link> : projectName],
           [c.started, <time key="s" dateTime={run.startedAt} title={formatDateTime(run.startedAt)}>{relativeTime(run.startedAt)}</time>],
           [c.updated, <time key="u" dateTime={run.updatedAt} title={formatDateTime(run.updatedAt)}>{relativeTime(run.updatedAt)}</time>],
-          [c.cost, costLabel(run.costStatus, run.costNanoUsd)],
+          [c.cost, costText(run)],
           ...(run.status !== "awaiting_confirmation" && inputItems.length ? [[c.inputs, inputItems.map(([k, v]) => `${k}: ${v}`).join(" · ")] as [string, string]] : []),
         ]}
       />
       {run.status === "running" ? <p className={s.footNote}>{c.polling}</p> : null}
+      <TechDetails>
+        <p>
+          Run <span className="mono">{run.id}</span> · workflow version {run.workflowVersion}
+        </p>
+        <ul className={s.techList}>
+          {run.checkpoints.map((cp) => {
+            const def = steps.find((st) => st.key === cp.stepKey);
+            return (
+              <li key={cp.stepKey}>
+                <span className="mono">{cp.stepKey}</span> · tool <span className="mono">{def?.tool ?? "none"}</span> · attempts {cp.attempt} · idempotency key <span className="mono">{cp.idempotencyKey}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </TechDetails>
     </Card>
   );
 }

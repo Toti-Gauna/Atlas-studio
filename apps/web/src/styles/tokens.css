@@ -42,6 +42,23 @@
   --info: #2c4a73;
   --info-soft: #e8eef7;
 
+  /* Categorical (project identity) — never reuses status or role colors */
+  --cat-1: #19b6a4;
+  --cat-2: #5b8def;
+  --cat-3: #d16b8a;
+  --cat-4: #64748b;
+  --meter-warn: #e0a32b;
+
+  /* Surfaces drawn on ink (demo bar, toasts) */
+  --on-ink: #f5f7fa;
+  --on-ink-2: #cbd5e1;
+  --ink-deep: #060a13;
+  --teal-hover: #2cc5b3;
+
+  /* Chat */
+  --bubble-user-bg: #0b1220;
+  --bubble-user-text: #f5f7fa;
+
   /* Focus */
   --focus: #0b6f65;
   --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus);
@@ -120,8 +137,10 @@
     --surface: #101a2b;
     --surface-2: #132036;
     --surface-3: #192842;
-    --line: #22314b;
-    --line-strong: #31425f;
+    --line: #2a3b59;
+    --line-strong: #3b5072;
+    --bubble-user-bg: #17403f;
+    --bubble-user-text: #edf1f6;
     --text: #edf1f6;
     --text-2: #b9c3d1;
     --text-3: #8d9aae;
@@ -154,8 +173,10 @@
   --surface: #101a2b;
   --surface-2: #132036;
   --surface-3: #192842;
-  --line: #22314b;
-  --line-strong: #31425f;
+  --line: #2a3b59;
+  --line-strong: #3b5072;
+  --bubble-user-bg: #17403f;
+  --bubble-user-text: #edf1f6;
   --text: #edf1f6;
   --text-2: #b9c3d1;
   --text-3: #8d9aae;

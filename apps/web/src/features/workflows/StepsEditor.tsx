@@ -8,6 +8,7 @@ import { useCan } from "@/lib/state/session";
 import { Button, Callout, Card, ErrorState, SectionHead, Select, Skeleton, TextField, useToast } from "@/components/ui";
 import { wfCopy } from "@/copy/workflows";
 import { StepRow } from "./StepRow";
+import { effectLabel } from "./PlanPreview";
 import s from "./workflows.module.css";
 
 const MAX_STEPS = 12;
@@ -38,7 +39,7 @@ export function StepsEditor({ workflow }: { workflow: WorkflowDetail }) {
   const qc = useQueryClient();
   const toast = useToast();
   const canWrite = useCan("workflow.write");
-  const tools = useQuery({ queryKey: ["tools"], queryFn: api.tools, enabled: canWrite });
+  const tools = useQuery({ queryKey: ["tools"], queryFn: api.tools });
   const [steps, setSteps] = useState<WorkflowStepDef[]>(() => structuredClone(workflow.current.steps));
   const [toolPick, setToolPick] = useState<string>(NO_TOOL);
   const [note, setNote] = useState("");
@@ -55,7 +56,7 @@ export function StepsEditor({ workflow }: { workflow: WorkflowDetail }) {
       toast({ tone: "success", title: c.saved(w.currentVersion) });
     },
     onError: (e) => {
-      if (!(isApiError(e) && e.code === "CONFLICT")) toast({ tone: "error", title: "Not saved", body: (e as Error).message });
+      if (!(isApiError(e) && e.code === "CONFLICT")) toast({ tone: "error", title: c.saveFailed, body: (e as Error).message });
     },
   });
   const conflict = save.isError && isApiError(save.error) && save.error.code === "CONFLICT";
@@ -75,12 +76,12 @@ export function StepsEditor({ workflow }: { workflow: WorkflowDetail }) {
 
   return (
     <Card>
-      <SectionHead title={c.title} aside={`v${workflow.currentVersion}`} />
+      <SectionHead title={c.title} aside={wfCopy.versions.version(workflow.currentVersion)} />
       {!canWrite ? <Callout>{c.readOnly}</Callout> : null}
       {dirty ? <Callout tone="info">{c.unsaved}</Callout> : null}
       <ol className={s.editList}>
         {steps.map((st, i) => (
-          <StepRow key={st.key} step={st} index={i} count={steps.length} readOnly={!canWrite} onChange={(p) => patch(i, p)} onMove={(d) => move(i, d)} onRemove={() => setSteps((xs) => xs.filter((_, j) => j !== i))} />
+          <StepRow key={st.key} step={st} toolName={tools.data?.find((t) => t.id === st.tool)?.name ?? null} index={i} count={steps.length} readOnly={!canWrite} onChange={(p) => patch(i, p)} onMove={(d) => move(i, d)} onRemove={() => setSteps((xs) => xs.filter((_, j) => j !== i))} />
         ))}
       </ol>
 
@@ -91,7 +92,7 @@ export function StepsEditor({ workflow }: { workflow: WorkflowDetail }) {
           ) : tools.isError ? (
             <ErrorState compact error={tools.error} onRetry={() => void tools.refetch()} />
           ) : (
-            <Select label={c.addTool} value={toolPick} onChange={(e) => setToolPick(e.target.value)} options={[{ value: NO_TOOL, label: c.noTool }, ...tools.data.map((t) => ({ value: t.id, label: `${t.name} · ${t.effect.replace(/_/g, " ")}` }))]} />
+            <Select label={c.addTool} value={toolPick} onChange={(e) => setToolPick(e.target.value)} options={[{ value: NO_TOOL, label: c.noTool }, ...tools.data.map((t) => ({ value: t.id, label: `${t.name} · ${effectLabel(t.effect)}` }))]} />
           )}
           <Button icon={<Plus size={14} />} disabled={steps.length >= MAX_STEPS || tools.isPending} onClick={add}>
             {c.add}

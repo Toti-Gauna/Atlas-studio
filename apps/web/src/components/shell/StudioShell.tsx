@@ -83,7 +83,7 @@ function PanelContent() {
   return <RunPanel runId={panel.runId} />;
 }
 
-const PANEL_TITLE = { evidence: "Evidence", canvas: "Canvas", run: "Run trace" } as const;
+const PANEL_TITLE = { evidence: "Evidence", canvas: "Deliverable", run: "Run trace" } as const;
 
 function RightPanel({ asSheet }: { asSheet: boolean }) {
   const { panel, close } = usePanel();

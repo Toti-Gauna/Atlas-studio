@@ -60,7 +60,7 @@ export function VersionsPanel({ agent }: { agent: AgentDetail }) {
               }}
             >
               <span className={ps.versionTop}>
-                <Badge mono>v{v.version}</Badge>
+                <strong>{c.versions.selected(v.version)}</strong>
                 {v.version === agent.currentVersion ? <Badge tone="teal">{c.versions.current}</Badge> : null}
                 <span className={s.checkMeta}>{formatDateTime(v.createdAt)}</span>
               </span>

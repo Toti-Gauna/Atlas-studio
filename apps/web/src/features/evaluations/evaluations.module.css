@@ -43,3 +43,60 @@
 .selectedRow td {
   background: var(--teal-soft);
 }
+.nowrap {
+  white-space: nowrap;
+}
+.scope {
+  margin: 4px 0 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  max-width: 72ch;
+}
+.latest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.latestHead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+.latestTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-22);
+  font-weight: 700;
+}
+.iconOk {
+  color: var(--ok);
+}
+.iconFail {
+  color: var(--danger);
+}
+.line {
+  margin: 0;
+  font-size: var(--fs-14);
+}
+.caseList {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: var(--fs-14);
+}
+.disclosure {
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+}
+.disclosure > summary {
+  cursor: pointer;
+  padding: var(--s-3) var(--s-4);
+  font-weight: 650;
+}
+.disclosureBody {
+  padding: 0 var(--s-4) var(--s-4);
+}
+.techList {
+  margin: 0;
+  padding-left: 18px;
+}

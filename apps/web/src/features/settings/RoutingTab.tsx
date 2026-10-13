@@ -6,7 +6,7 @@ import type { ModelRegistryEntry, RoutingPolicy, RoutingRule } from "@atlas/cont
 import { api, isApiError } from "@/lib/api";
 import { formatDateTime, modelName, money } from "@/lib/format";
 import { useCan } from "@/lib/state/session";
-import { Badge, Button, Callout, EmptyState, ErrorState, LoadingBlock, SectionHead, Select, Table, useToast } from "@/components/ui";
+import { Button, Callout, EmptyState, ErrorState, LoadingBlock, SectionHead, Select, Table, useToast } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { settingsCopy as c } from "@/copy/settings";
 import s from "./settings.module.css";
@@ -20,7 +20,7 @@ function RulesTable({ rules, models, edit, onChange }: { rules: RoutingRule[]; m
   };
   const options = models.map((x) => ({ value: x.key, label: label(x.key) }));
   return (
-    <Table caption={r.caption}>
+    <Table stack caption={r.caption}>
       <thead>
         <tr>
           <th scope="col">{r.task}</th>
@@ -37,21 +37,15 @@ function RulesTable({ rules, models, edit, onChange }: { rules: RoutingRule[]; m
           return (
             <tr key={rule.id}>
               <th scope="row">{task}</th>
-              <td>
+              <td data-label={r.preferred}>
                 {edit ? (
                   <Select label={`${r.preferred} — ${task}`} hideLabel value={rule.preferredModelKey} options={options} onChange={(e) => onChange(rule.id, { preferredModelKey: e.target.value })} />
                 ) : (
                   label(rule.preferredModelKey)
                 )}
               </td>
-              <td>
-                <span className={s.chips}>
-                  {rule.requiredCapabilities.map((cap) => (
-                    <Badge key={cap}>{c.capabilities[cap] ?? cap}</Badge>
-                  ))}
-                </span>
-              </td>
-              <td>
+              <td data-label={r.required}>{rule.requiredCapabilities.map((cap) => c.capabilities[cap] ?? cap).join(" · ") || "—"}</td>
+              <td data-label={r.fallback}>
                 {edit ? (
                   <Select
                     label={`${r.fallback} — ${task}`}
@@ -67,7 +61,7 @@ function RulesTable({ rules, models, edit, onChange }: { rules: RoutingRule[]; m
                   <span className={s.subtle}>{r.none}</span>
                 )}
               </td>
-              <td className="mono">{rule.maxEstimatedCostNanoUsd ? money(rule.maxEstimatedCostNanoUsd) : <span className={s.subtle}>{r.noCap}</span>}</td>
+              <td className="tabular" data-label={r.maxCost}>{rule.maxEstimatedCostNanoUsd ? money(rule.maxEstimatedCostNanoUsd) : <span className={s.subtle}>{r.noCap}</span>}</td>
             </tr>
           );
         })}
@@ -100,6 +94,7 @@ export function RoutingTab() {
   const p = policy.data;
   const rules = draft ?? p.rules;
   const invalid = rules.some((x) => x.fallbackModelKey !== null && x.fallbackModelKey === x.preferredModelKey);
+  const unchanged = JSON.stringify(draft) === JSON.stringify(p.rules);
   const change = (id: string, patch: Partial<RoutingRule>) => setDraft(rules.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   return (
@@ -108,15 +103,12 @@ export function RoutingTab() {
         id="routing-h"
         title={r.heading}
         aside={
-          <span className={s.chips}>
-            <Badge mono>{r.version(p.version)}</Badge>
-            <span className={s.subtle}>{r.updated(formatDateTime(p.updatedAt))}</span>
+          <span className={s.subtle}>
+            {r.version(p.version)} · {r.updated(formatDateTime(p.updatedAt))}
           </span>
         }
       />
-      <Callout tone="teal" icon={<ShieldCheck size={16} aria-hidden />}>
-        <strong>{r.fallbackOff}</strong>
-      </Callout>
+      <Callout icon={<ShieldCheck size={16} aria-hidden />}>{r.fallbackOff}</Callout>
       <p className={s.subtle}>
         {r.defaultModel}: <span className={s.strong}>{modelName(p.defaultModelKey)}</span>
       </p>
@@ -133,7 +125,7 @@ export function RoutingTab() {
             <Button onClick={() => setDraft(null)} disabled={save.isPending}>
               {copy.actions.cancel}
             </Button>
-            <Button variant="primary" loading={save.isPending} disabled={invalid || JSON.stringify(draft) === JSON.stringify(p.rules)} onClick={() => save.mutate({ ...p, rules: draft })}>
+            <Button variant={unchanged || invalid ? "secondary" : "primary"} loading={save.isPending} disabled={invalid || unchanged} onClick={() => save.mutate({ ...p, rules: draft })}>
               {r.save}
             </Button>
           </>

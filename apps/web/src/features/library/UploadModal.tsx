@@ -4,9 +4,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
 import type { DocumentSummary, Project } from "@atlas/contracts";
 import { api, isApiError } from "@/lib/api";
-import { Button, Callout, Modal, Select, TextField, useToast } from "@/components/ui";
+import { Button, Callout, Modal, Select, TextField, statusLabel, useToast } from "@/components/ui";
 import { copy } from "@/copy/en";
 import { libraryCopy as L } from "@/copy/library";
+import s from "./library.module.css";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const BY_EXT: Record<string, string> = {
@@ -38,6 +39,12 @@ function readText(file: File): Promise<string> {
     r.onerror = () => reject(r.error ?? new Error(L.upload.readFailed));
     r.readAsText(file);
   });
+}
+
+/** A human sentence for an upload failure — never the raw error code. */
+function uploadErrorText(e: unknown): string {
+  if (isApiError(e)) return L.upload.errors[e.code] ?? (e.code === "VALIDATION" && e.message ? e.message : L.upload.failedBody);
+  return L.upload.failedBody;
 }
 
 function validate(file: File | null): string | null {
@@ -78,11 +85,11 @@ export function UploadModal({ open, onClose, projects, defaultProjectId, onUploa
       void qc.invalidateQueries({ queryKey: ["documents"] });
       void qc.invalidateQueries({ queryKey: ["projects"] });
       void qc.invalidateQueries({ queryKey: ["project"] });
-      toast({ tone: d.latestStatus === "failed" ? "info" : "success", title: L.upload.done, body: `${d.title} · ${L.status[d.latestStatus]}` });
+      toast({ tone: d.latestStatus === "failed" ? "info" : "success", title: L.upload.done, body: `${d.title} · ${statusLabel("document", d.latestStatus)}` });
       onUploaded(d);
       close();
     },
-    onError: (e) => toast({ tone: "error", title: L.upload.failed, body: e instanceof Error ? e.message : undefined }),
+    onError: (e) => toast({ tone: "error", title: L.upload.failed, body: uploadErrorText(e) }),
   });
 
   const submit = (e: FormEvent) => {
@@ -112,7 +119,7 @@ export function UploadModal({ open, onClose, projects, defaultProjectId, onUploa
         </>
       }
     >
-      <form id={formId} onSubmit={submit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <form id={formId} onSubmit={submit} noValidate className={s.form}>
         <TextField
           label={L.upload.file}
           type="file"
@@ -134,7 +141,7 @@ export function UploadModal({ open, onClose, projects, defaultProjectId, onUploa
         <div aria-live="assertive">
           {serverError ? (
             <Callout tone="danger">
-              <strong>{isApiError(serverError) ? serverError.code : L.upload.failed}</strong> — {serverError instanceof Error ? serverError.message : L.upload.failed}
+              <strong>{L.upload.failed}.</strong> {uploadErrorText(serverError)}
             </Callout>
           ) : null}
         </div>

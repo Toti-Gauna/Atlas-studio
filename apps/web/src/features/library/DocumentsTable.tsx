@@ -5,9 +5,9 @@ import { ShieldAlert } from "lucide-react";
 import type { DocumentSummary, Project } from "@atlas/contracts";
 import { api } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
-import { Badge, Table, numCell } from "@/components/ui";
+import { Badge, Table } from "@/components/ui";
 import { libraryCopy as L } from "@/copy/library";
-import { ClassificationBadge, StatusBadge } from "./docBadges";
+import { ClassificationText, DocStatus } from "./docBadges";
 import s from "./library.module.css";
 
 /** The summary has no failure reason; failed rows read it from the latest version (real server text). */
@@ -18,61 +18,60 @@ export function FailureReason({ id }: { id: string }) {
   return <span className={s.failReason}>{reason}</span>;
 }
 
+/** Title, projects, classification, updated. Status and sensitive findings appear only as exceptions. */
 export function DocumentsTable({ docs, projects, highlightId, caption = L.list.caption }: { docs: DocumentSummary[]; projects: Project[] | undefined; highlightId?: string | null; caption?: string }) {
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? id;
+  const C = L.list.cols;
   return (
-    <Table caption={caption}>
+    <Table caption={caption} stack>
       <thead>
         <tr>
-          <th scope="col">{L.list.cols.title}</th>
-          <th scope="col">{L.list.cols.kind}</th>
-          <th scope="col">{L.list.cols.projects}</th>
-          <th scope="col">{L.list.cols.classification}</th>
-          <th scope="col" className={numCell}>{L.list.cols.findings}</th>
-          <th scope="col">{L.list.cols.version}</th>
-          <th scope="col">{L.list.cols.status}</th>
+          <th scope="col">{C.title}</th>
+          <th scope="col">{C.projects}</th>
+          <th scope="col">{C.classification}</th>
+          <th scope="col">{C.updated}</th>
         </tr>
       </thead>
       <tbody>
-        {docs.map((d) => (
-          <tr key={d.id} className={d.id === highlightId ? s.rowNew : undefined}>
-            <td>
-              <div className={s.titleCell}>
-                <Link href={`/app/document/?id=${d.id}`} className={s.docLink}>
-                  {d.title}
-                </Link>
-                <span className={s.subtle}>
-                  {d.id === highlightId ? <Badge tone="teal">{L.list.newlyUploaded}</Badge> : null}
-                  {relativeTime(d.updatedAt)}
-                </span>
-              </div>
-            </td>
-            <td>{L.kind[d.kind]}</td>
-            <td>
-              <span className={s.projectList}>{d.projectIds.map(projectName).join(", ") || "—"}</span>
-            </td>
-            <td>
-              <ClassificationBadge value={d.classification} />
-            </td>
-            <td className={numCell}>
-              {d.sensitiveFindingCount > 0 ? (
-                <Link href="/app/privacy/" className={s.findings} aria-label={L.list.findingsLink(d.sensitiveFindingCount)} title={L.list.findingsLink(d.sensitiveFindingCount)}>
-                  <ShieldAlert size={14} aria-hidden />
-                  {d.sensitiveFindingCount}
-                </Link>
-              ) : (
-                <span className={s.subtle}>0</span>
-              )}
-            </td>
-            <td className="tabular">{d.publishedVersion ? `v${d.publishedVersion}` : <span className={s.subtle}>{L.list.notPublished}</span>}</td>
-            <td>
-              <div className={s.statusCell}>
-                <StatusBadge status={d.latestStatus} />
-                {d.latestStatus === "failed" ? <FailureReason id={d.id} /> : null}
-              </div>
-            </td>
-          </tr>
-        ))}
+        {docs.map((d) => {
+          const exceptions = d.id === highlightId || d.latestStatus !== "ready" || d.sensitiveFindingCount > 0;
+          return (
+            <tr key={d.id} className={d.id === highlightId ? s.rowNew : undefined}>
+              <td data-label={C.title}>
+                <div className={s.titleCell}>
+                  <span className={s.titleLine}>
+                    <Link href={`/app/document/?id=${d.id}`} className={s.docLink}>
+                      {d.title}
+                    </Link>
+                    <span className={s.kind}>{L.kind[d.kind]}</span>
+                  </span>
+                  {exceptions ? (
+                    <span className={s.rowExceptions}>
+                      {d.id === highlightId ? <Badge tone="teal">{L.list.newlyUploaded}</Badge> : null}
+                      <DocStatus status={d.latestStatus} />
+                      {d.sensitiveFindingCount > 0 ? (
+                        <Link href="/app/privacy/" className={s.findings}>
+                          <ShieldAlert size={14} aria-hidden />
+                          {L.list.findingsLink(d.sensitiveFindingCount)}
+                        </Link>
+                      ) : null}
+                    </span>
+                  ) : null}
+                  {d.latestStatus === "failed" ? <FailureReason id={d.id} /> : null}
+                </div>
+              </td>
+              <td data-label={C.projects}>
+                <span className={s.projectList}>{d.projectIds.map(projectName).join(", ") || "—"}</span>
+              </td>
+              <td data-label={C.classification}>
+                <ClassificationText value={d.classification} />
+              </td>
+              <td data-label={C.updated} className={s.nowrap}>
+                {relativeTime(d.updatedAt)}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </Table>
   );

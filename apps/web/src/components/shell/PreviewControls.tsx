@@ -27,7 +27,7 @@ export function PreviewControls({ open, onClose }: { open: boolean; onClose: () 
         </IconButton>
       </div>
       <div style={{ padding: "8px 20px 24px", display: "flex", flexDirection: "column", gap: 20, overflowY: "auto" }}>
-        <Callout tone="info">Frontend preview only. These controls change how the in-browser FIXTURE transport responds so you can review loading, empty, error, forbidden and offline states. They do not exist once the API is connected.</Callout>
+        <Callout tone="info">Preview only. These controls change how this in-browser demo responds so you can review loading, empty, error, forbidden and offline states. They disappear once the real API is connected.</Callout>
         <div>
           <div className="eyebrow" style={{ marginBottom: 8 }}>Force response state</div>
           <Segmented<ForcedState>

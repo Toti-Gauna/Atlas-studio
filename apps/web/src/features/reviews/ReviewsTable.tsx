@@ -2,54 +2,50 @@ import Link from "next/link";
 import type { ReviewRequest } from "@atlas/contracts";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { reviewsCopy as c } from "@/copy/reviews";
-import { Badge, Table, numCell } from "@/components/ui";
-import { REQUEST_TONE, requestLabel } from "./status";
+import { LinkButton, StatusBadge } from "@/components/ui";
 import s from "./reviews.module.css";
 
-function When({ iso, prefix }: { iso: string; prefix: string }) {
+/** Reviews as a task list: "Vendor checklist gap report v2 · from Leo Brandt · 3 h ago · [Review]". */
+export function ReviewsTable({ rows, caption, me }: { rows: ReviewRequest[]; caption: string; me?: string }) {
   return (
-    <div>
-      {prefix} <time dateTime={iso} title={formatDateTime(iso)}>{relativeTime(iso)}</time>
-    </div>
-  );
-}
-
-export function ReviewsTable({ rows, caption }: { rows: ReviewRequest[]; caption: string }) {
-  return (
-    <Table caption={caption}>
-      <thead>
-        <tr>
-          <th scope="col">{c.cols.artifact}</th>
-          <th scope="col" className={numCell}>{c.cols.version}</th>
-          <th scope="col">{c.cols.requester}</th>
-          <th scope="col">{c.cols.reviewer}</th>
-          <th scope="col">{c.cols.status}</th>
-          <th scope="col">{c.cols.dates}</th>
-          <th scope="col">{c.cols.note}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => (
-          <tr key={r.id}>
-            <td>
-              <Link href={`/app/artifact/?id=${r.artifactId}`} className={s.link}>
-                {r.artifactTitle}
+    <ul className={s.tasks} aria-label={caption}>
+      {rows.map((r) => {
+        const href = `/app/artifact/?id=${r.artifactId}`;
+        const mineToDo = r.status === "open" && r.reviewerId === me;
+        const who = r.reviewerId === me ? c.task.from(r.requestedByName) : r.requestedBy === me ? c.task.to(r.reviewerName) : c.task.between(r.requestedByName, r.reviewerName);
+        return (
+          <li key={r.id} className={s.task}>
+            <div className={s.taskMain}>
+              <Link href={href} className={s.link}>
+                {r.artifactTitle} v{r.version}
               </Link>
-            </td>
-            <td className={numCell}>v{r.version}</td>
-            <td>{r.requestedByName}</td>
-            <td>{r.reviewerName}</td>
-            <td>
-              <Badge tone={REQUEST_TONE[r.status]}>{requestLabel(r.status)}</Badge>
-            </td>
-            <td className={s.dates}>
-              <When iso={r.createdAt} prefix="Requested" />
-              {r.decidedAt ? <When iso={r.decidedAt} prefix="Decided" /> : null}
-            </td>
-            <td className={s.note}>{r.decisionNote ?? <span className={s.none}>—</span>}</td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+              <div className={s.taskMeta}>
+                <span>{who}</span>
+                <span aria-hidden>·</span>
+                <time dateTime={r.createdAt} title={formatDateTime(r.createdAt)}>{relativeTime(r.createdAt)}</time>
+                {r.decidedAt ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <time dateTime={r.decidedAt} title={formatDateTime(r.decidedAt)}>{c.task.decided(relativeTime(r.decidedAt))}</time>
+                  </>
+                ) : null}
+              </div>
+              {r.decisionNote ? (
+                <blockquote className={s.note}>
+                  <span className="sr-only">{c.task.note}: </span>
+                  {r.decisionNote}
+                </blockquote>
+              ) : null}
+            </div>
+            <div className={s.taskSide}>
+              <StatusBadge kind="review" status={r.status} />
+              <LinkButton href={href} size="sm" variant={mineToDo ? "primary" : "secondary"}>
+                {mineToDo ? c.task.review : c.task.open}
+              </LinkButton>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

@@ -47,7 +47,7 @@ export function Recommendations({ projectId, conversationId, agentId, onUse, act
       </div>
     );
   if (q.isError) return <ErrorState error={q.error} compact onRetry={() => void q.refetch()} />;
-  if (!q.data.length) return <EmptyState title="No suggestions" body="Suggestions appear when a project has an objective, documents or a conversation to build on. Atlas does not invent context." />;
+  if (!q.data.length) return <EmptyState title="No suggestions" body="Suggestions appear once a project has an objective, documents or a conversation." />;
   return (
     <div className={s.recos} ref={ref}>
       {q.data.slice(0, limit).map((sg) => {
@@ -59,7 +59,7 @@ export function Recommendations({ projectId, conversationId, agentId, onUse, act
               <Badge tone={k.tone} icon={<Icon size={12} aria-hidden />}>
                 {k.label}
               </Badge>
-              <IconButton label={`Dismiss suggestion: ${sg.title}`} size="sm" style={{ marginLeft: "auto" }} onClick={() => dismiss.mutate(sg.id)}>
+              <IconButton label={`Dismiss suggestion: ${sg.title}`} size="sm" className={s.recoDismiss} onClick={() => dismiss.mutate(sg.id)}>
                 <X size={14} />
               </IconButton>
             </div>

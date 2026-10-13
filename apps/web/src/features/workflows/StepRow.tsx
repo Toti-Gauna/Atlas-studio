@@ -1,12 +1,14 @@
 "use client";
-import { ArrowDown, ArrowUp, Cpu, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Sparkles, Trash2 } from "lucide-react";
 import type { WorkflowStepDef } from "@atlas/contracts";
 import { Badge, IconButton, Switch, TextField } from "@/components/ui";
-import { wfCopy } from "@/copy/workflows";
+import { planCopy, wfCopy } from "@/copy/workflows";
+import { effectLabel } from "./PlanPreview";
 import s from "./workflows.module.css";
 
 export function StepRow({
   step,
+  toolName,
   index,
   count,
   readOnly,
@@ -15,6 +17,8 @@ export function StepRow({
   onRemove,
 }: {
   step: WorkflowStepDef;
+  /** Human tool name; the tool id itself is never shown. */
+  toolName: string | null;
   index: number;
   count: number;
   readOnly: boolean;
@@ -33,20 +37,13 @@ export function StepRow({
           {n}
         </span>
         <div className={s.planMeta}>
-          <Badge mono tone="neutral">
-            {step.tool ?? "manual"}
-          </Badge>
+          <span className={s.muted}>{step.tool ? (toolName ?? "") : c.manual}</span>
           {step.invokesModel ? (
             <Badge tone="info" icon={<Sparkles size={12} aria-hidden />}>
-              {wfCopy.preview.model}
+              {planCopy.callsModel}
             </Badge>
-          ) : (
-            <Badge tone="teal" icon={<Cpu size={12} aria-hidden />}>
-              {wfCopy.preview.noModel}
-            </Badge>
-          )}
-          <span className={s.muted}>{c.effect[step.effect]}</span>
-          <span className={`mono ${s.cpTool}`}>{step.key}</span>
+          ) : null}
+          <span className={s.muted}>{effectLabel(step.effect)}</span>
         </div>
         {!readOnly ? (
           <div className={s.editTools}>
@@ -63,8 +60,8 @@ export function StepRow({
         ) : null}
       </div>
       <div className={s.editFields}>
-        <TextField label={`${c.stepTitle} (step ${n})`} value={step.title} maxLength={120} readOnly={readOnly} error={titleErr} onChange={(e) => onChange({ title: e.target.value })} />
-        <TextField label={`${c.inputHint} (step ${n})`} value={step.inputHint} maxLength={300} readOnly={readOnly} error={hintErr} onChange={(e) => onChange({ inputHint: e.target.value })} />
+        <TextField label={c.stepField(c.stepTitle, n)} value={step.title} maxLength={120} readOnly={readOnly} error={titleErr} onChange={(e) => onChange({ title: e.target.value })} />
+        <TextField label={c.stepField(c.inputHint, n)} value={step.inputHint} maxLength={300} readOnly={readOnly} error={hintErr} onChange={(e) => onChange({ inputHint: e.target.value })} />
       </div>
       <Switch label={c.confirmStep(n)} description={c.confirmDesc} checked={step.requiresConfirmation} disabled={readOnly} onChange={(v) => onChange({ requiresConfirmation: v })} />
     </li>

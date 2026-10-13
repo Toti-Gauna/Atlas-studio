@@ -231,6 +231,9 @@ export function seedActivity(db: Db, ids: { projectIds: Record<string, string>; 
     costStatus: "no_provider_charge",
     startedAt: iso(Date.now() - 50 * HOUR),
     updatedAt: iso(Date.now() - 49 * HOUR),
+    startedByName: "Maya Okafor",
+    pausedByName: null,
+    pausedAt: null,
   });
   db.workflowRuns.push({
     id: "wfr_seed_csv",
@@ -251,6 +254,9 @@ export function seedActivity(db: Db, ids: { projectIds: Record<string, string>; 
     costStatus: "no_provider_charge",
     startedAt: iso(Date.now() - 26 * HOUR),
     updatedAt: iso(Date.now() - 25 * HOUR),
+    startedByName: "Leo Brandt",
+    pausedByName: "Leo Brandt",
+    pausedAt: iso(Date.now() - 25 * HOUR),
   });
   db.workflows.find((w) => w.summary.id === "wfl_policy_review")!.summary.lastRunStatus = "succeeded";
   db.workflows.find((w) => w.summary.id === "wfl_csv_analysis")!.summary.lastRunStatus = "paused";

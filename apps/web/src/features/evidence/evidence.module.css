@@ -4,34 +4,14 @@
   flex-direction: column;
   gap: var(--s-4);
 }
-.chain {
-  list-style: none;
-  margin: 0;
-  padding: var(--s-3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-2);
-  background: var(--surface-2);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: var(--fs-13);
-}
-.chain li {
-  display: flex;
-  flex-direction: column;
-}
-.arrow {
-  color: var(--teal-ink);
-  padding-left: 2px;
-}
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.chipActive > * {
-  background: var(--teal-soft) !important;
-  border-color: var(--teal-line) !important;
+.chips .chipActive > * {
+  background: var(--teal-soft);
+  border-color: var(--teal-line);
 }
 .docHead {
   display: flex;
@@ -45,8 +25,7 @@
   font-weight: 700;
 }
 .docMeta {
-  font-family: var(--font-mono);
-  font-size: var(--fs-11);
+  font-size: var(--fs-13);
   color: var(--text-3);
   margin-top: 2px;
 }
@@ -72,9 +51,36 @@
   white-space: pre-wrap;
 }
 .mark {
-  background: rgba(25, 182, 164, 0.18);
+  background: color-mix(in srgb, var(--teal) 18%, transparent);
   color: var(--ink);
   border-bottom: 2px solid var(--teal);
   padding: 1px 0;
   border-radius: 2px;
+  animation: flash 0.6s ease-out;
+}
+@keyframes flash {
+  from {
+    background: color-mix(in srgb, var(--teal) 45%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    animation: none;
+  }
+}
+.tech {
+  margin-top: var(--s-4);
+}
+.techList {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 12px;
+  margin: 0;
+}
+.techList dt {
+  color: var(--text-3);
+}
+.techList dd {
+  margin: 0;
+  overflow-wrap: anywhere;
 }

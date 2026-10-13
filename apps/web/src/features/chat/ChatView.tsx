@@ -1,51 +1,58 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, History, MessageSquarePlus, ShieldAlert } from "lucide-react";
-import type { ConversationDetail, Message, Suggestion } from "@atlas/contracts";
+import { ArrowUpRight, ClipboardList, History, MessageSquarePlus, MoreHorizontal, ShieldAlert } from "lucide-react";
+import type { ConversationDetail, Message, Suggestion, WorkMode } from "@atlas/contracts";
 import { api, isApiError, type SendMessageResult } from "@/lib/api";
 import { relativeTime, modelName } from "@/lib/format";
 import { useDraft } from "@/lib/state/drafts";
+import { usePanel } from "@/lib/state/panel";
+import { useCan } from "@/lib/state/session";
 import { gsap, useReducedMotion } from "@/lib/motion";
-import { Badge, Button, Callout, EmptyState, ErrorState, LoadingBlock, Select, Sheet, useToast } from "@/components/ui";
+import { chatCopy as cc } from "@/copy/chat";
+import { Badge, Button, Callout, ErrorState, LoadingBlock, Select, Sheet, TechDetails, useToast } from "@/components/ui";
 import { Composer, type ComposerHandle, type ComposerState } from "./Composer";
-import { MessageItem } from "./MessageItem";
+import { MessageItem, type CreatedDeliverable } from "./MessageItem";
 import { Recommendations } from "./Recommendations";
-import { BranchDialog, CompareDialog, ServiceRequestDialog } from "./dialogs";
+import { MenuItem, Popover } from "@/components/ui";
+import { CompareDialog, EditQuestionDialog, ServiceRequestDialog } from "./dialogs";
+import { deliverableFromAnswer, type DeliverableKind } from "./deliverableFromAnswer";
 import s from "./chat.module.css";
 
 const newKey = () => `cm_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const MODES: WorkMode[] = ["answer", "plan_then_run", "draft_artifact"];
+const KIND_NAME: Record<DeliverableKind, string> = { report: cc.create.report, table: cc.create.table, presentation: cc.create.deck };
 
 function HistoryList({ activeId, onPick }: { activeId: string | null; onPick?: () => void }) {
   const q = useQuery({ queryKey: ["conversations", null], queryFn: () => api.conversations.list() });
   return (
     <>
       <div className={s.historyHead}>
-        <span className="eyebrow">History</span>
-        <Link href="/app/chat/?new=1" style={{ marginLeft: "auto", fontSize: 13, fontWeight: 600, color: "var(--teal-ink)", textDecoration: "none", display: "inline-flex", gap: 4, alignItems: "center" }} onClick={onPick}>
-          <MessageSquarePlus size={14} aria-hidden /> New
+        <h2 className={s.historyHeading}>{cc.history.title}</h2>
+        <Link href="/app/chat/?new=1" className={s.historyNew} onClick={onPick}>
+          <MessageSquarePlus size={14} aria-hidden /> {cc.history.newChat}
         </Link>
       </div>
       {q.isPending ? (
-        <div style={{ padding: 12 }}><LoadingBlock rows={5} /></div>
+        <div className={s.historyPad}><LoadingBlock rows={5} /></div>
       ) : q.isError ? (
-        <div style={{ padding: 12 }}><ErrorState error={q.error} compact onRetry={() => void q.refetch()} /></div>
+        <div className={s.historyPad}><ErrorState error={q.error} compact onRetry={() => void q.refetch()} /></div>
       ) : q.data.length === 0 ? (
-        <p style={{ padding: 16, color: "var(--text-3)", fontSize: 14 }}>No conversations yet.</p>
+        <p className={s.historyEmpty}>{cc.history.empty}</p>
       ) : (
         <ul className={s.historyList}>
           {q.data.map((c) => (
             <li key={c.id}>
               <Link href={`/app/chat/?c=${c.id}`} className={s.historyItem} aria-current={c.id === activeId ? "page" : undefined} onClick={onPick}>
                 <span className={s.historyTitle}>
-                  {c.title}
-                  {c.hasOpenTicket ? <Badge tone="warn">ticket</Badge> : null}
+                  <span className={s.ellipsis}>{c.title}</span>
+                  {c.hasOpenTicket ? <Badge tone="warn">{cc.history.ticket}</Badge> : null}
                 </span>
                 <span className={s.historyMeta}>
-                  {relativeTime(c.updatedAt)} · {c.branchCount > 1 ? `${c.branchCount} branches · ` : ""}
-                  {c.lastMessagePreview}
+                  <time dateTime={c.updatedAt}>{relativeTime(c.updatedAt)}</time>
+                  {c.lastMessagePreview ? ` · ${c.lastMessagePreview}` : ""}
                 </span>
               </Link>
             </li>
@@ -56,7 +63,9 @@ function HistoryList({ activeId, onPick }: { activeId: string | null; onPick?: (
   );
 }
 
-function Thread({ conv, onHandoff, handoffPending, onRegenerate, onEdit, onCompare }: { conv: ConversationDetail; onHandoff: () => void; handoffPending: boolean; onRegenerate: (m: Message) => void; onEdit: (m: Message) => void; onCompare: (m: Message) => void }) {
+type ThreadHandlers = Omit<Parameters<typeof MessageItem>[0], "m" | "created" | "creating"> & { created: Record<string, CreatedDeliverable[]>; creating: { id: string; kind: DeliverableKind } | null };
+
+function Thread({ conv, handlers }: { conv: ConversationDetail; handlers: ThreadHandlers }) {
   const end = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const last = conv.messages.at(-1)?.id;
@@ -65,11 +74,12 @@ function Thread({ conv, onHandoff, handoffPending, onRegenerate, onEdit, onCompa
     const el = last ? document.getElementById(`msg-${last}`) : null;
     if (el && !reduced) gsap.from(el, { y: 8, opacity: 0, duration: 0.22, ease: "power2.out", clearProps: "transform,opacity" });
   }, [last, reduced]);
+  const { created, creating, ...rest } = handlers;
   return (
     <div className={s.threadInner}>
       {conv.messages.map((m) => (
         <div key={m.id} id={`msg-${m.id}`}>
-          <MessageItem m={m} onHandoff={onHandoff} handoffPending={handoffPending} hasOpenTicket={conv.hasOpenTicket} onRegenerate={onRegenerate} onEdit={onEdit} onCompare={onCompare} />
+          <MessageItem m={m} {...rest} created={created[m.id] ?? []} creating={creating?.id === m.id ? creating.kind : null} />
         </div>
       ))}
       <div ref={end} />
@@ -77,23 +87,41 @@ function Thread({ conv, onHandoff, handoffPending, onRegenerate, onEdit, onCompa
   );
 }
 
+/** The question an answer responds to: its parent message, or the closest earlier question. */
+function questionFor(messages: Message[], answer: Message): string {
+  const parent = messages.find((x) => x.id === answer.parentMessageId && x.role === "user");
+  if (parent) return parent.content;
+  const i = messages.findIndex((x) => x.id === answer.id);
+  return [...messages.slice(0, i)].reverse().find((x) => x.role === "user")?.content ?? "";
+}
+
+function withCitations(m: Message): string {
+  if (!m.citations.length) return m.content;
+  const list = m.citations.map((c, i) => `[S${i + 1}] ${c.documentTitle}, v${c.version}${c.page ? `, p. ${c.page}` : ""} — “${c.quote}”`);
+  return `${m.content}\n\n${cc.message.copySources}:\n${list.join("\n")}`;
+}
+
 export function ChatView() {
   const params = useSearchParams();
   const router = useRouter();
   const qc = useQueryClient();
   const toast = useToast();
+  const { panel } = usePanel();
+  const canWrite = useCan("artifact.write");
   const convId = params.get("c");
   const isNew = params.get("new") === "1" || !convId;
   const presetProject = params.get("project");
   const presetAgent = params.get("agent");
+  const presetMode = params.get("mode") as WorkMode | null;
   const [branchId, setBranchId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [draft, setDraft, clearDraft] = useDraft(convId ?? `new:${presetProject ?? "any"}`);
-  const [state, setState] = useState<ComposerState>({ agentId: presetAgent, pinnedModelKey: null, workMode: (params.get("mode") as ComposerState["workMode"]) ?? "answer", attachments: [] });
+  const [state, setState] = useState<ComposerState>({ agentId: presetAgent, pinnedModelKey: null, workMode: presetMode && MODES.includes(presetMode) ? presetMode : "answer", attachments: params.get("attach") ? [params.get("attach")!] : [] });
   const [blocked, setBlocked] = useState<SendMessageResult["blocked"]>(null);
   const [compare, setCompare] = useState<string | null>(null);
-  const [branchFrom, setBranchFrom] = useState<Message | null>(null);
+  const [editFrom, setEditFrom] = useState<Message | null>(null);
   const [service, setService] = useState(false);
+  const [created, setCreated] = useState<Record<string, CreatedDeliverable[]>>({});
   const abortRef = useRef<AbortController | null>(null);
   const composerRef = useRef<ComposerHandle>(null);
   const clientKey = useRef(newKey());
@@ -102,6 +130,7 @@ export function ChatView() {
 
   const agents = useQuery({ queryKey: ["agents"], queryFn: api.agents.list });
   const projects = useQuery({ queryKey: ["projects"], queryFn: api.projects.list });
+  const models = useQuery({ queryKey: ["models"], queryFn: api.models });
   const conv = useQuery({ queryKey: ["conversation", convId, branchId], queryFn: () => api.conversations.get(convId!, branchId ?? undefined), enabled: Boolean(convId) && !isNew });
   const [newProject, setNewProject] = useState<string | null>(presetProject);
 
@@ -110,6 +139,9 @@ export function ChatView() {
 
   // The agent shown in the composer falls back to the conversation/project default until the user picks one.
   const agentId = state.agentId ?? conv.data?.agentId ?? project?.defaultAgentId ?? agents.data?.[0]?.id ?? null;
+  const agentList = agents.data ?? [];
+  const defaultModelKey = agentList.find((a) => a.id === agentId)?.modelKey ?? null;
+  const canCompare = (models.data ?? []).filter((m) => m.availability.mode !== "pending").length >= 2;
   const [branchFor, setBranchFor] = useState(convId);
   if (branchFor !== convId) {
     setBranchFor(convId);
@@ -125,8 +157,8 @@ export function ChatView() {
       let activeBranch = conv.data?.activeBranchId;
       if (!id || isNew) {
         if (!createdRef.current) {
-          const created = await api.conversations.create({ projectId: projectId!, agentId: agentId! });
-          createdRef.current = { id: created.id, branchId: created.activeBranchId };
+          const createdConv = await api.conversations.create({ projectId: projectId!, agentId: agentId! });
+          createdRef.current = { id: createdConv.id, branchId: createdConv.activeBranchId };
         }
         id = createdRef.current.id;
         activeBranch = createdRef.current.branchId;
@@ -148,10 +180,8 @@ export function ChatView() {
     },
     onSuccess: (r) => {
       if (r.blocked) {
+        // Nothing was sent: the draft stays in the composer.
         setBlocked(r.blocked);
-        if (r.conversation === null || !r.userMessage) {
-          /* draft stays */
-        }
         void qc.invalidateQueries({ queryKey: ["conversations"] });
         return;
       }
@@ -167,7 +197,7 @@ export function ChatView() {
       else void qc.invalidateQueries({ queryKey: ["conversation", convId] });
     },
     onError: (e) => {
-      if (isApiError(e) && e.code === "CANCELLED") toast({ tone: "info", title: "Stopped", body: "Your message is kept in the composer. Resending reuses the same idempotency key, so nothing is duplicated." });
+      if (isApiError(e) && e.code === "CANCELLED") toast({ tone: "info", title: cc.toasts.stopped });
     },
   });
 
@@ -187,28 +217,70 @@ export function ChatView() {
     router.replace(`/app/chat/?${q.toString()}`);
   }, [autoText, ready, sendNow, setDraft, params, router]);
 
+  // `q` without `send=1` (e.g. "Ask about this document") only prefills the composer; nothing runs until the user sends.
+  const prefillText = isNew && params.get("send") !== "1" ? params.get("q") : null;
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (!prefillText || prefilled.current) return;
+    prefilled.current = true;
+    setDraft(prefillText);
+    composerRef.current?.focus();
+    const q = new URLSearchParams(params.toString());
+    q.delete("q");
+    router.replace(`/app/chat/?${q.toString()}`);
+  }, [prefillText, setDraft, params, router]);
+
+  /** Example questions count as sending: one click asks. */
+  const ask = (text: string) => {
+    setDraft(text);
+    send.mutate({ content: text });
+  };
+
   const handoff = useMutation({
     mutationFn: () => api.conversations.handoff(convId!),
     onSuccess: (t) => {
-      toast({ tone: "success", title: `Ticket #${t.number}`, body: "A person will reply. Context was preserved." });
+      toast({ tone: "success", title: cc.toasts.ticket(t.number), body: cc.toasts.ticketBody });
       void qc.invalidateQueries({ queryKey: ["conversation", convId] });
       void qc.invalidateQueries({ queryKey: ["conversations"] });
       void qc.invalidateQueries({ queryKey: ["tickets"] });
     },
-    onError: (e) => toast({ tone: "error", title: "Handoff failed", body: (e as Error).message }),
+    onError: (e) => toast({ tone: "error", title: cc.toasts.handoffFailed, body: (e as Error).message }),
   });
 
-  const branch = useMutation({
+  const attempt = useMutation({
     mutationFn: (v: { from: Message; reason: "edit" | "regenerate"; text?: string }) => api.branches.create({ fromMessageId: v.from.id, reason: v.reason, editedContent: v.text, agentId: agentId ?? undefined, pinnedModelKey: state.pinnedModelKey }),
-    onSuccess: (d) => {
-      setBranchFrom(null);
+    onSuccess: (d, v) => {
+      setEditFrom(null);
       setBranchId(d.activeBranchId);
       qc.setQueryData(["conversation", convId, d.activeBranchId], d);
       void qc.invalidateQueries({ queryKey: ["conversations"] });
-      toast({ tone: "success", title: "New branch created", body: "The original branch is unchanged." });
+      toast({ tone: "success", title: v.reason === "edit" ? cc.toasts.edited : cc.toasts.regenerated, body: cc.toasts.versionHint });
     },
-    onError: (e) => toast({ tone: "error", title: "Branch not created", body: (e as Error).message }),
+    onError: (e) => toast({ tone: "error", title: cc.toasts.notCreated, body: (e as Error).message }),
   });
+
+  const create = useMutation({
+    mutationFn: (v: { m: Message; kind: DeliverableKind }) => {
+      const d = deliverableFromAnswer(v.kind, questionFor(conv.data?.messages ?? [], v.m), v.m);
+      return api.artifacts.create({ projectId: projectId!, title: d.title, content: d.content, sources: d.sources });
+    },
+    onSuccess: (art, v) => {
+      setCreated((prev) => ({ ...prev, [v.m.id]: [...(prev[v.m.id] ?? []), { id: art.id, kind: v.kind }] }));
+      qc.setQueryData(["artifact", art.id], art);
+      void qc.invalidateQueries({ queryKey: ["artifacts"] });
+      toast({ tone: "success", title: cc.create.done(KIND_NAME[v.kind]), body: cc.create.doneBody });
+    },
+    onError: (e) => toast({ tone: "error", title: cc.create.failed, body: (e as Error).message }),
+  });
+
+  const copyAnswer = async (m: Message) => {
+    try {
+      await navigator.clipboard.writeText(withCitations(m));
+      toast({ tone: "success", title: cc.message.copied });
+    } catch (e) {
+      toast({ tone: "error", title: cc.message.copyFailed, body: (e as Error).message });
+    }
+  };
 
   const usePrepared = (sg: Suggestion) => {
     setDraft(sg.prompt);
@@ -216,41 +288,55 @@ export function ChatView() {
     composerRef.current?.focus();
   };
 
-  const lastUser = useMemo(() => [...(conv.data?.messages ?? [])].reverse().find((m) => m.role === "user"), [conv.data]);
-  const agentList = agents.data ?? [];
+  const examples = projectId ? (cc.examples[projectId] ?? []) : [];
+  const panelOpen = panel !== null;
 
   return (
-    <div className={s.layout}>
+    <div className={`${s.layout} ${panelOpen ? s.layoutPanel : ""}`}>
       <aside className={s.history} aria-label="Conversation history">
         <HistoryList activeId={convId} />
       </aside>
       <section className={s.convo} aria-label="Conversation">
         <div className={s.convoHead}>
-          <Button size="sm" variant="ghost" className={s.mobileHistoryBtn} icon={<History size={14} />} onClick={() => setHistoryOpen(true)}>
-            History
+          <Button size="sm" variant="ghost" className={s.historyBtn} icon={<History size={14} />} onClick={() => setHistoryOpen(true)}>
+            {cc.history.open}
           </Button>
-          <h1 className={s.convoTitle}>{isNew ? "New conversation" : (conv.data?.title ?? "Conversation")}</h1>
+          <h1 className={s.convoTitle}>{isNew ? cc.head.newTitle : (conv.data?.title ?? cc.head.fallbackTitle)}</h1>
           {isNew ? (
-            <div style={{ minWidth: 200 }}>
-              <Select label="Project" hideLabel value={projectId ?? ""} onChange={(e) => setNewProject(e.target.value)} options={(projects.data ?? []).map((p) => ({ value: p.id, label: p.name }))} />
+            <div className={s.projectPick}>
+              <Select label={cc.head.project} hideLabel value={projectId ?? ""} onChange={(e) => setNewProject(e.target.value)} options={(projects.data ?? []).map((p) => ({ value: p.id, label: p.name }))} />
             </div>
           ) : conv.data ? (
             <>
-              {project ? <Badge>{project.name}</Badge> : null}
+              {project ? <span className={s.convoProject}>{project.name}</span> : null}
               {conv.data.branches.length > 1 ? (
-                <div style={{ minWidth: 170 }}>
-                  <Select
-                    label="Branch"
-                    hideLabel
-                    value={conv.data.activeBranchId}
-                    onChange={(e) => setBranchId(e.target.value)}
-                    options={conv.data.branches.map((b) => ({ value: b.id, label: `${b.label} · ${modelName(b.modelKey)}` }))}
-                  />
-                </div>
+                <label className={s.versionPick}>
+                  <span>{cc.head.version}</span>
+                  <select value={conv.data.activeBranchId} onChange={(e) => setBranchId(e.target.value)}>
+                    {conv.data.branches.map((b, i) => (
+                      <option key={b.id} value={b.id}>
+                        {cc.head.versionLabel(i, b.reason)} · {modelName(b.modelKey)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               ) : null}
-              <Button size="sm" variant="ghost" icon={<ClipboardList size={14} />} onClick={() => setService(true)}>
-                Service request
-              </Button>
+              <Popover
+                kind="menu"
+                align="end"
+                label={cc.head.more}
+                trigger={(p) => (
+                  <button type="button" className={s.moreBtn} aria-label={cc.head.more} title={cc.head.more} {...p}>
+                    <MoreHorizontal size={16} aria-hidden />
+                  </button>
+                )}
+              >
+                {(close) => (
+                  <MenuItem icon={<ClipboardList size={15} />} onSelect={() => { close(); setService(true); }}>
+                    {cc.head.serviceRequest}
+                  </MenuItem>
+                )}
+              </Popover>
             </>
           ) : null}
         </div>
@@ -261,17 +347,47 @@ export function ChatView() {
             <div className={s.threadInner}><ErrorState error={conv.error} onRetry={() => void conv.refetch()} /></div>
           ) : isNew || !conv.data?.messages.length ? (
             <div className={s.empty}>
-              <EmptyState title="Start with a question or a deliverable" body="Answers quote authorized project sources with page and version. Without evidence, Atlas abstains and offers a person." />
-              {projectId ? <Recommendations projectId={projectId} agentId={agentId ?? undefined} onUse={usePrepared} limit={3} /> : null}
+              <div>
+                <h2 className={s.emptyTitle}>{cc.empty.title}</h2>
+                {examples.length ? <p className={s.emptyLead}>{cc.empty.lead}</p> : null}
+              </div>
+              {examples.length ? (
+                <ul className={s.examples} aria-label={cc.empty.examplesLabel}>
+                  {examples.map((q) => (
+                    <li key={q}>
+                      <button type="button" className={s.example} disabled={!ready || send.isPending} onClick={() => ask(q)}>
+                        <span>{q}</span>
+                        <ArrowUpRight size={16} aria-hidden />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {projectId ? (
+                <section className={s.suggestions} aria-labelledby="chat-suggestions">
+                  <h3 id="chat-suggestions" className={s.suggestionsHead}>{cc.empty.suggestions}</h3>
+                  <Recommendations projectId={projectId} agentId={agentId ?? undefined} onUse={usePrepared} limit={3} />
+                </section>
+              ) : null}
             </div>
           ) : (
             <Thread
               conv={conv.data}
-              onHandoff={() => handoff.mutate()}
-              handoffPending={handoff.isPending}
-              onRegenerate={(m) => branch.mutate({ from: m, reason: "regenerate" })}
-              onEdit={(m) => setBranchFrom(m)}
-              onCompare={() => setCompare(lastUser?.content ?? "")}
+              handlers={{
+                defaultModelKey,
+                onHandoff: () => handoff.mutate(),
+                handoffPending: handoff.isPending,
+                hasOpenTicket: conv.data.hasOpenTicket,
+                onRegenerate: (m) => attempt.mutate({ from: m, reason: "regenerate" }),
+                onEdit: (m) => setEditFrom(m),
+                onCompare: (m) => setCompare(questionFor(conv.data.messages, m)),
+                onCopy: (m) => void copyAnswer(m),
+                onCreate: (m, kind) => create.mutate({ m, kind }),
+                creating: create.isPending && create.variables ? { id: create.variables.m.id, kind: create.variables.kind } : null,
+                created,
+                canCreate: canWrite && Boolean(projectId),
+                canCompare,
+              }}
             />
           )}
         </div>
@@ -279,20 +395,24 @@ export function ChatView() {
           {blocked ? (
             <div className={s.approval}>
               <Callout tone="warn" icon={<ShieldAlert size={16} />}>
-                <strong>Not sent.</strong> {blocked.message}
+                <strong>{cc.blocked.title}</strong> {cc.blocked.body}
                 {blocked.pendingFallback ? (
-                  <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <div className={s.approvalRow}>
                     <Button size="sm" variant="primary" loading={send.isPending} onClick={() => send.mutate({ approvalKey: blocked.pendingFallback!.modelKey })}>
-                      Approve {modelName(blocked.pendingFallback.modelKey)} for this message
+                      {cc.blocked.approve(modelName(blocked.pendingFallback.modelKey))}
                     </Button>
-                    <span style={{ fontSize: 12 }}>
-                      {blocked.pendingFallback.changesProvider ? "Changes provider. " : ""}
-                      {blocked.pendingFallback.changesPrice ? "Changes price. " : ""}Nothing switches without your approval.
+                    <span className={s.approvalNote}>
+                      {blocked.pendingFallback.changesProvider ? `${cc.blocked.changesProvider} ` : ""}
+                      {blocked.pendingFallback.changesPrice ? `${cc.blocked.changesPrice} ` : ""}
+                      {cc.blocked.approval}
                     </span>
                   </div>
                 ) : (
-                  <div style={{ marginTop: 6, fontSize: 13 }}>Pick another model in the composer; your draft is kept.</div>
+                  <div className={s.approvalNote}>{cc.blocked.pickAnother}</div>
                 )}
+                <div className={s.approvalDetails}>
+                  <TechDetails summary={cc.blocked.details}>{blocked.message}</TechDetails>
+                </div>
               </Callout>
             </div>
           ) : null}
@@ -324,7 +444,7 @@ export function ChatView() {
         <HistoryList activeId={convId} onPick={() => setHistoryOpen(false)} />
       </Sheet>
       {convId && agentId ? <CompareDialog open={compare !== null} onClose={() => setCompare(null)} conversationId={convId} prompt={compare ?? ""} agentId={agentId} /> : null}
-      <BranchDialog open={branchFrom !== null} onClose={() => setBranchFrom(null)} initial={branchFrom?.content ?? ""} pending={branch.isPending} onSubmit={(text) => branch.mutate({ from: branchFrom!, reason: "edit", text })} />
+      <EditQuestionDialog open={editFrom !== null} onClose={() => setEditFrom(null)} initial={editFrom?.content ?? ""} pending={attempt.isPending} onSubmit={(text) => attempt.mutate({ from: editFrom!, reason: "edit", text })} />
       {convId ? <ServiceRequestDialog open={service} onClose={() => setService(false)} conversationId={convId} /> : null}
     </div>
   );

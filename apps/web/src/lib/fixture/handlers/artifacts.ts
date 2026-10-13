@@ -6,7 +6,7 @@ import { iso, newId, type ArtifactRecord } from "../db";
 import { body, FixtureError, notFound, on, requireAction, type Ctx } from "../router";
 import { createArtifact, myRoleOn, saveVersion, toDetail } from "../engine/artifacts";
 
-const getArt = (ctx: Ctx, id: string): ArtifactRecord => ctx.db.artifacts.find((a) => a.summary.id === id) ?? notFound("Artifact");
+const getArt = (ctx: Ctx, id: string): ArtifactRecord => ctx.db.artifacts.find((a) => a.summary.id === id) ?? notFound("Deliverable");
 const roleOn = (ctx: Ctx, rec: ArtifactRecord) => myRoleOn(rec, ctx.userId, ctx.role);
 
 on("GET", "/artifacts", (ctx) => {
@@ -32,10 +32,10 @@ on("POST", "/artifacts", (ctx) => {
 on("POST", "/artifacts/:id/versions", (ctx) => {
   requireAction(ctx, "artifact.write");
   const rec = getArt(ctx, ctx.params.id!);
-  if (!canOnArtifact(roleOn(ctx, rec), "edit")) throw new FixtureError("FORBIDDEN", "You can view this artifact but not edit it.");
+  if (!canOnArtifact(roleOn(ctx, rec), "edit")) throw new FixtureError("FORBIDDEN", "You can view this deliverable but not edit it.");
   const b = body<{ baseVersion: number; content: ArtifactContent; sources: SourceRef[]; changeNote: string }>(ctx);
   if (b.baseVersion !== rec.summary.currentVersion) throw new FixtureError("CONFLICT", `A newer version (v${rec.summary.currentVersion}) exists. Reload before saving.`);
-  if (b.content.type !== rec.summary.type) throw new FixtureError("VALIDATION", "Artifact type cannot change.");
+  if (b.content.type !== rec.summary.type) throw new FixtureError("VALIDATION", "A deliverable’s type cannot change.");
   saveVersion(ctx.db, rec, { content: b.content, sources: b.sources, authorId: ctx.userId, changeNote: b.changeNote });
   return toDetail(rec, ctx.userId, ctx.role);
 });
@@ -59,7 +59,7 @@ on("POST", "/artifact-shares", (ctx) => {
   requireAction(ctx, "artifact.share");
   const b = body<{ artifactId: string; userId: string; role: ShareRole }>(ctx);
   const rec = getArt(ctx, b.artifactId);
-  if (!canOnArtifact(roleOn(ctx, rec), "share")) throw new FixtureError("FORBIDDEN", "Only the owner can share this artifact.");
+  if (!canOnArtifact(roleOn(ctx, rec), "share")) throw new FixtureError("FORBIDDEN", "Only the owner can share this deliverable.");
   const user = ctx.db.users.find((u) => u.id === b.userId);
   if (!user) throw new FixtureError("FORBIDDEN", "You can only share with members of this workspace. Public links are not available.");
   const existing = rec.shares.find((s) => s.userId === b.userId);
@@ -94,7 +94,7 @@ on("POST", "/reviews", (ctx) => {
   const rec = getArt(ctx, b.artifactId);
   if (b.version !== rec.summary.currentVersion) throw new FixtureError("CONFLICT", "Request review of the current version.");
   const reviewer = ctx.db.users.find((u) => u.id === b.reviewerId) ?? notFound("Reviewer");
-  const r: ReviewRequest = { id: newId("rvw"), artifactId: rec.summary.id, artifactTitle: rec.summary.title, version: b.version, requestedBy: ctx.userId, requestedByName: "Demo Visitor", reviewerId: reviewer.id, reviewerName: reviewer.displayName, status: "open", decisionNote: null, createdAt: iso(Date.now()), decidedAt: null };
+  const r: ReviewRequest = { id: newId("rvw"), artifactId: rec.summary.id, artifactTitle: rec.summary.title, version: b.version, requestedBy: ctx.userId, requestedByName: ctx.db.users.find((u) => u.id === ctx.userId)?.displayName ?? "Demo Visitor", reviewerId: reviewer.id, reviewerName: reviewer.displayName, status: "open", decisionNote: null, createdAt: iso(Date.now()), decidedAt: null };
   ctx.db.reviews.unshift(r);
   rec.versions.find((v) => v.version === b.version)!.reviewState = "in_review";
   rec.summary.reviewState = "in_review";
@@ -107,7 +107,7 @@ on("POST", "/reviews/:id/decision", (ctx) => {
   const b = body<{ version: number; decision: "approve" | "request_changes"; note?: string }>(ctx);
   const rec = getArt(ctx, r.artifactId);
   if (r.status !== "open") throw new FixtureError("CONFLICT", `This review is ${r.status.replace("_", " ")}.`);
-  if (b.version !== r.version || r.version !== rec.summary.currentVersion) throw new FixtureError("CONFLICT", "The artifact changed after review was requested. Approval applies to an exact version.");
+  if (b.version !== r.version || r.version !== rec.summary.currentVersion) throw new FixtureError("CONFLICT", "This deliverable changed after the review was requested. Approval applies to an exact version.");
   if (r.reviewerId !== ctx.userId && ctx.role !== "admin") throw new FixtureError("FORBIDDEN", "Only the assigned reviewer can decide.");
   const v = rec.versions.find((x) => x.version === r.version)!;
   r.status = b.decision === "approve" ? "approved" : "changes_requested";
@@ -130,7 +130,7 @@ on("POST", "/artifacts/:id/comments", (ctx) => {
   if (!canOnArtifact(roleOn(ctx, rec), "comment") && roleOn(ctx, rec) !== "owner") throw new FixtureError("FORBIDDEN", "Viewers cannot comment.");
   const b = body<{ version: number; body: string; anchor?: string | null }>(ctx);
   if (!b.body?.trim()) throw new FixtureError("VALIDATION", "Comment is empty.");
-  const c = { id: newId("cmt"), artifactId: rec.summary.id, version: b.version, authorId: ctx.userId, authorName: "Demo Visitor", body: b.body.trim().slice(0, 2000), anchor: b.anchor ?? null, resolved: false, createdAt: iso(Date.now()) };
+  const c = { id: newId("cmt"), artifactId: rec.summary.id, version: b.version, authorId: ctx.userId, authorName: ctx.db.users.find((u) => u.id === ctx.userId)?.displayName ?? "Demo Visitor", body: b.body.trim().slice(0, 2000), anchor: b.anchor ?? null, resolved: false, createdAt: iso(Date.now()) };
   ctx.db.comments.push(c);
   return c;
 });

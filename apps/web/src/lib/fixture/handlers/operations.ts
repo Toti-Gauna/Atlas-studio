@@ -49,7 +49,10 @@ on("POST", "/workflows/:id/preview", (ctx) => {
     agentVersion: agent.summary.currentVersion,
     steps: v.steps.map((s) => ({ title: s.title, tool: s.tool, effect: s.effect === "none" ? (s.requiresConfirmation ? "waits for your confirmation" : "no side effects") : s.effect.replace(/_/g, " "), invokesModel: s.invokesModel })),
     routing,
-    estimate: { inputTokens: null, outputTokens: null, costNanoUsd: "0", basis: "Local adapter: no provider charge. Model-backed steps would reserve budget before each call." },
+    // Honest estimate: zero only when the routed model runs inside Atlas; otherwise unknown (never zero).
+    estimate: routing.modelKey.startsWith("local:")
+      ? { inputTokens: null, outputTokens: null, costNanoUsd: "0", basis: "Runs inside Atlas: no provider charge." }
+      : { inputTokens: null, outputTokens: null, costNanoUsd: null, basis: "Steps that call a model reserve budget before each call; the amount is not estimated in this preview." },
     requiresConfirmation: v.steps.some((s) => s.requiresConfirmation),
     confirmationReasons: v.steps.filter((s) => s.requiresConfirmation).map((s) => `“${s.title}” waits for your confirmation.`),
     missingBrief: [],
@@ -60,7 +63,7 @@ on("POST", "/workflows/:id/runs", (ctx) => {
   const w = getWf(ctx, ctx.params.id!);
   const b = body<{ projectId: string; version: number; inputs: Record<string, string>; idempotencyKey: string }>(ctx);
   if (!w.versions.some((v) => v.version === b.version)) notFound("Workflow version");
-  return startWorkflow(ctx.db, w.summary.id, b.version, b.projectId, b.inputs, b.idempotencyKey);
+  return startWorkflow(ctx.db, w.summary.id, b.version, b.projectId, b.inputs, b.idempotencyKey, ctx.userId);
 });
 on("GET", "/workflows/:id/runs", (ctx) => {
   requireAction(ctx, "workflow.read");
@@ -70,7 +73,7 @@ on("GET", "/workflows/:id/runs", (ctx) => {
 on("GET", "/workflow-runs/:id", (ctx) => tick(ctx.db, getWfRun(ctx, ctx.params.id!), ctx.userId));
 on("POST", "/workflow-runs/:id/pause", (ctx) => {
   requireAction(ctx, "workflow.run");
-  return requestPause(ctx.db, getWfRun(ctx, ctx.params.id!));
+  return requestPause(ctx.db, getWfRun(ctx, ctx.params.id!), ctx.userId);
 });
 on("POST", "/workflow-runs/:id/resume", (ctx) => {
   requireAction(ctx, "workflow.run");

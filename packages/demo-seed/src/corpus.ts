@@ -262,7 +262,7 @@ export const SEED_DOCUMENTS: SeedDocument[] = [
       {
         version: 1,
         status: "failed",
-        failureReason: "No extractable text layer: this PDF is a scanned image and OCR is not implemented.",
+        failureReason: "This PDF is a scanned image, so it can’t be read or cited yet in this demo.",
         pages: [],
       },
     ],

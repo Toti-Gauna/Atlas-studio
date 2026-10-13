@@ -126,7 +126,7 @@ export function PolicyTab() {
                   [c.policy.detectors, list(p.enabledDetectors, detectorLabel)],
                 ]}
               />
-              {!isAdmin ? <p className={s.muted} style={{ marginTop: 12 }}>{c.policy.adminOnly}</p> : null}
+              {!isAdmin ? <p className={`${s.muted} ${s.noteTop}`}>{c.policy.adminOnly}</p> : null}
             </>
           )}
         </Card>

@@ -1,15 +1,12 @@
 /** Centralized English copy for the Showcase (R14). */
 export const showcaseCopy = {
-  eyebrow: "Guided tours",
   title: "Guided tours",
-  description: "Three end-to-end tours through the real screens of this workspace. Each step opens the screen where you do the work yourself.",
-  honesty: "The guide never simulates success. Every status and deliverable below comes from a real run in this visitor workspace.",
-  honestyPreview: "Frontend preview: runs execute in an in-browser fixture with synthetic data, and everything resets on reload.",
-  honestyApi: "Runs execute against the Atlas API in your isolated demo workspace.",
+  description: "Three short tours of the real screens — you do each step yourself.",
+  honesty: "Statuses and deliverables below come from real runs in this demo workspace.",
   emptyTitle: "No tours available",
   emptyBody: "Reset the demo data to restore the three guided tours.",
   start: "Start tour",
-  startHint: "Opens the workflow page. Nothing runs until you preview the plan and press Run.",
+  startHint: "Nothing runs until you review the plan.",
   stepsLabel: (title: string) => `Steps of the ${title} tour`,
   lastRun: "Last run",
   noRun: "No run yet in this workspace.",
@@ -18,7 +15,6 @@ export const showcaseCopy = {
   notFinished: "Not finished",
   deliverables: "Created deliverables",
   afterRun: "Available after a run creates the deliverable",
-  integration: "Integration",
   listLabel: "Guided tours",
   step: {
     openProject: { title: "Open the project", description: "Review the policy, the customer checklist and the project objective." },

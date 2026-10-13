@@ -42,7 +42,7 @@ export function AgentPicker({ agents, value, onChange, label = "Agent" }: { agen
           <AgentGlyph profile={a.profile} size={34} />
           <span>
             <span className={s.agentName}>{a.name}</span>
-            <span className={s.agentDesc} style={{ display: "block" }}>
+            <span className={s.agentDesc}>
               {a.description.length > 92 ? `${a.description.slice(0, 90)}…` : a.description}
             </span>
           </span>

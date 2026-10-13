@@ -88,35 +88,47 @@
   gap: 8px;
 }
 .updated {
-  margin-left: auto;
   font-size: var(--fs-12);
   color: var(--text-3);
 }
-
-/* Project detail */
-.back {
+.continue {
+  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 32px;
   font-size: var(--fs-13);
   font-weight: 600;
   color: var(--teal-ink);
   text-decoration: none;
-  margin-bottom: var(--s-3);
 }
-.back:hover {
+.continue:hover {
   text-decoration: underline;
 }
-.eyebrowRow {
+
+/* Project detail */
+.titleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.iconTitle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+.loadingGap {
+  margin-top: var(--s-5);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 .setup {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 280px;
   gap: var(--s-5);
-  margin-bottom: var(--s-5);
 }
 .objectiveCol {
   min-width: 0;
@@ -152,8 +164,30 @@
   flex-wrap: wrap;
   gap: var(--s-2);
 }
-.tabsWrap {
+.tabsBar {
   overflow-x: auto;
+}
+.tabsSelect {
+  display: none;
+}
+/* Overview */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-6);
+  align-items: start;
+}
+.overviewBlock {
+  min-width: 0;
+}
+.emptyLine {
+  font-size: var(--fs-14);
+  color: var(--text-3);
 }
 .tabBody {
   margin-top: var(--s-5);
@@ -289,6 +323,15 @@
   font-size: var(--fs-12);
   color: var(--text-3);
 }
+.memLink {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--teal-ink);
+}
+.prefNote {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
 .memContent {
   font-size: var(--fs-15);
   line-height: var(--lh-body);
@@ -302,8 +345,18 @@
 
 @media (max-width: 1023px) {
   .setup,
-  .memoryGrid {
+  .memoryGrid,
+  .overviewGrid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 639px) {
+  .tabsSelect {
+    display: block;
+    margin-bottom: var(--s-2);
+  }
+  .tabsBar {
+    display: none;
   }
 }
 @media (max-width: 767px) {

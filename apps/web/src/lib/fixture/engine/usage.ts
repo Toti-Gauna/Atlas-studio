@@ -108,7 +108,7 @@ export function usageReport(db: Db, q: UsageQuery): UsageReport {
     daily,
     label: "DEMO",
     disclaimer:
-      "DEMO fixture data. Costs of Atlas API calls only — not Claude Max, ChatGPT or development costs. Calculated costs use the verified price snapshot; unknown costs are shown separately and never counted as zero. Not a reconciled invoice.",
+      "Demo data. Only Atlas’s own model calls; calculated costs use the verified price snapshot and unknown costs are shown separately. Not a reconciled invoice.",
   };
 }
 

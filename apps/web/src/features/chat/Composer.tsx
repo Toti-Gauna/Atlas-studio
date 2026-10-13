@@ -1,13 +1,17 @@
 "use client";
 import { forwardRef, useImperativeHandle, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUp, Bot, Cpu, Paperclip, Square } from "lucide-react";
+import { ArrowUp, Paperclip, SlidersHorizontal, Square } from "lucide-react";
 import type { AgentSummary, WorkMode } from "@atlas/contracts";
 import { estimateTokens } from "@atlas/domain";
 import { api } from "@/lib/api";
 import { modelName } from "@/lib/format";
-import { Button, IconButton, Modal, Badge } from "@/components/ui";
+import { chatCopy } from "@/copy/chat";
+import { Badge, Button, IconButton, Modal, Segmented, Select } from "@/components/ui";
+import { Popover } from "@/components/ui";
 import s from "./chat.module.css";
+
+const c = chatCopy.composer;
 
 export interface ComposerState {
   agentId: string | null;
@@ -21,12 +25,12 @@ export interface ComposerHandle {
 }
 
 const MODES: Array<{ value: WorkMode; label: string }> = [
-  { value: "answer", label: "Answer" },
-  { value: "plan_then_run", label: "Plan & run" },
-  { value: "draft_artifact", label: "Draft deliverable" },
+  { value: "answer", label: c.modes.answer },
+  { value: "draft_artifact", label: c.modes.draft_artifact },
+  { value: "plan_then_run", label: c.modes.plan_then_run },
 ];
 
-/** Spacious composer: attachments, agent, model, mode, sources and an honest estimate. */
+/** Composer: visible work mode, one compact Settings control (agent + model), sources and an honest cost line. */
 export const Composer = forwardRef<ComposerHandle, {
   value: string;
   onChange: (v: string) => void;
@@ -49,22 +53,27 @@ export const Composer = forwardRef<ComposerHandle, {
   const effectiveModel = state.pinnedModelKey ?? agent?.modelKey ?? null;
   const model = models.data?.find((m) => m.key === effectiveModel);
   const readyDocs = (docs.data ?? []).filter((d) => d.latestStatus === "ready");
+  const unavailable = model?.availability.mode === "pending";
 
   return (
     <>
       <div className={s.composer}>
+        <div className={s.composerModes}>
+          <Segmented<WorkMode> label={c.modeLabel} value={state.workMode} onChange={(workMode) => onState({ workMode })} options={MODES} />
+        </div>
         <label htmlFor="composer-input" className="sr-only">
-          Message
+          {c.label}
         </label>
         <textarea
           id="composer-input"
           ref={inputRef}
           className={s.composerInput}
-          placeholder={agent ? `Ask ${agent.name}… (Enter to send, Shift+Enter for a new line)` : "Ask about your sources…"}
+          placeholder={c.placeholder(agent?.name ?? null)}
           value={value}
           rows={2}
           maxLength={8000}
           disabled={disabled}
+          aria-describedby="composer-hint"
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -73,52 +82,50 @@ export const Composer = forwardRef<ComposerHandle, {
             }
           }}
         />
+        <span id="composer-hint" className="sr-only">
+          {c.hint}
+        </span>
         <div className={s.composerBar}>
-          <IconButton label={`Attach project sources (${state.attachments.length} selected)`} size="sm" onClick={() => setAttachOpen(true)} disabled={!projectId}>
+          <IconButton label={c.attach(state.attachments.length)} size="sm" onClick={() => setAttachOpen(true)} disabled={!projectId}>
             <Paperclip size={16} />
           </IconButton>
-          <label className={s.pill} title="Agent for the next run">
-            <Bot size={14} aria-hidden />
-            <span className="sr-only">Agent</span>
-            <select className={s.pillSelect} value={state.agentId ?? ""} onChange={(e) => onState({ agentId: e.target.value })}>
-              {agents.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={s.pill} title="Model for this conversation">
-            <Cpu size={14} aria-hidden />
-            <span className="sr-only">Model</span>
-            <select className={s.pillSelect} value={state.pinnedModelKey ?? ""} onChange={(e) => onState({ pinnedModelKey: e.target.value || null })}>
-              <option value="">Agent default ({modelName(agent?.modelKey ?? "local:atlas-extractive-v1")})</option>
-              {(models.data ?? []).map((m) => (
-                <option key={m.key} value={m.key}>
-                  {m.displayName}
-                  {m.availability.mode === "pending" ? " — pending" : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={s.pill} title="Work mode">
-            <span className="sr-only">Work mode</span>
-            <select className={s.pillSelect} value={state.workMode} onChange={(e) => onState({ workMode: e.target.value as WorkMode })}>
-              {MODES.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Popover
+            label={c.settingsTitle}
+            trigger={(p) => (
+              <button type="button" className={s.settingsBtn} {...p} aria-label={`${c.settings}: ${agent?.name ?? ""}, ${model?.displayName ?? ""}`}>
+                <SlidersHorizontal size={14} aria-hidden />
+                <span className={s.settingsText}>
+                  {agent?.name ?? c.settings}
+                  {state.pinnedModelKey ? ` · ${modelName(state.pinnedModelKey)}` : ""}
+                </span>
+                {unavailable ? <span className={s.settingsWarn} aria-hidden /> : null}
+              </button>
+            )}
+          >
+            <Select label={c.agent} value={state.agentId ?? ""} onChange={(e) => onState({ agentId: e.target.value })} options={agents.map((a) => ({ value: a.id, label: a.name }))} />
+            <Select
+              label={c.model}
+              value={state.pinnedModelKey ?? ""}
+              onChange={(e) => onState({ pinnedModelKey: e.target.value || null })}
+              options={[
+                { value: "", label: c.agentDefault(modelName(agent?.modelKey ?? "local:atlas-extractive-v1")) },
+                ...(models.data ?? []).map((m) => ({
+                  value: m.key,
+                  label: m.availability.mode === "pending" ? `${m.displayName} — ${c.needsAdmin}` : m.displayName,
+                  disabled: m.availability.mode === "pending" && m.key !== state.pinnedModelKey,
+                })),
+              ]}
+            />
+            {unavailable && model ? <p className={s.settingsNote}>{c.modelNotConnected(model.displayName)}</p> : null}
+          </Popover>
           {extra}
           <div className={s.sendRow}>
             {pending ? (
               <Button size="sm" variant="secondary" icon={<Square size={12} />} onClick={onStop}>
-                Stop
+                {c.stop}
               </Button>
             ) : (
-              <IconButton label="Send message" variant="primary" disabled={!value.trim() || disabled} onClick={onSend}>
+              <IconButton label={c.send} variant="primary" disabled={!value.trim() || disabled} onClick={onSend}>
                 <ArrowUp size={18} />
               </IconButton>
             )}
@@ -126,33 +133,20 @@ export const Composer = forwardRef<ComposerHandle, {
         </div>
       </div>
       <div className={s.composerFoot} aria-live="polite">
-        <span>
-          Sources: {state.attachments.length ? `${state.attachments.length} attached` : `all authorized project documents (${readyDocs.length})`}
-        </span>
-        <span>
-          Model: {model?.displayName ?? "—"}
-          {model?.availability.mode === "pending" ? <Badge tone="warn">pending</Badge> : null}
-        </span>
-        <span>
-          Estimate:{" "}
-          {model?.provider === "local"
-            ? "local · no provider charge"
-            : model
-              ? `≈${estimateTokens(value).toLocaleString()} input tokens + context; reserved before the call`
-              : "—"}
-        </span>
+        <span>{state.attachments.length ? c.sourcesSome(state.attachments.length) : c.sourcesAll(readyDocs.length)}</span>
+        {model ? (
+          <span>
+            {model.displayName}
+            {unavailable ? null : model.provider === "local" ? ` · ${c.noCharge}` : ` · ${c.estimate(estimateTokens(value))}`}
+          </span>
+        ) : null}
+        {unavailable && model ? <Badge tone="warn">{c.modelNotConnected(model.displayName)}</Badge> : null}
       </div>
-      <Modal
-        open={attachOpen}
-        onClose={() => setAttachOpen(false)}
-        title="Attach sources"
-        description="Limit this message to specific project documents. Agents can never read documents outside their authorized scope."
-        footer={<Button variant="primary" onClick={() => setAttachOpen(false)}>Done</Button>}
-      >
-        <fieldset style={{ border: 0, padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-          <legend className="sr-only">Project documents</legend>
+      <Modal open={attachOpen} onClose={() => setAttachOpen(false)} title={c.attachTitle} description={c.attachDescription} footer={<Button variant="primary" onClick={() => setAttachOpen(false)}>{c.done}</Button>}>
+        <fieldset className={s.attachList}>
+          <legend className="sr-only">{c.attachLegend}</legend>
           {readyDocs.map((d) => (
-            <label key={d.id} style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <label key={d.id} className={s.attachItem}>
               <input
                 type="checkbox"
                 checked={state.attachments.includes(d.id)}
@@ -162,7 +156,7 @@ export const Composer = forwardRef<ComposerHandle, {
               <Badge mono>{d.kind}</Badge>
             </label>
           ))}
-          {readyDocs.length === 0 ? <p>No ready documents in this project.</p> : null}
+          {readyDocs.length === 0 ? <p>{c.attachNone}</p> : null}
         </fieldset>
       </Modal>
     </>

@@ -1,0 +1,70 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+.panel {
+  position: fixed;
+  z-index: var(--z-overlay);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-3);
+  max-width: calc(100vw - 16px);
+}
+.menu {
+  min-width: 220px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.dialog {
+  width: 320px;
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-1);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  cursor: pointer;
+}
+.item:hover,
+.item:focus-visible {
+  background: var(--surface-3);
+  outline: none;
+}
+.item[aria-disabled="true"] {
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+.item[aria-disabled="true"]:hover {
+  background: transparent;
+}
+.icon {
+  display: inline-flex;
+  margin-top: 2px;
+  color: var(--text-3);
+  flex: none;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.hint {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}

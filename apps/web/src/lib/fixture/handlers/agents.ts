@@ -92,12 +92,12 @@ on("POST", "/agents/:id/plan", (ctx) => {
       inputTokens: model?.provider === "local" ? null : inputTokens,
       outputTokens: model?.provider === "local" ? null : v.config.limits.maxOutputTokens,
       costNanoUsd: bound === null ? null : bound.toString(),
-      basis: model?.provider === "local" ? "Local adapter: no provider charge." : "Upper bound reserved before the call: estimated input (≈4 chars/token) + max output at the snapshot price.",
+      basis: model?.provider === "local" ? "Runs inside Atlas: no provider charge." : "Upper bound reserved before the call: estimated input plus the maximum output, at the current verified price.",
     },
     requiresConfirmation: v.config.allowedTools.some((t) => toolById(t).effect === "requires_confirmation") || Boolean(routing.pendingFallback),
     confirmationReasons: [
       ...v.config.allowedTools.filter((t) => toolById(t).effect === "requires_confirmation").map((t) => `${toolById(t).name} needs your confirmation before it has any effect.`),
-      ...(routing.pendingFallback ? [`Switching to ${routing.pendingFallback.modelKey} needs your approval.`] : []),
+      ...(routing.pendingFallback ? [`Switching to ${findModel(routing.pendingFallback.modelKey)?.displayName ?? routing.pendingFallback.modelKey} needs your approval.`] : []),
     ],
     missingBrief,
   };

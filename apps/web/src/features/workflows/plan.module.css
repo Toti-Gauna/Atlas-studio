@@ -1,0 +1,77 @@
+/* Shared plan preview (agents and workflows). */
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.head {
+  margin: 0 0 var(--s-2);
+  font-size: var(--fs-13);
+  font-weight: 650;
+  color: var(--text-2);
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.steps li {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+}
+.idx {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-pill);
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+}
+.body {
+  min-width: 0;
+}
+.title {
+  font-weight: 600;
+  font-size: var(--fs-14);
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+.muted {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.line {
+  margin: 0;
+  font-size: var(--fs-14);
+}
+.list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.techList {
+  margin: 0;
+  padding-left: 18px;
+}

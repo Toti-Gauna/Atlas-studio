@@ -1,13 +1,11 @@
-/** Help desk (core) copy: operator inbox, tickets, service requests. */
+/** Support copy (Inbox › Support): tickets handed off to a person and service requests. */
 export const deskCopy = {
-  eyebrow: "Operate · Help desk",
-  inboxTitle: "Help desk",
-  inboxDesc: "Conversations handed off to a person, with the context preserved at handoff.",
-  myTitle: "My tickets",
-  myDesc: "Questions you handed off to a person. Replies appear here and in the conversation.",
-  filters: { status: "Status", all: "All statuses", mine: "Assigned to me", label: "Ticket filters" },
+  filters: { status: "Status", needs: "Open and waiting", all: "All statuses", mine: "Assigned to me", label: "Ticket filters" },
+  summary: (unanswered: number, unassigned: number) => `${unanswered} unanswered · ${unassigned} unassigned`,
+  views: { label: "Show", tickets: "Tickets", services: "Service requests" },
   status: { open: "Open", pending_customer: "Waiting on customer", resolved: "Resolved", closed: "Closed" } as Record<string, string>,
   priority: { low: "Low", normal: "Normal", high: "High" } as Record<string, string>,
+  highPriority: "High priority",
   table: {
     caption: "Tickets",
     number: "#",
@@ -35,11 +33,13 @@ export const deskCopy = {
     created: "Created",
     empty: "No service requests",
     emptyBody: "Requests appear after a person confirms a proposed action in chat.",
-    statusLabel: { received: "Received", in_progress: "In progress", done: "Done" } as Record<string, string>,
+    intro: "Actions people confirmed in chat. They are created only after that confirmation.",
   },
   ticket: {
     back: "Inbox",
     backMine: "My tickets",
+    meta: (n: number, requester: string, opened: string) => `Ticket #${n} · from ${requester} · opened ${opened}`,
+    membersFailed: "Could not load members.",
     missing: "No ticket selected",
     missingBody: "Open a ticket from the inbox.",
     status: "Status",

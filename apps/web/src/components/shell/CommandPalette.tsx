@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, Compass, FolderKanban, MessageSquarePlus, MessagesSquare, Moon, Search } from "lucide-react";
+import { Bot, Boxes, Compass, FileText, FolderKanban, MessageSquarePlus, MessagesSquare, Moon, Search } from "lucide-react";
 import { can } from "@atlas/domain";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/state/session";
@@ -31,6 +31,8 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const role = session?.role;
   const projects = useQuery({ queryKey: ["projects"], queryFn: api.projects.list, enabled: open && Boolean(role && can(role, "project.read")) });
   const agents = useQuery({ queryKey: ["agents"], queryFn: api.agents.list, enabled: open && Boolean(role && can(role, "agent.read")) });
+  const docs = useQuery({ queryKey: ["documents", null], queryFn: () => api.documents.list(), enabled: open && Boolean(role && can(role, "document.read")) });
+  const deliverables = useQuery({ queryKey: ["artifacts", null], queryFn: () => api.artifacts.list(), enabled: open && Boolean(role && can(role, "artifact.read")) });
   const convs = useQuery({ queryKey: ["conversations", null], queryFn: () => api.conversations.list(), enabled: open && Boolean(role) });
 
   useEffect(() => {
@@ -56,15 +58,18 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
     out.push({ id: "theme", group: "Actions", label: `Switch to ${theme === "dark" ? "light" : "dark"} theme`, icon: <Moon size={16} />, run: () => { setTheme(theme === "dark" ? "light" : "dark"); onClose(); } });
     for (const n of ALL_NAV) if (canSee(role, n)) out.push({ id: `nav-${n.href}`, group: "Go to", label: n.label, icon: <n.icon size={16} />, run: go(n.href) });
     for (const p of projects.data ?? []) out.push({ id: `p-${p.id}`, group: "Projects", label: p.name, hint: `${p.documentCount} sources`, icon: <FolderKanban size={16} />, run: go(`/app/project/?id=${p.id}`) });
+    for (const d of deliverables.data ?? []) out.push({ id: `d-${d.id}`, group: "Deliverables", label: d.title, hint: `v${d.currentVersion}`, icon: <Boxes size={16} />, run: go(`/app/artifact/?id=${d.id}`) });
+    for (const d of docs.data ?? []) out.push({ id: `s-${d.id}`, group: "Sources", label: d.title, icon: <FileText size={16} />, run: go(`/app/document/?id=${d.id}`) });
     for (const a of agents.data ?? []) out.push({ id: `a-${a.id}`, group: "Agents", label: a.name, hint: `v${a.currentVersion}`, icon: <Bot size={16} />, run: go(`/app/agent/?id=${a.id}`) });
     for (const c of (convs.data ?? []).slice(0, 8)) out.push({ id: `c-${c.id}`, group: "Recent conversations", label: c.title, icon: <MessagesSquare size={16} />, run: go(`/app/chat/?c=${c.id}`) });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role, theme, projects.data, agents.data, convs.data]);
+  }, [role, theme, projects.data, agents.data, convs.data, docs.data, deliverables.data]);
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
-    return t ? items.filter((i) => i.label.toLowerCase().includes(t) || i.group.toLowerCase().includes(t)) : items;
+    // Sources and deliverables appear once you type, so the empty palette stays short.
+    return t ? items.filter((i) => i.label.toLowerCase().includes(t) || i.group.toLowerCase().includes(t)) : items.filter((i) => i.group !== "Sources" && i.group !== "Deliverables");
   }, [items, q]);
 
   const onKey = (e: React.KeyboardEvent) => {
@@ -96,12 +101,12 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
     >
       {open ? (
         <>
-          <div style={{ display: "flex", alignItems: "center", paddingLeft: 18 }}>
-            <Search size={18} aria-hidden style={{ color: "var(--text-3)" }} />
+          <div className={s.paletteSearch}>
+            <Search size={18} aria-hidden />
             <input
               ref={inputRef}
               className={s.paletteInput}
-              placeholder="Search pages, projects, agents, conversations…"
+              placeholder="Search sources, deliverables, projects, conversations…"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -115,13 +120,13 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
             />
           </div>
           <ul id="palette-list" role="listbox" className={s.paletteList}>
-            {filtered.length === 0 ? <li style={{ padding: 16, color: "var(--text-3)" }}>No matches.</li> : null}
+            {filtered.length === 0 ? <li className={s.paletteEmpty}>No matches.</li> : null}
             {filtered.map((item, i) => {
               const header = item.group !== lastGroup ? item.group : null;
               lastGroup = item.group;
               return (
                 <li key={item.id} role="presentation">
-                  {header ? <div className={`eyebrow ${s.paletteGroup}`}>{header}</div> : null}
+                  {header ? <div className={s.paletteGroup}>{header}</div> : null}
                   <div id={`pal-${item.id}`} role="option" aria-selected={i === active} className={s.paletteItem} onMouseEnter={() => setActive(i)} onClick={item.run}>
                     {item.icon}
                     <span>{item.label}</span>
