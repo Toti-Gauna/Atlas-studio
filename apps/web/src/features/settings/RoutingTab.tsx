@@ -94,6 +94,7 @@ export function RoutingTab() {
   const p = policy.data;
   const rules = draft ?? p.rules;
   const invalid = rules.some((x) => x.fallbackModelKey !== null && x.fallbackModelKey === x.preferredModelKey);
+  const unchanged = JSON.stringify(draft) === JSON.stringify(p.rules);
   const change = (id: string, patch: Partial<RoutingRule>) => setDraft(rules.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   return (
@@ -124,7 +125,7 @@ export function RoutingTab() {
             <Button onClick={() => setDraft(null)} disabled={save.isPending}>
               {copy.actions.cancel}
             </Button>
-            <Button variant="primary" loading={save.isPending} disabled={invalid || JSON.stringify(draft) === JSON.stringify(p.rules)} onClick={() => save.mutate({ ...p, rules: draft })}>
+            <Button variant={unchanged || invalid ? "secondary" : "primary"} loading={save.isPending} disabled={invalid || unchanged} onClick={() => save.mutate({ ...p, rules: draft })}>
               {r.save}
             </Button>
           </>

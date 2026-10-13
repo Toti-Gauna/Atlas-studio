@@ -119,7 +119,7 @@ export const wfCopy = {
     resumeFailed: "Resume failed",
     confirmFailed: "Confirmation failed",
     resumeNote: "Completed steps are not repeated when you resume.",
-    pausedWhy: (after: string | null, when: string) => (after ? `Paused ${when}, after “${after}”.` : `Paused ${when}, before the first step.`),
+    pausedWhy: (after: string | null, when: string, who?: string | null) => `${who ? `${who} paused this` : "Paused"} ${when}, ${after ? `after “${after}”` : "before the first step"}.`,
     nextStep: (step: string) => `Next step: ${step}.`,
     confirmTitle: "This step needs your confirmation",
     confirmBody: "Check the inputs below. Confirming lets the run continue with them.",

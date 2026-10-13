@@ -108,14 +108,13 @@ function SuiteBlock({ suite }: { suite: EvaluationSuite }) {
           <p className={s.scope}>{scope}</p>
         </div>
         <div className={s.runAction}>
-          <Button variant="primary" icon={<Play size={14} aria-hidden />} onClick={() => run.mutate()} loading={run.isPending} disabled={!canRun} aria-describedby={canRun ? undefined : `run-hint-${suite.id}`}>
-            {c.run}
-          </Button>
-          {!canRun ? (
-            <span id={`run-hint-${suite.id}`} className={s.muted}>
-              {c.runAdminOnly}
-            </span>
-          ) : null}
+          {canRun ? (
+            <Button variant="primary" icon={<Play size={14} aria-hidden />} onClick={() => run.mutate()} loading={run.isPending}>
+              {c.run}
+            </Button>
+          ) : (
+            <span className={s.muted}>{c.runAdminOnly}</span>
+          )}
         </div>
       </div>
 

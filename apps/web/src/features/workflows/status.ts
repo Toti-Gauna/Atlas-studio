@@ -24,10 +24,10 @@ export function runWhen(isoString: string, now = Date.now()): string {
 }
 
 /** Date + the run's main input (its objective), instead of an internal run id. */
-export function runName(run: Pick<WorkflowRun, "startedAt" | "inputs">, recipe?: WorkflowSummary["recipe"]): string {
+export function runName(run: Pick<WorkflowRun, "startedAt" | "inputs" | "startedByName">, recipe?: WorkflowSummary["recipe"]): string {
   const keys = recipe ? RECIPE_INPUTS[recipe].map((r) => r.key) : [];
   const main = [...keys, ...Object.keys(run.inputs)].map((k) => run.inputs[k]).find((v) => v && v.trim());
-  return main ? `${runWhen(run.startedAt)} · ${main}` : runWhen(run.startedAt);
+  return [runWhen(run.startedAt), run.startedByName?.split(" ")[0], main].filter(Boolean).join(" · ");
 }
 
 /** One key per "run click session"; reused on retry so the server can deduplicate. */

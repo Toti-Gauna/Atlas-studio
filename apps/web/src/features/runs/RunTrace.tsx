@@ -17,7 +17,6 @@ export function costLabel(status: string, nano: string | null) {
 }
 
 /** Kept for callers outside this folder; new code should use `<StatusBadge kind="run">`. */
-export const RUN_TONE = { succeeded: "teal", abstained: "info", failed: "danger", cancelled: "warn", blocked: "warn", running: "info", planned: "neutral", awaiting_confirmation: "violet" } as const;
 
 /** Run trace (R11): frozen snapshot, operational steps and attempts — never private reasoning. */
 export function RunTrace({ run }: { run: RunDetail }) {

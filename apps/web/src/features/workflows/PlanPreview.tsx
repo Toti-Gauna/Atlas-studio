@@ -89,7 +89,7 @@ export function PlanPreview({ plan, footer }: { plan: Plan; footer?: ReactNode }
       <section aria-label={c.estimate}>
         <h3 className={s.head}>{c.estimate}</h3>
         <p className={s.line}>{local ? c.noCharge : est.costNanoUsd === null ? c.unknownCost : `${c.upperBound} ${money(est.costNanoUsd)}`}</p>
-        {est.basis ? <p className={s.muted}>{est.basis}</p> : null}
+        {est.basis && !local ? <p className={s.muted}>{est.basis}</p> : null}
       </section>
 
       {plan.confirmationReasons.length ? (

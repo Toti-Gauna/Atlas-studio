@@ -168,7 +168,7 @@ export function RunSetup({ workflow, initialProjectId, onStarted }: { workflow: 
                     >
                       {c.editInputs}
                     </Button>
-                    <Button variant="primary" icon={<Play size={14} />} disabled={!canRun || blocked} loading={runM.isPending} onClick={() => runM.mutate()}>
+                    <Button variant={canRun && !blocked ? "primary" : "secondary"} icon={<Play size={14} />} disabled={!canRun || blocked} loading={runM.isPending} onClick={() => runM.mutate()}>
                       {c.run}
                     </Button>
                   </div>

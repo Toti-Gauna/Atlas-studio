@@ -103,7 +103,7 @@ function RunBody({ run, workflow }: { run: WorkflowRun; workflow: WorkflowDetail
 
       {run.status === "paused" ? (
         <Callout tone="warn" icon={<PauseCircle size={16} aria-hidden />}>
-          <strong>{c.pausedWhy(titleOf(lastDone?.stepKey ?? null), relativeTime(run.updatedAt))}</strong>
+          <strong>{c.pausedWhy(titleOf(lastDone?.stepKey ?? null), relativeTime(run.pausedAt ?? run.updatedAt), run.pausedByName)}</strong>
           {currentTitle ? <> {c.nextStep(currentTitle)}</> : null} {c.resumeNote}
           {resumeButton}
         </Callout>

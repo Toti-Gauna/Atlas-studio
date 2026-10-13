@@ -73,6 +73,10 @@ export const WorkflowRun = z.object({
   costStatus: z.enum(["no_provider_charge", "calculated", "unknown"]),
   startedAt: IsoDateTime,
   updatedAt: IsoDateTime,
+  /** Display names for the run log ("who started / paused"); optional for older records. */
+  startedByName: z.string().nullable().optional(),
+  pausedByName: z.string().nullable().optional(),
+  pausedAt: IsoDateTime.nullable().optional(),
 });
 export type WorkflowRun = z.infer<typeof WorkflowRun>;
 

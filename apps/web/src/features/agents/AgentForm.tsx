@@ -129,7 +129,7 @@ export function AgentForm({ agent, initial, profile, duplicatedFrom }: { agent: 
             ) : null}
             <div className={s.saveRow}>
               {agent ? <TextField label={c.editor.changeNote} hint={c.editor.changeNoteHint} value={draft.changeNote} maxLength={200} onChange={(e) => setDraft({ changeNote: e.target.value })} /> : <span />}
-              <Button type="submit" variant="primary" loading={save.isPending} disabled={Boolean(agent) && !dirty}>
+              <Button type="submit" variant={agent && !dirty ? "secondary" : "primary"} loading={save.isPending} disabled={Boolean(agent) && !dirty}>
                 {agent ? c.editor.save : c.editor.create}
               </Button>
             </div>

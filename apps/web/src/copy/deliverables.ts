@@ -135,26 +135,3 @@ export const deliverablesCopy = {
     resolved: "resolved",
   },
 } as const;
-
-export const runHistoryCopy = {
-  eyebrow: "Run history",
-  title: "Activity",
-  description:
-    "Every agent run keeps a frozen snapshot of the agent version, model, prices and document versions it used. Steps show operational summaries only, never private reasoning. Re-running may not produce identical output once a generative model is connected.",
-  caption: "Agent runs",
-  filtersLabel: "Filter runs",
-  allProjects: "All projects",
-  allAgents: "All agents",
-  allStatuses: "All statuses",
-  emptyTitle: "No runs yet",
-  emptyBody: "Runs appear here when an agent answers in chat or a workflow executes.",
-  emptyCta: "Open chat",
-  noMatchTitle: "No runs match these filters",
-  clearFilters: "Clear filters",
-  selectHint: "Select a run to see its frozen snapshot, steps, attempts and cost.",
-  detailTitle: "Run detail",
-  close: "Close detail",
-  view: "View",
-  local: "Local",
-  connected: "Connected",
-} as const;

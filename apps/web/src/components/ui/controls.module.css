@@ -44,6 +44,12 @@
   background: var(--teal);
   color: var(--ink);
 }
+.primary:disabled,
+.primary[aria-disabled="true"] {
+  background: var(--surface-3);
+  color: var(--text-3);
+  opacity: 1;
+}
 .primary:hover:not(:disabled) {
   background: var(--teal-hover);
 }
